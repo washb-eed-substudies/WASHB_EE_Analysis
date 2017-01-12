@@ -3,10 +3,10 @@ set more off
 clear all
 
 
-log using "C:/Users/andre/Dropbox/WBB-EE-analysis/Logs/Andrew/BD-dm-EE-stool.log", text replace
+log using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Logs/Andrew/BD-dm-EE-stool.log", text replace
 
 *--------------------------------------------
-* 4-kenya-dm-stool.do
+* BD-EE-dm-stool.do
 *
 * andrew mertens (amertens@berkeley.edu)
 *
@@ -31,7 +31,7 @@ log using "C:/Users/andre/Dropbox/WBB-EE-analysis/Logs/Andrew/BD-dm-EE-stool.log
 *--------------------------------------------
 * format the treatment assignment information
 *--------------------------------------------
-use "C:/Users/andre/Dropbox/WBB-EE-analysis/Data/Untouched/washb-bangladesh-blind-tr.dta", clear
+use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/washb-bangladesh-blind-tr.dta", clear
 
 destring clusterid, replace
 sort clusterid
@@ -43,7 +43,7 @@ save `trdata'
 * Append 3 rounds of stool collection surveys and rename variables
 *--------------------------------------------
 clear
-cd "C:/Users/andre/Dropbox/WBB-EE-analysis/Data/Untouched"
+cd "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched"
 
 use Endline/EE_Endline_Stool_CLEANED_data_7Sept2016, clear
 
@@ -146,20 +146,209 @@ gen svy=1
 *Append midline and endline anthropometry
 append using `c_stool2', force nolabel
 append using `c_stool3', force nolabel
+sort dataid childNo
 
-*Appear to be fully duplicated observations (rows). Drop here: 
+*Appear to be fully duplicated observations (rows). List and drop here: 
+duplicates tag dataid childNo sampid1 sampid2 sampid3 sampid4 sampid5 svy, generate(dup)
+list dataid clusterid SampleColDate childNo sampid1 nonconsent_reason svy dup if dup>0
 duplicates drop dataid childNo sampid1 sampid2 sampid3 sampid4 sampid5 svy, force
 
+*Dataset cleaning
+replace nonconsent_reason=0 if nonconsent_reason==.
+
+
+tempfile stool
+save `stool' 
+
+
+
+
+
+*Calculate child age at each sample collection
+*First, merge in main study DOB from anthro and diar datasets
+use washb-bangladesh-anthro, clear
+
+duplicates tag dataid childid, generate(dup)
+keep if childid=="T1" | childid=="T2"
+
+gen childNo= substr(childid,2,1) //change childid to match EE
+rename dob anthrodob
+gen byte MainStudyDataset_anthro_DOB=1 
+keep dataid childNo svy anthrodob MainStudyDataset_anthro_DOB
+sort dataid childNo svy
+
+duplicates drop dataid childNo anthrodob, force
+duplicates list dataid childNo
+
+tempfile anthro
+save `anthro'
+
+use washb-bangladesh-diar, clear
+keep if childid=="T1" | childid=="T2"
+
+gen childNo= substr(childid,2,1)
+rename dob diardob
+gen byte MainStudyDataset_diar_DOB=1 
+keep dataid childNo svy diardob MainStudyDataset_diar_DOB
+sort dataid childNo svy
+
+duplicates tag dataid childNo, generate(dup)
+duplicates drop dataid childNo diardob, force
+duplicates list dataid childNo
+
+merge dataid childNo svy using `anthro' 
+tab _merge
+drop _merge dup
+sort dataid childNo svy
+duplicates list dataid childNo
+duplicates tag dataid childNo, generate(dup)
+drop if dup==1 & svy!=1
+
+tempfile mainDOB
+save `mainDOB' 
+
+
+
+
+
+
+*Merge in the EE medical history files for the child date of birth for the 58 children
+*not in the main study
+    *Save relevent parts of baseline childid tracking
+use Baseline/Baseline_ChildID_CLEANED_VersionIncorporated_20Oct15, clear
+rename q15 EEdob
+rename childno childNo
+gen byte EE_BLdataset_DOB=1 
+gen female= q14-1
+keep dataid childNo EEdob EE_BLdataset_DOB female
+
+gen EE_dob = date(EEdob, "DMY")
+drop EEdob
+format EE_dob %d
+
+tempfile BL_EE_dob
+save `BL_EE_dob'
+
+    *Save relevent parts of midline childid tracking
+use Midline/ChildID_Midline_Cleaned_MatchedwEnrollment_2Feb16, clear
+rename q15 EEdob
+rename childno childNo
+gen byte EE_MLdataset_DOB=1 
+gen female= q14-1
+keep dataid childNo EEdob EE_MLdataset_DOB female
+
+gen EE_dob = date(EEdob, "DMY")
+drop EEdob
+format EE_dob %d
+
+tempfile ML_EE_dob
+save `ML_EE_dob'
+	
+    *Save relevent parts of endline childid tracking
+use Endline/EE_Endline_ChildID&MedHistory_CLEANED_data_22June2016, clear
+rename q15 EEdob
+gen byte EE_ELdataset_DOB=1 
+gen female= q14-1
+keep dataid childNo EEdob EE_ELdataset_DOB female
+
+format EEdob %d
+rename EEdob EE_dob
+
+append using `BL_EE_dob', force nolabel
+append using `ML_EE_dob', force nolabel 
+sort dataid childNo
+
+*Only keep midline and endline DOBs not found at baseline
+duplicates tag dataid childNo EE_dob ,generate(dup)
+tab dup	
+duplicates tag dataid childNo, generate(dup2)
+tab dup2
+
+*List out where DOB is not consistent between EE rounds
+list dataid childNo EE_dob  EE_BLdataset_DOB EE_MLdataset_DOB EE_ELdataset_DOB  dup dup2 if dup!=dup2
+
+*Keep preferenctially baseline, then midline, then endline DOB where DOBs aren't consistent across rounds
+*drop if (EE_BLdataset_DOB!=1 & dup2==2) | (EE_ELdataset_DOB==1 & dup2==1) | (EE_ELdataset_DOB!=1 & EE_MLdataset_DOB==1  & dup2==1)
+drop if (EE_BLdataset_DOB!=1 & dup2==2) | (EE_ELdataset_DOB==1 & dup2==1) 
+duplicates tag dataid childNo, generate(dup3)
+drop if dup3==1 & EE_MLdataset_DOB==1
+
+duplicates list dataid childNo
+drop dup dup2 dup3 EE_BLdataset_DOB EE_MLdataset_DOB EE_ELdataset_DOB
+gen byte EEdataset_DOB=1
+	
+	
+*Merge in childid tracking with main study DOBs
+sort dataid childNo 
+merge dataid childNo using `mainDOB' 
+tab _merge
+
+*list if dates mismatch between datasets
+list dataid childNo svy anthrodob diardob if (MainStudyDataset_anthro_DOB==1 & MainStudyDataset_diar_DOB==1) & anthrodob!=diardob
+list dataid childNo svy anthrodob EE_dob if (MainStudyDataset_anthro_DOB==1 & EEdataset_DOB==1) & anthrodob!=EE_dob
+list dataid childNo svy diardob EE_dob if (EEdataset_DOB==1 & MainStudyDataset_diar_DOB==1) & EE_dob!=diardob
+
+*Create single DOB variable, preferentially using main study DOB, then EEdob for the 37 subjects without a
+*main study DOB
+generate DOB=anthrodob
+replace DOB=diardob if MainStudyDataset_anthro_DOB!=1
+replace DOB=EE_dob if MainStudyDataset_anthro_DOB!=1 & MainStudyDataset_diar_DOB!=1
+format DOB %d
+
+*Create indicator for whether dob comes from EE or main study
+generate DOBfromEE byte=1 if EEdataset_DOB==1 & (MainStudyDataset_diar_DOB!=1 & MainStudyDataset_anthro_DOB!=1)
+drop anthrodob diardob EE_dob MainStudyDataset_anthro_DOB MainStudyDataset_diar_DOB EEdataset_DOB _merge svy
+
+
+*Merge DOBs into urine dataset
+sort dataid childNo
+merge 1:m dataid childNo using `stool'
+tab _merge
+drop if _merge==1
+list dataid childNo svy if _merge==2
+list dataid childNo svy if DOBfromEE==1
+
+
+************************************
+*Generate child ages
+************************************
+gen date = date(SampleColDate, "DMY")
+drop SampleColDate
+format date %d
+	label var date "Date of sample collection"
+	
+gen aged = date-DOB
+	label var aged "Age in days (anthro meas)"
+gen double agem = aged/30.4167
+	label var agem "Age in months (anthro meas)"
+gen double agey = aged/365.25
+	label var agey "Age in years (anthro meas)"
+codebook agey
+
+* Month of measurement
+gen month = month(date)
+	label var month "Month of sample collection"
+
+	
+	
+	
+
+************************************
+*Reshape to wide
+************************************
+
 *Temporarily limit variables in dataset to help with reshape
-keep dataid clusterid svy nonconsent_reason childNo aliqout1 aliqout2 aliqout3 aliqout4 aliqout5
+keep dataid clusterid svy nonconsent_reason childNo aliqout1 aliqout2 aliqout3 aliqout4 aliqout5 date aged agem agey month female
 
 *Reshape to wide
-reshape wide nonconsent_reason aliqout1 aliqout2 aliqout3 aliqout4 aliqout5, i(dataid childNo) j(svy)
+reshape wide date aged agem agey month female nonconsent_reason aliqout1 aliqout2 aliqout3 aliqout4 aliqout5, i(dataid childNo) j(svy)
 *Check for any duplicates after reshaping
 duplicates list dataid childNo 
 
 *Save file 
 label data "BD EE stool dataset, created by BD-EE-dm-stool.do"
-saveold "C:/Users/andre/Dropbox/WBB-EE-analysis/Data/Cleaned/Andrew/BD-EE-stool.dta", replace version(12)
-outsheet using "C:/Users/andre/Dropbox/WBB-EE-analysis/Data/Cleaned/Andrew/BD-EE-stool.csv", comma replace
+saveold "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew/BD-EE-stool.dta", replace version(12)
+outsheet using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew/BD-EE-stool.csv", comma replace
 clear
+
+
