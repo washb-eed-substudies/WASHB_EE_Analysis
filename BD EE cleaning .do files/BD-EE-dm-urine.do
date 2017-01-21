@@ -186,7 +186,6 @@ rename _merge midline_preLM_merge
 tempfile c_urine2
 save `c_urine2'
 
-x
 
 use Baseline/Baseline_Urine_CLEANED_VersionIncorporated_30Sept14, clear
 rename faid staffid
@@ -258,8 +257,10 @@ keep if childid=="T1" | childid=="T2"
 
 gen childNo= substr(childid,2,1) //change childid to match EE
 rename dob anthrodob
+rename sex anthrosex
 gen byte MainStudyDataset_anthro_DOB=1 
-keep dataid childNo svy anthrodob MainStudyDataset_anthro_DOB
+gen byte MainStudyDataset_anthro_sex=1 
+keep dataid childNo svy anthrodob MainStudyDataset_anthro_DOB anthrosex MainStudyDataset_anthro_sex
 sort dataid childNo svy
 
 duplicates drop dataid childNo anthrodob, force
@@ -273,8 +274,10 @@ keep if childid=="T1" | childid=="T2"
 
 gen childNo= substr(childid,2,1)
 rename dob diardob
+rename sex diarsex
 gen byte MainStudyDataset_diar_DOB=1 
-keep dataid childNo svy diardob MainStudyDataset_diar_DOB
+gen byte MainStudyDataset_diar_sex=1 
+keep dataid childNo svy diardob MainStudyDataset_diar_DOB diarsex MainStudyDataset_diar_sex
 sort dataid childNo svy
 
 duplicates tag dataid childNo, generate(dup)
@@ -304,9 +307,11 @@ save `mainDOB'
 use Baseline/Baseline_ChildID_CLEANED_VersionIncorporated_20Oct15, clear
 rename q15 EEdob
 rename childno childNo
-gen byte EE_BLdataset_DOB=1 
-gen female= q14-1
-keep dataid childNo EEdob EE_BLdataset_DOB female
+gen EE_svy=1
+gen byte EEsex=1 if q14==1
+  replace EEsex=0 if q14==2
+  label var EEsex "1=male, 0=female"
+keep dataid childNo EEdob EE_svy EEsex
 
 gen EE_dob = date(EEdob, "DMY")
 drop EEdob
@@ -320,9 +325,11 @@ save `BL_EE_dob'
 use Midline/ChildID_Midline_Cleaned_MatchedwEnrollment_2Feb16, clear
 rename q15 EEdob
 rename childno childNo
-gen female= q14-1
-gen byte EE_MLdataset_DOB=1 
-keep dataid childNo EEdob EE_MLdataset_DOB female
+gen EE_svy=2
+gen byte EEsex=1 if q14==1
+  replace EEsex=0 if q14==2
+  label var EEsex "1=male, 0=female"
+keep dataid childNo EEdob EE_svy EEsex
 
 gen EE_dob = date(EEdob, "DMY")
 drop EEdob
@@ -334,9 +341,11 @@ save `ML_EE_dob'
     *Save relevent parts of endline childid tracking
 use Endline/EE_Endline_ChildID&MedHistory_CLEANED_data_22June2016, clear
 rename q15 EEdob
-gen female= q14-1
-gen byte EE_ELdataset_DOB=1 
-keep dataid childNo EEdob EE_ELdataset_DOB female
+gen EE_svy=3
+gen byte EEsex=1 if q14==1
+  replace EEsex=0 if q14==2
+  label var EEsex "1=male, 0=female"
+keep dataid childNo EEdob  EE_svy EEsex
 
 format EEdob %d
 rename EEdob EE_dob
@@ -345,24 +354,28 @@ append using `BL_EE_dob', force nolabel
 append using `ML_EE_dob', force nolabel 
 sort dataid childNo
 
+
+*Reshape to wide 
+reshape wide EE_dob EEsex, i(dataid childNo) j(EE_svy)
+
+
 *Only keep midline and endline DOBs not found at baseline
-duplicates tag dataid childNo EE_dob ,generate(dup)
-tab dup	
-duplicates tag dataid childNo, generate(dup2)
-tab dup2
+gen DOB=EE_dob1
+	replace DOB=EE_dob2 if DOB==.
+	replace DOB=EE_dob3 if DOB==.
+format DOB %d
 
-*List out where DOB is not consistent between EE rounds
-list dataid childNo EE_dob  EE_BLdataset_DOB EE_MLdataset_DOB EE_ELdataset_DOB  dup dup2 if dup!=dup2
 
-*Keep preferentially baseline, then midline, then endline DOB where DOBs aren't consistent across rounds
-drop if (EE_BLdataset_DOB!=1 & dup2==2) | (EE_ELdataset_DOB==1 & dup2==1) 
-duplicates tag dataid childNo, generate(dup3)
-drop if dup3==1 & EE_MLdataset_DOB==1
+*Display mismatches between DOB across survey rounds
+list dataid EE_dob1 EE_dob2 EE_dob3 DOB if EE_dob1!=EE_dob2 & EE_dob1!=. & EE_dob2!=. | EE_dob1!=EE_dob3 & EE_dob1!=. & EE_dob3!=.  | EE_dob2!=EE_dob3 & EE_dob2!=. & EE_dob3!=. 
 
-duplicates list dataid childNo
-drop dup dup2 dup3 EE_BLdataset_DOB EE_MLdataset_DOB EE_ELdataset_DOB
-gen byte EEdataset_DOB=1
-	
+gen sex=EEsex1
+	replace sex=EEsex2 if sex==.
+	replace sex=EEsex3 if sex==.
+
+*Display mismatches between gender across survey rounds
+list dataid EEsex1 EEsex2 EEsex3 sex if EEsex1!=EEsex2 & EEsex1!=. & EEsex2!=. | EEsex1!=EEsex3 & EEsex1!=. & EEsex3!=.  | EEsex2!=EEsex3 & EEsex2!=. & EEsex3!=. 
+
 	
 *Merge in childid tracking with main study DOBs
 sort dataid childNo 
@@ -371,19 +384,49 @@ tab _merge
 
 *list if dates mismatch between datasets
 list dataid childNo svy anthrodob diardob if (MainStudyDataset_anthro_DOB==1 & MainStudyDataset_diar_DOB==1) & anthrodob!=diardob
-list dataid childNo svy anthrodob EE_dob if (MainStudyDataset_anthro_DOB==1 & EEdataset_DOB==1) & anthrodob!=EE_dob
-list dataid childNo svy diardob EE_dob if (EEdataset_DOB==1 & MainStudyDataset_diar_DOB==1) & EE_dob!=diardob
+list dataid childNo svy anthrodob DOB if (MainStudyDataset_anthro_DOB==1 & DOB!=.) & anthrodob!=DOB
+list dataid childNo svy diardob DOB if (DOB!=. & MainStudyDataset_diar_DOB==1) & DOB!=diardob
+
+
+
+
+*Look at two dataids without main study or EE BL DOBs and conflicting ML and EL DOBs
+list dataid childNo DOB if dataid=="06103" | dataid=="29708" //Midline DOB correctly used
 
 *Create single DOB variable, preferentially using main study DOB, then EEdob for the 37 subjects without a
 *main study DOB
+rename DOB EE_dob
 generate DOB=anthrodob
 replace DOB=diardob if MainStudyDataset_anthro_DOB!=1
 replace DOB=EE_dob if MainStudyDataset_anthro_DOB!=1 & MainStudyDataset_diar_DOB!=1
 format DOB %d
 
 *Create indicator for whether dob comes from EE or main study
-generate DOBfromEE byte=1 if EEdataset_DOB==1 & (MainStudyDataset_diar_DOB!=1 & MainStudyDataset_anthro_DOB!=1)
-drop anthrodob diardob EE_dob MainStudyDataset_anthro_DOB MainStudyDataset_diar_DOB EEdataset_DOB _merge svy
+generate DOBfromEE byte=1 if EE_dob!=. & (MainStudyDataset_diar_DOB!=1 & MainStudyDataset_anthro_DOB!=1)
+*Count how many DOB had to come from the EE surveys
+table  DOBfromEE 
+
+replace DOB=diardob if MainStudyDataset_anthro_DOB!=1
+replace DOB=EE_dob if MainStudyDataset_anthro_DOB!=1 & MainStudyDataset_diar_DOB!=1
+format DOB %d
+
+*Create a single sex variable, preferentially using main study sex, then EEsex for the 30 subjects without a
+*main study sex
+rename sex EEsex
+generate sex=anthrosex
+replace sex=diarsex if MainStudyDataset_anthro_sex!=1
+replace sex=EEsex if MainStudyDataset_anthro_sex!=1 & MainStudyDataset_diar_sex!=1
+	label var sex "Male=1, Female=0"
+	
+*Create indicator for whether sex comes from EE or main study
+generate sexfromEE byte=1 if EEsex!=. & (MainStudyDataset_diar_sex!=1 & MainStudyDataset_anthro_sex!=1)
+*Count how many sex observations had to come from the EE surveys
+table  sexfromEE 
+
+
+*Drop unneeded variables
+drop anthrodob diardob EE_dob MainStudyDataset_anthro_DOB MainStudyDataset_diar_DOB EE_dob1 EEsex1 EE_dob2 EEsex2 EE_dob3 EEsex3 EE_dob EEsex _merge svy diarsex anthrosex MainStudyDataset_diar_sex MainStudyDataset_anthro_sex
+	
 
 
 *Merge DOBs into urine dataset
@@ -407,7 +450,7 @@ format date %d
 	
 gen aged = date-DOB
 	label var aged "Age in days (anthro meas)"
-gen double agem = aged/30.4167
+gen double agem = aged/30.4375
 	label var agem "Age in months (anthro meas)"
 gen double agey = aged/365.25
 	label var agey "Age in years (anthro meas)"
@@ -425,10 +468,10 @@ gen month = month(date)
 ********************************************************************************
 
 *Temporarily limit variables in dataset to help with reshape
-keep dataid clusterid svy consent nonconsent_reason childNo DOB female h2aliqout1_t h2aliqout2_t h2aliqout3_t h2aliqout4_t h2aliqout5_t h2aliqout6_t h5aliqout7_t h5aliqout8_t h5aliqout9_t h5aliqout10_t h5aliqout11_t h5aliqout12_t preLMaliqout13_t preLMaliqout14_t preLMaliqout15_t preLMaliqout16_t preLMaliqout17_t preLMaliqout18_t preLMnonconsent_reason aged agem agey date month
+keep dataid clusterid svy consent nonconsent_reason childNo DOB sex h2aliqout1_t h2aliqout2_t h2aliqout3_t h2aliqout4_t h2aliqout5_t h2aliqout6_t h5aliqout7_t h5aliqout8_t h5aliqout9_t h5aliqout10_t h5aliqout11_t h5aliqout12_t preLMaliqout13_t preLMaliqout14_t preLMaliqout15_t preLMaliqout16_t preLMaliqout17_t preLMaliqout18_t preLMnonconsent_reason aged agem agey date month
 
 *Reshape to wide
-reshape wide consent nonconsent_reason female aged agem agey month date h2aliqout1_t h2aliqout2_t h2aliqout3_t h2aliqout4_t h2aliqout5_t h2aliqout6_t h5aliqout7_t h5aliqout8_t h5aliqout9_t h5aliqout10_t h5aliqout11_t h5aliqout12_t  preLMaliqout13_t preLMaliqout14_t preLMaliqout15_t preLMaliqout16_t preLMaliqout17_t preLMaliqout18_t preLMnonconsent_reason, i(dataid childNo) j(svy)
+reshape wide consent nonconsent_reason aged agem agey month date h2aliqout1_t h2aliqout2_t h2aliqout3_t h2aliqout4_t h2aliqout5_t h2aliqout6_t h5aliqout7_t h5aliqout8_t h5aliqout9_t h5aliqout10_t h5aliqout11_t h5aliqout12_t  preLMaliqout13_t preLMaliqout14_t preLMaliqout15_t preLMaliqout16_t preLMaliqout17_t preLMaliqout18_t preLMnonconsent_reason, i(dataid childNo) j(svy)
 *Check for any duplicates after reshaping
 duplicates list dataid childNo 
 

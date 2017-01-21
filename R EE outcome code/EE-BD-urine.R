@@ -83,9 +83,10 @@ t2s9<-d%>% subset(h5aliqout9_t2>1)%>%group_by(tr) %>%summarize(h5sample9=n())
 t2s10<-d%>% subset(h5aliqout10_t2>1)%>%group_by(tr) %>%summarize(h5sample10=n()) 
 t2s11<-d%>% subset(h5aliqout11_t2>1)%>%group_by(tr) %>%summarize(h5sample11=n()) 
 t2s12<-d%>% subset(h5aliqout12_t2>1)%>%group_by(tr) %>%summarize(h5sample12=n()) 
+t3s13<-d%>% subset(preLMaliqout13_t2>1)%>%group_by(tr) %>%summarize(preLMsample13_t2=n()) 
 
  
-aliquotN_t2<-cbind(t2s1,t2s2[,2],t2s3[,2],t2s4[,2],t2s5[,2],t2s6[,2],t2s7[,2],t2s8[,2],t2s9[,2],t2s10[,2],t2s11[,2],t2s12[,2])
+aliquotN_t2<-cbind(t2s1,t2s2[,2],t2s3[,2],t2s4[,2],t2s5[,2],t2s6[,2],t2s7[,2],t2s8[,2],t2s9[,2],t2s10[,2],t2s11[,2],t2s12[,2],t3s13[,2])
 
 
 #aliqout time 3
@@ -108,41 +109,40 @@ aliquotN_t3<-cbind(t3s1,t3s2[,2],t3s3[,2],t3s4[,2],t3s5[,2],t3s6[,2],t3s7[,2],t3
 
 
 aliquotN_t1[c(1,3,4,2),c(1:2,8)]
-aliquotN_t2[c(1,3,4,2),c(1:2,8)]
+aliquotN_t2[c(1,3,4,2),c(1:2,8,14)]
 aliquotN_t3[c(1,3,4,2),c(1:2,8,14)]
 
 
 
 #Calculate average age across arms at followup time 1, 2, and 3
-
 #Survey 1
 #Tabulate overall N, gender, and age 
-overallN1<-d%>% subset(!is.na(nonconsent_reason1==0)) %>% summarize(N=n(),Median_agem=median(agem1, na.rm=T), Mean_agem=mean(agem1, na.rm=T), Sd_agem=sd(agem1, na.rm=T), numfemales=sum(female1), nummales=n()-sum(female1)) 
+overallN1<-d%>% subset(!is.na(h2aliqout1_t1) & h2aliqout1_t1>1 | !is.na(h5aliqout7_t1) & h5aliqout7_t1>1) %>% summarize(N=n(),Median_agem=median(agem1, na.rm=T), Mean_agem=mean(agem1, na.rm=T), Sd_agem=sd(agem1, na.rm=T), nummales=sum(sex), numfemales=n()-sum(sex)) 
 overallN1<-cbind("Overall", overallN1)
 colnames(overallN1)[1]<-"tr"
 
 #Tabulate N, gender, and age across survey rounds
-t1<-d%>% subset(!is.na(nonconsent_reason1==0)) %>% group_by(tr) %>%summarize(N=n(), Median_agem=median(agem1, na.rm=T), Mean_agem=mean(agem1, na.rm=T), Sd_agem=sd(agem1, na.rm=T), numfemales=sum(female1), nummales=n()-sum(female1)) 
+t1<-d%>% subset(!is.na(h2aliqout1_t1) & h2aliqout1_t1>1 | !is.na(h5aliqout7_t1) & h5aliqout7_t1>1) %>% group_by(tr) %>%summarize(N=n(), Median_agem=median(agem1, na.rm=T), Mean_agem=mean(agem1, na.rm=T), Sd_agem=sd(agem1, na.rm=T), nummales=sum(sex), numfemales=n()-sum(sex)) 
 
 
 #Survey 2
 #Tabulate overall N, gender, and age 
-overallN2<-d%>% subset(!is.na(nonconsent_reason2==0)) %>% summarize(N=n(),Median_agem=median(agem2, na.rm=T), Mean_agem=mean(agem2, na.rm=T), Sd_agem=sd(agem2, na.rm=T), numfemales=sum(female2), nummales=n()-sum(female2)) 
+overallN2<-d%>% subset(!is.na(h2aliqout1_t2) & h2aliqout1_t2>1 | !is.na(h5aliqout7_t2) & h5aliqout7_t2>1) %>% summarize(N=n(),Median_agem=median(agem2, na.rm=T), Mean_agem=mean(agem2, na.rm=T), Sd_agem=sd(agem2, na.rm=T), nummales=sum(sex), numfemales=n()-sum(sex)) 
 overallN2<-cbind("Overall", overallN2)
 colnames(overallN2)[1]<-"tr"
 
 #Tabulate N, gender, and age across survey rounds
-t2<-d%>% subset(!is.na(nonconsent_reason2==0)) %>% group_by(tr) %>%summarize(N=n(), Median_agem=median(agem2, na.rm=T), Mean_agem=mean(agem2, na.rm=T), Sd_agem=sd(agem2, na.rm=T), numfemales=sum(female2), nummales=n()-sum(female2)) 
+t2<-d%>% subset(!is.na(h2aliqout1_t2) & h2aliqout1_t2>1 | !is.na(h5aliqout7_t2) & h5aliqout7_t2>1) %>% group_by(tr) %>%summarize(N=n(), Median_agem=median(agem2, na.rm=T), Mean_agem=mean(agem2, na.rm=T), Sd_agem=sd(agem2, na.rm=T), nummales=sum(sex), numfemales=n()-sum(sex)) 
 
 
 #Survey 3
 #Tabulate overall N, gender, and age 
-overallN3<-d%>% subset(!is.na(nonconsent_reason3==0)) %>% summarize(N=n(),Median_agem=median(agem3, na.rm=T), Mean_agem=mean(agem3, na.rm=T), Sd_agem=sd(agem3, na.rm=T), numfemales=sum(female3, na.rm=T), nummales=n()-sum(female3, na.rm=T)) 
+overallN3<-d%>% subset(!is.na(h2aliqout1_t3) & h2aliqout1_t3>1 | !is.na(h5aliqout7_t3) & h5aliqout7_t3>1) %>% summarize(N=n(),Median_agem=median(agem3, na.rm=T), Mean_agem=mean(agem3, na.rm=T), Sd_agem=sd(agem3, na.rm=T), nummales=sum(sex, na.rm=T), numfemales=n()-sum(sex, na.rm=T)) 
 overallN3<-cbind("Overall", overallN3)
 colnames(overallN3)[1]<-"tr"
 
 #Tabulate N, gender, and age across survey rounds
-t3<-d%>% subset(!is.na(nonconsent_reason3==0)) %>% group_by(tr) %>%summarize(N=n(), Median_agem=median(agem3, na.rm=T), Mean_agem=mean(agem3, na.rm=T), Sd_agem=sd(agem3, na.rm=T), numfemales=sum(female3, na.rm=T), nummales=n()-sum(female3, na.rm=T)) 
+t3<-d%>% subset(!is.na(h2aliqout1_t3) & h2aliqout1_t3>1 | !is.na(h5aliqout7_t3) & h5aliqout7_t3>1) %>% group_by(tr) %>%summarize(N=n(), Median_agem=median(agem3, na.rm=T), Mean_agem=mean(agem3, na.rm=T), Sd_agem=sd(agem3, na.rm=T), nummales=sum(sex, na.rm=T), numfemales=n()-sum(sex, na.rm=T)) 
 
 
 rbind(overallN1, t1[c(1,3,4,2),])
@@ -151,6 +151,33 @@ rbind(overallN3, t3[c(1,3,4,2),])
 
 
 
+#Temporarily generate fake outcome data for L and M
+#geometric mean mannitol concentrations were 1.56 mmol/L (95% CI 1.26-1.95) 
+#geometric mean lactulose concentrations were 0.58mmol/L (95%CI 0.49-0.69)
+set.seed(12345)
+d$Lact1<-rnorm(n=nrow(d), mean=0.58, sd=0.1)
+d$Mann1<-rnorm(n=nrow(d), mean=1.56, sd=0.15)
+
+d$Lact2<-rnorm(n=nrow(d), mean=0.7, sd=0.07)
+d$Mann2<-rnorm(n=nrow(d), mean=1.6, sd=0.1)
+
+d$Lact3<-rnorm(n=nrow(d), mean=0.5, sd=0.11)
+d$Mann3<-rnorm(n=nrow(d), mean=1.6, sd=0.2)
+
+#Create and save dataset for Audrie:
+urine_simulated_outcomes<-d %>%
+    mutate(childid=as.character(dataid*10+childNo)) %>%
+    select(childid, Lact1, Mann1, Lact2, Mann2, Lact3, Mann3)
+library(stringr)
+urine_simulated_outcomes$childid<-str_pad(urine_simulated_outcomes$childid, 6, pad = "0")
+head(urine_simulated_outcomes)    
+
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
+save(urine_simulated_outcomes, file="washb-BD-EE-sim-urine-outcomes.Rdata")
+write.dta(urine_simulated_outcomes, "washb-BD-EE-sim-urine-outcomes.dta")
+
+
+#Outcome
 
 
 

@@ -3,7 +3,7 @@ set more off
 clear all
 
 
-log using "C:/Users/andre/Dropbox/WBB-EE-analysis/Logs/Andrew/BD-dm-EE-anthro.log", text replace
+log using "C:/Users/andre/Dropbox/WASHB-EE-Analysis/WBB-EE-analysis/Logs/Andrew/BD-dm-EE-anthro.log", text replace
 
 *--------------------------------------------
 * 4-kenya-dm-anthro.do
@@ -47,7 +47,7 @@ log using "C:/Users/andre/Dropbox/WBB-EE-analysis/Logs/Andrew/BD-dm-EE-anthro.lo
 *--------------------------------------------
 * format the treatment assignment information
 *--------------------------------------------
-use "C:/Users/andre/Dropbox/WBB-EE-analysis/Data/Untouched/washb-bangladesh-blind-tr.dta", clear
+use "C:/Users/andre/Dropbox/WASHB-EE-Analysis/WBB-EE-analysis/Data/Untouched/washb-bangladesh-blind-tr.dta", clear
 
 destring clusterid, replace
 sort clusterid
@@ -59,7 +59,7 @@ save `trdata'
 * Append 3 rounds of child anthro and rename variables
 *--------------------------------------------
 clear
-cd "C:/Users/andre/Dropbox/WBB-EE-analysis/Data/Untouched"
+cd "C:/Users/andre/Dropbox/WASHB-EE-Analysis/WBB-EE-analysis/Data/Untouched"
 
 
 use Endline/EE_Endline_Anthro_CLEANED_data_26June2016, clear
@@ -75,6 +75,8 @@ rename q18 hc3
 rename q19 muac1
 rename q20 muac2
 rename q21 muac3
+rename q12 length_method
+	label var length_method "Length or height of child"
 
 *destring anthro variables
 destring Weight1, replace
@@ -90,10 +92,11 @@ destring muac1, replace
 destring muac2, replace
 destring muac3, replace
 
+	
 *generate surveyyear variable
 gen svy=3
 
-keep svy dataid mid clusterid Weight1 Weight2 Weight3 Len1 Len2 Len3 hc1 hc2 hc3 muac1 muac2 muac3
+keep svy dataid mid clusterid childNo SampleColDate length_method Weight1 Weight2 Weight3 Len1 Len2 Len3 hc1 hc2 hc3 muac1 muac2 muac3
 
 tempfile c_anthr3
 save `c_anthr3'
@@ -111,6 +114,10 @@ rename q18 hc3
 rename q19 muac1
 rename q20 muac2
 rename q21 muac3
+rename childno childNo
+rename samplecoldate SampleColDate
+rename q12 length_method
+	label var length_method "Length or height of child"
 
 *destring anthro variables
 destring Weight1, replace
@@ -125,11 +132,11 @@ destring hc3, replace
 destring muac1, replace
 destring muac2, replace
 destring muac3, replace
-
+destring clusterid, replace
 *generate surveyyear variable
 gen svy=2
 
-keep svy dataid mid clusterid Weight1 Weight2 Weight3 Len1 Len2 Len3 hc1 hc2 hc3 muac1 muac2 muac3
+keep svy dataid mid clusterid childNo SampleColDate length_method Weight1 Weight2 Weight3 Len1 Len2 Len3 hc1 hc2 hc3 muac1 muac2 muac3
 
 tempfile c_anthr2
 save `c_anthr2'
@@ -147,7 +154,11 @@ rename q18 hc3
 rename q19 muac1
 rename q20 muac2
 rename q21 muac3
-
+rename childno childNo
+rename samplecoldate SampleColDate
+rename q12 length_method
+	label var length_method "Length or height of child"
+	
 *destring anthro variables
 destring Weight1, replace
 destring Weight2, replace
@@ -165,257 +176,195 @@ destring muac3, replace
 *generate surveyyear variable
 gen svy=1
 
-keep svy dataid mid clusterid Weight1 Weight2 Weight3 Len1 Len2 Len3 hc1 hc2 hc3 muac1 muac2 muac3
+keep svy dataid mid clusterid childNo SampleColDate length_method Weight1 Weight2 Weight3 Len1 Len2 Len3 hc1 hc2 hc3 muac1 muac2 muac3
 
 
 *Append midline and endline anthropometry
 append using `c_anthr2', force nolabel
 append using `c_anthr3', force nolabel
 
+destring clusterid, replace
+
+tempfile EEanthro
+save `EEanthro'
 
 
-*--------------------------------------------
-* merge in baseline child information
-*--------------------------------------------
-use WBK-primary-analysis/Data/Untouched/msP_child_IDchar_20161006
-keep childid compoundid childtype sex DOB ms_bl_date blvisit1date ms_ml_ad_date ms_ml_am_date ms_el_ad_date ms_el_am_date attritioncase_el haslength_mla haslength_ela haslength
+********************************************************************************
+*Calculate child age at each sample collection
+********************************************************************************
+*First, merge together main study DOB from anthro and diar datasets
+use washb-bangladesh-anthro, clear
+duplicates tag dataid childid, generate(dup)
+keep if childid=="T1" | childid=="T2"
 
-merge 1:m childid using `anthrosurv'
-drop if _merge!=3
-drop _merge
+gen childNo= substr(childid,2,1) //change childid to match EE
+rename dob anthrodob
+gen byte MainStudyDataset_anthro_DOB=1 
+keep dataid childNo clusterid svy anthrodob MainStudyDataset_anthro_DOB
+sort dataid childNo svy
 
+duplicates drop dataid childNo anthrodob, force
+duplicates list dataid childNo
 
+tempfile main_anthro
+save `main_anthro'
 
-*--------------------------------------------
-* check agreement between child tracking document and anthro surveys
-*--------------------------------------------
-*Should be no duplicate children
-duplicates report childid studyyear
+use washb-bangladesh-diar, clear
+keep if childid=="T1" | childid=="T2"
 
-*Check if any children reported to be collected are missing from year 1
-list childid if haslength_mla==1 & headc1==. & muac1==. 
-*br if chin_mla==1 & headc1==. 
-*Check if any children reported to be collected are missing from year 2
-list childid if haslength_ela==1 & headc1==. & muac1==. 
-*Check if any children collected are reported to be missing from year 1
-list childid if haslength_mla==0 & headc1!=.
-*Check if any children collected are reported to be missing from year 2
-list childid if haslength_ela==0 & headc1!=.
-*--------------------------------------------
-* YEAR 1
-* merge the household and child data
-*--------------------------------------------
-/*
-use "~/dropbox/WBB-primary-analysis/Data/Untouched/2_Midline/1. WASHB_Midline_main_survey_cleaned.dta", clear
-sort dataid 
-tempfile main
-save `main'
+gen childNo= substr(childid,2,1)
+rename dob diardob
+gen byte MainStudyDataset_diar_DOB=1 
+keep dataid childNo svy clusterid diardob MainStudyDataset_diar_DOB
+sort dataid childNo svy
 
-use "~/dropbox/WBB-primary-analysis/Data/Untouched/2_Midline/3. WASHB_Midline_childinfo_cleaned.dta", clear
-sort dataid hhid
-tempfile childinfo
-save `childinfo'
+duplicates tag dataid childNo, generate(dup)
+duplicates drop dataid childNo diardob, force
+duplicates list dataid childNo
 
-use "~/dropbox/WBB-primary-analysis/Data/Untouched/2_Midline/8. WASHB_Midline_anthropometry_cleaned.dta", clear
-duplicates list dataid childid
-sort dataid childid
-tempfile childanthro
-save `childanthro'
+merge dataid childNo svy using `main_anthro' 
+tab _merge
+drop _merge dup
+sort dataid childNo svy
+duplicates list dataid childNo
+duplicates tag dataid childNo, generate(dup)
+drop if dup==1 & svy!=1
+
+tempfile mainDOB
+save `mainDOB' 
 
 
-use `main', clear
-merge 1:m dataid using `childinfo'
-assert _merge!=1
-drop if _merge==2
-drop _merge
-
-* merge in the child anthro information
-sort dataid childid
-merge 1:1 dataid childid using `childanthro'
 
 
-* list 3 children who are not matching
-* dropped, after confirming with Kishor
-count if _merge==2
-list dataid clusterid bariid motherid childid  if _merge==2
-drop if _merge==2
 
-keep if _merge==3
-drop _merge
+********************************************************************************
+*Merge in the EE medical history files for the child date of birth for the 58 children
+*not in the main study
+********************************************************************************
+    *Save relevent parts of baseline childid tracking
+use Baseline/Baseline_ChildID_CLEANED_VersionIncorporated_20Oct15, clear
+rename q15 EEdob
+rename childno childNo
+gen byte EE_BLdataset_DOB=1 
+gen female= q14-1
+keep dataid childNo EEdob EE_BLdataset_DOB female
 
-* assign survey
-gen svy = 1 
-	label var svy "Survey round (0,1,2)"
+gen EE_dob = date(EEdob, "DMY")
+drop EEdob
+format EE_dob %d
+
+
+tempfile BL_EE_dob
+save `BL_EE_dob'
+
+    *Save relevent parts of midline childid tracking
+use Midline/ChildID_Midline_Cleaned_MatchedwEnrollment_2Feb16, clear
+rename q15 EEdob
+rename childno childNo
+gen female= q14-1
+gen byte EE_MLdataset_DOB=1 
+keep dataid childNo clusterid EEdob EE_MLdataset_DOB female
+
+gen EE_dob = date(EEdob, "DMY")
+drop EEdob
+format EE_dob %d
+
+tempfile ML_EE_dob
+save `ML_EE_dob'
 	
-sort dataid childid
-tempfile year1
-save `year1'
+    *Save relevent parts of endline childid tracking
+use Endline/EE_Endline_ChildID&MedHistory_CLEANED_data_22June2016, clear
+rename q15 EEdob
+gen female= q14-1
+gen byte EE_ELdataset_DOB=1 
+keep dataid childNo clusterid EEdob EE_ELdataset_DOB female
+
+format EEdob %d
+rename EEdob EE_dob
+
+append using `BL_EE_dob', force nolabel
+append using `ML_EE_dob', force nolabel 
+sort dataid childNo
+
+*Only keep midline and endline DOBs not found at baseline
+duplicates tag dataid childNo EE_dob ,generate(dup)
+tab dup	
+duplicates tag dataid childNo, generate(dup2)
+tab dup2
+
+*List out where DOB is not consistent between EE rounds
+list dataid childNo EE_dob  EE_BLdataset_DOB EE_MLdataset_DOB EE_ELdataset_DOB  dup dup2 if dup!=dup2
+
+*Keep preferentially baseline, then midline, then endline DOB where DOBs aren't consistent across rounds
+drop if (EE_BLdataset_DOB!=1 & dup2==2) | (EE_ELdataset_DOB==1 & dup2==1) 
+duplicates tag dataid childNo, generate(dup3)
+drop if dup3==1 & EE_MLdataset_DOB==1
+
+duplicates list dataid childNo
+drop dup dup2 dup3 EE_BLdataset_DOB EE_MLdataset_DOB EE_ELdataset_DOB
+gen byte EEdataset_DOB=1
 	
-*--------------------------------------------
-* YEAR 2
-* merge the household and child data
-*--------------------------------------------
 	
+*Merge in childid tracking with main study DOBs
+sort dataid childNo 
+merge dataid childNo using `mainDOB' 
+tab _merge
 
-use "~/dropbox/WBB-primary-analysis/Data/Untouched/3_Endline/04. WASHB_Endline_main_survey_cleaned.dta", clear
-sort dataid 
-tempfile main
-save `main'
+*list if dates mismatch between datasets
+list dataid childNo svy anthrodob diardob if (MainStudyDataset_anthro_DOB==1 & MainStudyDataset_diar_DOB==1) & anthrodob!=diardob
+list dataid childNo svy anthrodob EE_dob if (MainStudyDataset_anthro_DOB==1 & EEdataset_DOB==1) & anthrodob!=EE_dob
+list dataid childNo svy diardob EE_dob if (EEdataset_DOB==1 & MainStudyDataset_diar_DOB==1) & EE_dob!=diardob
 
-use "~/dropbox/WBB-primary-analysis/Data/Untouched/3_Endline/07. WASHB_Endline_childinformation_cleaned.dta", clear
-sort dataid hhid
-tempfile childinfo
-save `childinfo'
+*Create single DOB variable, preferentially using main study DOB, then EEdob for the 37 subjects without a
+*main study DOB
+generate DOB=anthrodob
+replace DOB=diardob if MainStudyDataset_anthro_DOB!=1
+replace DOB=EE_dob if MainStudyDataset_anthro_DOB!=1 & MainStudyDataset_diar_DOB!=1
+format DOB %d
 
-use "~/dropbox/WBB-primary-analysis/Data/Untouched/3_Endline/09. WASHB_Endline_anthropometry_cleaned.dta", clear
-
-
-* for now, drop sibling measurements because there is no clean way to merge them
-* to the childinfo data
-tab childid
-drop if childid=="S1"
-
-* rename variables to be consistent with year 1
-* sub the "an" prefix for a "c" prefix
-foreach var of varlist an* {
-	local vname = "`var'"
-	local vstub = substr("`vname'",3,.)
-	rename `var' c`vstub'
-}
+*Create indicator for whether dob comes from EE or main study
+generate DOBfromEE byte=1 if EEdataset_DOB==1 & (MainStudyDataset_diar_DOB!=1 & MainStudyDataset_anthro_DOB!=1)
+drop anthrodob diardob EE_dob MainStudyDataset_anthro_DOB MainStudyDataset_diar_DOB EEdataset_DOB _merge svy
 
 
-* list duplicates
-duplicates list dataid childid
-sort dataid childid
-tempfile childanthro
-save `childanthro'
-
-use `main', clear
-merge 1:m dataid using `childinfo'
-assert _merge==3
+*Merge DOBs into EEanthro dataset
+sort dataid childNo
+merge 1:m dataid childNo using `EEanthro'
+tab _merge
+drop if _merge==1
+list dataid childNo svy if _merge==2
+list dataid childNo svy if DOBfromEE==1
 drop _merge
 
-* merge in the child anthro information
-sort dataid childid
-merge 1:1 dataid childid using `childanthro'
-
-
-* list 4 children who are not matching
-* dropped, after confirming with Kishor
-count if _merge==2
-list dataid childid  if _merge==2
-drop if _merge==2
-keep if _merge!=1
-drop _merge
 
 
 
-*--------------------------------------------
-* Year 2 data formats differ for many variables, 
-* which creates problems in the append. 
-* standardize to earlier year formats
-*--------------------------------------------
-
-* convert survey date to date format
-gen rq4002 = date(q4002,"DMY")
-drop q4002
-rename rq4002 q4002
-
-
-* numeric to string
-local rtoslist "q4014 q4015 q4016 q4017 q105years q105months q105days q716mins q716secs q721mins q721secs q817years q817months q905adays q905ahours q905amins q912adays q912ahours q912amins q1004days q1004hours q1004mins q1011mins q1015mins q807cahours q807camins q807cbhours q807cbmins q807cchours q807ccmins q807cdhours q807cdmins q807cehours q807cemins"
-foreach var of local rtoslist {
-	gen r`var' = string(`var')
-	drop `var'
-	rename r`var' `var'
-}
-
-* string to numeric
-local storlist "q102 q1303 q1307 q1308 q1310 q1311"
-foreach var of local storlist {
-	gen r`var' = real(`var')
-	drop `var'
-	rename r`var' `var'
-}
+*Temporarily fix incorrect collection dates
+replace SampleColDate="27 Jun 2013" if dataid=="17605" & svy==1 & SampleColDate=="26 Jun 1900" 
 
 
 
-*--------------------------------------------
-* APPEND YEAR 1, YEAR 2
-*--------------------------------------------
-gen svy = 2
-	label var svy "Survey round (0,1,2)"
+********************************************************************************
+*Generate child ages
+********************************************************************************
+gen date = date(SampleColDate, "DMY")
+format date %d
+	label var date "Date of sample collection"
 	
-append using `year1'
-
-
-
-*--------------------------------------------
-* merge in the treatment assignment information 
-*--------------------------------------------
-
-* drop clusterid and block variables to 
-* ensure we get a complete set
-
-* merge in the treatment assignment info (keep only matching obs)
-sort dataid
-drop clusterid
-merge m:1 dataid using `trdata'
-assert _merge != 1
-drop if _merge==2
-drop _merge
-*/
-
-
-
-*--------------------------------------------
-* for a small number of children without age
-* or sex information in one of the measurement
-* rounds, fill it in using the other round
-*--------------------------------------------
-
-
-*--------------------------------------------
-* Age, using measurement date and birth date
-*--------------------------------------------
-label define sex 0 "female" 1 "male"
-
-format DOB ms_bl_date blvisit1date ms_ml_ad_date ms_ml_am_date ms_el_ad_date ms_el_am_date %d
-
-*Generate anthrodate variable based on survey year
-generate anthrodate=0
-replace anthrodate=ms_ml_am_date if studyyear==1
-replace anthrodate=ms_el_am_date if studyyear==2
-	format anthrodate %d
-	label var anthrodate "Date of anthro measurement"
-	
-
-gen aged = anthrodate-DOB
+gen aged = date-DOB
 	label var aged "Age in days (anthro meas)"
-gen double agem = aged/30.4167
+gen double agem = aged/30.4375
 	label var agem "Age in months (anthro meas)"
 gen double agey = aged/365.25
 	label var agey "Age in years (anthro meas)"
 codebook agey
 
 * Month of measurement
-gen month = month(anthrodate)
-	label var month "Month of measurement"
-
-*generate var if non-target under 36mo at baseline
-gen u36=0
-replace u36=1 if agem<36 & studyyear==0 & childtype>2
-
-*Generate a variable to mark anthro cohort kids to be analyzed
-gen acohort=0
-	replace acohort=1 if u36==1 | (childtype<=2 & studyyear!=0)
+gen month = month(date)
+	label var month "Month of sample collection"
 
 
-* check children who seem too old
-list hhid childid DOB aged agem if agem>15 & agem<. & studyyear==1
-list hhid childid DOB aged agem if agem>32 & agem<. & studyyear==2
-
-
+	
 *--------------------------------------------
 * birth order of target children
 * collected at year 2, so backfill
@@ -436,12 +385,23 @@ drop _x
 tab birthord if svy==1
 tab birthord if svy==2
 */
+
+*Rename anthro variables to match main trial conventions
+rename Weight1 weight1
+rename Weight2 weight2
+rename Weight3 weight3
+rename Len1 len1
+rename Len2 len2 
+rename Len3 len3
+
+
+
 *--------------------------------------------
 * ensure that all the anthro measurements 
 * are rounded to the correct level of precision
 * no more than 2 decimal places
 *--------------------------------------------
-for any headc1 headc2 headc3 muac1 muac2 muac3 weight1 weight2 weight3 length1 length2 length3 c422 c423 c424: replace X = round(X,0.01)
+for any hc1 hc2 hc3 muac1 muac2 muac3 weight1 weight2 weight3 len1 len2 len3: replace X = round(X,0.01)
 
 *--------------------------------------------
 * Calculate median length measurements
@@ -506,6 +466,8 @@ egen double headcir = rowmedian(hc1 hc2 hc3)
 * Calculate laz, waz, whz, using the zscore06
 * add-on package. do not specify oedema
 *--------------------------------------------
+codebook female
+generate sex=female+1 
 *recode sex(0=2)
 codebook sex
 
@@ -513,7 +475,8 @@ codebook sex
 zscore06, a(agem) s(sex) h(length) w(wch) female(2) male(1) measure(length_method) recum(1) stand(2)
 
 * save a temporary dataset to merge with the WHO igrowup output
-save "~/Dropbox/Kenya Primary Analysis/Data-selected/temp/washb-working-anthro.dta", replace
+save "C:/Users/andre/Dropbox/WASHB-EE-Analysis/WBB-EE-analysis/Data/Temp/washb-working-anthro-Andrew.dta", replace
+
 
 *--------------------------------------------
 * Calculate laz, waz, whz, and wcz using the 
@@ -577,12 +540,10 @@ gen sw = -10
 * to the "datalab" variable (defined in last chunk)
 *---------------------------------------------
 
-*keep hhid childid studyyear aged whosex whosex aged ageunit wch length measure headcir uac triskin subskin oedema sw  reflib datalib datalab 
-keep headcir hhid childid studyyear aged sex ageunit wch length measure headcir uac triskin subskin oedema sw  reflib datalib datalab 
-generate weight=wch
+keep headcir dataid childNo date svy clusterid aged sex ageunit wch length measure headcir uac triskin subskin oedema sw  reflib datalib datalab 
+rename wch weight
 
 save "~/Documents/washb_Kenya_primary_outcomes_Andrew/Kenya cleaning .do files/WHO igrowup workdata/TEMPanthro.dta", replace
-*C:\Users\andre\Dropbox\Kenya Primary Analysis\Kenya cleaning .do files\WHO igrowup workdata
 
 *igrowup_standard reflib datalib datalab sex aged ageunit weight length measure headcir uac triskin subskin oedema sw
 
@@ -602,22 +563,28 @@ sex aged ageunit weight length measure headcir uac triskin subskin oedema sw;
 *---------------------------------------------
 use "C:/Users/andre/Documents/washb_Kenya_primary_outcomes_Andrew/Kenya cleaning .do files/WHO igrowup workdata/TEMPanthro_z_st", clear
 
-keep headcir hhid childid studyyear _zwei _zlen _zbmi _zwfl _zhc _fwei _flen _fbmi _fwfl _fhc
-sort hhid childid studyyear
+keep headcir childNo dataid svy clusterid _zwei _zlen _zbmi _zwfl _zhc _fwei _flen _fbmi _fwfl _fhc
+sort dataid childNo svy
 save  "C:/Users/andre/Documents/washb_Kenya_primary_outcomes_Andrew/Kenya cleaning .do files/WHO igrowup workdata/TEMPanthro", replace
 
 use "~/Dropbox/Kenya Primary Analysis/Data-selected/temp/washb-working-anthro", clear
-sort hhid childid studyyear
-merge 1:1 hhid childid studyyear using "C:/Users/andre/Documents/washb_Kenya_primary_outcomes_Andrew/Kenya cleaning .do files/WHO igrowup workdata/TEMPanthro"
+sort dataid childNo svy
+drop _merge
+destring clusterid, replace
+merge 1:1 dataid childNo svy using "C:/Users/andre/Documents/washb_Kenya_primary_outcomes_Andrew/Kenya cleaning .do files/WHO igrowup workdata/TEMPanthro"
 assert _merge==3
 drop _merge
+
+
+*Replace "99" missing codes with .
+for any haz06 waz06 whz06 bmiz06: replace X = . if X==99
 
 
 * compare measurements from the 2 packages to ensure they are identical
 * (correlation = 1)
 corr haz06 _zlen 
 corr waz06 _zwei
-corr whz06 _zwfl
+corr whz06 _zwfl //Don't match
 corr bmiz06 _zbmi
 
 
@@ -708,25 +675,24 @@ gen byte whzminus3 = whz < -3
 
 
 * restrict to variables used in the analysis
-keep childid childtype compoundid staffid acohort sex DOB month length ms_bl_date blvisit1date ms_ml_ad_date ms_ml_am_date ms_el_ad_date ms_el_am_date attritioncase_el haslength_mla haslength_ela haslength hhid vlgid clusterid studyyear block tr anthrodate aged agem agey month headcir laz waz whz bmiz hcz laz_x waz_x whz_x hcz_x lazminus2 bmiz_x lazminus3 wazminus2 wazminus3 whzminus3 whzminus2
-order childid childtype compoundid staffid acohort sex DOB month length ms_bl_date blvisit1date ms_ml_ad_date ms_ml_am_date ms_el_ad_date ms_el_am_date attritioncase_el haslength_mla haslength_ela haslength hhid vlgid clusterid studyyear block tr anthrodate aged agem agey month headcir laz waz whz bmiz hcz laz_x waz_x whz_x hcz_x lazminus2 bmiz_x lazminus3 wazminus2 wazminus3 whzminus3 whzminus2
+keep dataid childNo clusterid female date DOB month length svy aged agem agey month headcir laz waz whz bmiz hcz laz_x waz_x whz_x hcz_x lazminus2 bmiz_x lazminus3 wazminus2 wazminus3 whzminus3 whzminus2
 
 *check childid formatting for R merge
 *format childid %9.0f
 
 
 compress
-sort hhid childid studyyear
+sort dataid childNo svy
 label data "Bangladesh EE anthropometry analysis dataset, created by BD-EE-dm-anthro.do"
-saveold "C:/Users/andre/Dropbox/WBB-EE-analysis/Data/Final/washb-eed-bd-anthro.dta", replace version(12)
-outsheet using "C:\Users\andre\Dropbox\WBB-EE-analysis\Data\Final/washb-eed-bd-anthro.csv", comma replace
+saveold "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew/BD-EE-anthro.dta", replace version(12)
+outsheet using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew/BD-EE-anthro.csv", comma replace
 
 
 
 
 * write a codebook for the dataset
 log close
-log using "C:\Users\andre\Dropbox\WBB-EE-analysis\Data\Final/washb-eed-bd-anthro-codebook.txt", text replace
+log using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/washb-eed-bd-anthro-codebook.txt", text replace
 desc
 codebook, c
 codebook
