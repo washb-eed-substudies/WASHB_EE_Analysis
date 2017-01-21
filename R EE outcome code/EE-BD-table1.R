@@ -9,6 +9,7 @@
 #---------------------------------------
 
 ###Load in data
+rm(list=ls())
 try(detach(package:plyr))
 library(foreign)
 library(dplyr)
@@ -48,7 +49,8 @@ stool<-stool %>%
   distinct(dataid, clusterid)
 
 medhistory<-medhistory %>%
-  subset(!is.na(consent1) | !is.na(consent2) | !is.na(consent3)) %>%
+  #subset(!is.na(consent1) | !is.na(consent2) | !is.na(consent3)) %>%
+  subset((consent1==1) | (consent2==1) | (consent3==1)) %>%
   select(dataid, clusterid) %>%
   distinct(dataid, clusterid)
 
@@ -56,7 +58,8 @@ medhistory<-medhistory %>%
 #urineform
 #stoolform
 
-childid<-union(urine, stool, medhistory)
+childid<-union(urine, stool)
+childid<-union(childid, medhistory)
 
 
 #Merge treatment information 
@@ -120,6 +123,41 @@ table1<-d %>%
           hfiacat=sum(hfiacat>1, na.rm=T) #Tabulate food insecure==2, 3, or 4
           )
 
+table1_sd<-d %>%
+        group_by(tr) %>%
+        summarize(
+          momage=sd(momage, na.rm=T), 
+          momedu=sd(momeduy, na.rm=T),
+          dadeduy=sd(dadeduy, na.rm=T),
+          dadagri=mean(dadagri, na.rm=T)*100,  #cat
+          Nhh=sd(Nhh, na.rm=T),
+          elec=mean(elec, na.rm=T)*100,
+          cement=mean(cement, na.rm=T)*100,
+          landacre=sd(landacre, na.rm=T),
+          tubewell=mean(tubewell, na.rm=T)*100,
+          storewat=mean(storewat, na.rm=T)*100,
+          treatwat=mean(treatwat, na.rm=T)*100,
+          watmin=sd(watmin, na.rm=T),
+          odmen=mean(odmen, na.rm=T)*100,
+          odwom=mean(odwom, na.rm=T)*100,
+          odch815=mean(odch815, na.rm=T)*100,
+          odch38=mean(odch38, na.rm=T)*100,
+          odchu3=mean(odchu3, na.rm=T)*100,
+          latown=mean(latown, na.rm=T)*100,
+          latslab=mean(latslab, na.rm=T)*100,
+          latseal=mean(latseal, na.rm=T)*100,
+          latfeces=mean(latfeces, na.rm=T)*100,
+          potty=mean(potty, na.rm=T)*100,
+          humfeces=mean(humfeces, na.rm=T)*100,
+          humfecesch=mean(humfecesch, na.rm=T)*100,
+          hwlatwat=mean(hwlatwat, na.rm=T)*100,
+          hwlatsoap=mean(hwlatsoap, na.rm=T)*100,
+          hwkitwat=mean(hwkitwat, na.rm=T)*100,
+          hwkitsoap=mean(hwkitsoap, na.rm=T)*100,
+          hfiacat=mean(hfiacat>1, na.rm=T)*100 #Tabulate food insecure==2, 3, or 4
+          )
+
+
 
 #Transpose
 table1<-table1 %>%
@@ -127,5 +165,10 @@ table1<-table1 %>%
   spread(tr, val)
 print(table1, n=nrow(table1))
 
+table1_sd<-table1_sd %>%
+  gather(var, val, 2:ncol(table1_sd)) %>%
+  spread(tr, val)
+print(table1_sd, n=nrow(table1_sd))
 
-#summarize SDs (continious vars) or %s (categorical vars)
+
+
