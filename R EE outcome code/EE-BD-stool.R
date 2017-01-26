@@ -121,24 +121,25 @@ rbind(overallN2, t2[c(1,3,4,2),])
 rbind(overallN3, t3[c(1,3,4,2),])
 
 
-#Temporarily generate fake outcome data for AAT (0.5, sd=0.12), NPO (10000, sd=2500), and NEO (2000, sd=250)
+#Temporarily generate fake outcome data for aat (0.5, sd=0.12), mpo (10000, sd=2500), and neo (2000, sd=250)
 set.seed(12345)
-d$AAT1<-rnorm(n=nrow(d), mean=0.4, sd=0.12)
-d$NPO1<-rnorm(n=nrow(d), mean=11000, sd=0.12)
-d$NEO1<-rnorm(n=nrow(d), mean=2000, sd=0.12)
+d$aat1<-rnorm(n=nrow(d), mean=13, sd=1)
+d$mpo1<-rnorm(n=nrow(d), mean=11000, sd=0.12)
+d$neo1<-rnorm(n=nrow(d), mean=2000, sd=0.12)
 
-d$AAT2<-rnorm(n=nrow(d), mean=0.6, sd=0.12)
-d$NPO2<-rnorm(n=nrow(d), mean=9000, sd=0.12)
-d$NEO2<-rnorm(n=nrow(d), mean=2100, sd=0.12)
+d$aat2<-rnorm(n=nrow(d), mean=12, sd=1.5)
+d$mpo2<-rnorm(n=nrow(d), mean=9000, sd=0.12)
+d$neo2<-rnorm(n=nrow(d), mean=2100, sd=0.12)
+d$reg1b2<-rnorm(n=nrow(d), mean=30, sd=5)
 
-d$AAT3<-rnorm(n=nrow(d), mean=0.5, sd=0.12)
-d$NPO3<-rnorm(n=nrow(d), mean=10000, sd=0.12)
-d$NEO3<-rnorm(n=nrow(d), mean=1900, sd=0.12)
+d$aat3<-rnorm(n=nrow(d), mean=13.5, sd=1.3)
+d$mpo3<-rnorm(n=nrow(d), mean=10000, sd=0.12)
+d$neo3<-rnorm(n=nrow(d), mean=1900, sd=0.12)
 
 #Create and save dataset for Audrie:
 stool_simulated_outcomes<-d %>%
     mutate(childid=as.character(dataid*10+childNo)) %>%
-    select(childid, AAT1, NPO1, NEO1, AAT2, NPO2, NEO2, AAT3, NPO3, NEO3)
+    select(childid, aat1, mpo1, neo1, aat2, mpo2, neo2, reg1b2, aat3, mpo3, neo3)
 library(stringr)
 stool_simulated_outcomes$childid<-str_pad(stool_simulated_outcomes$childid, 6, pad = "0")
 head(stool_simulated_outcomes)    
@@ -154,140 +155,95 @@ head(stool_simulated_outcomes)
 ############################
 
 #dataframe of stool biomarkers:
-Y<-d %>% select(AAT1,NPO1,NEO1,AAT2,NPO2,NEO2,AAT3,NPO3,NEO3)
+Y<-d %>% select(aat1,mpo1,neo1,aat2,mpo2,neo2,aat3,mpo3,neo3)
 
 #Set contrasts:
 contrasts <- list(c("Control","WSH"), c("Control","Nutrition"), c("Control","Nutrition + WSH"), c("Nutrition","Nutrition + WSH"), c("WSH","Nutrition + WSH"))
 
 
 #Create empty  matrices to hold the Ns and geometric means:
-NEO_t1_N_M<-NPO_t1_N_M<-AAT_t1_N_M<-NEO_t2_N_M<-NPO_t2_N_M<-AAT_t2_N_M<-NEO_t3_N_M<-NPO_t3_N_M<-AAT_t3_N<-matrix(0,4,2)
+neo_t1_N_M<-mpo_t1_N_M<-aat_t1_N_M<-neo_t2_N_M<-mpo_t2_N_M<-aat_t2_N_M<-neo_t3_N_M<-mpo_t3_N_M<-aat_t3_N<-matrix(0,4,2)
 
 
   #N's and geometric means
-AAT_t1_N_M<-d %>% group_by(tr) %>% subset(!is.na(AAT1)) %>% summarize(N=n(), geo_mean= exp(mean(log(AAT1), na.rm=T)))   
-NPO_t1_N_M<-d %>% group_by(tr) %>% subset(!is.na(NPO1)) %>% summarize(N=n(), geo_mean= exp(mean(log(NPO1), na.rm=T)))   
-NEO_t1_N_M<-d %>% group_by(tr) %>% subset(!is.na(NEO1)) %>% summarize(N=n(), geo_mean= exp(mean(log(NEO1), na.rm=T)))   
-AAT_t2_N_M<-d %>% group_by(tr) %>% subset(!is.na(AAT2)) %>% summarize(N=n(), geo_mean= exp(mean(log(AAT2), na.rm=T)))   
-NPO_t2_N_M<-d %>% group_by(tr) %>% subset(!is.na(NPO2)) %>% summarize(N=n(), geo_mean= exp(mean(log(NPO2), na.rm=T)))   
-NEO_t2_N_M<-d %>% group_by(tr) %>% subset(!is.na(NEO2)) %>% summarize(N=n(), geo_mean= exp(mean(log(NEO2), na.rm=T)))   
-AAT_t3_N_M<-d %>% group_by(tr) %>% subset(!is.na(AAT3)) %>% summarize(N=n(), geo_mean= exp(mean(log(AAT3), na.rm=T)))   
-NPO_t3_N_M<-d %>% group_by(tr) %>% subset(!is.na(NPO3)) %>% summarize(N=n(), geo_mean= exp(mean(log(NPO3), na.rm=T)))   
-NEO_t3_N_M<-d %>% group_by(tr) %>% subset(!is.na(NEO3)) %>% summarize(N=n(), geo_mean= exp(mean(log(NEO3), na.rm=T)))   
+aat_t1_N_M<-d %>% group_by(tr) %>% subset(!is.na(aat1)) %>% summarize(N=n(), geo_mean= exp(mean(log(aat1), na.rm=T)))   
+mpo_t1_N_M<-d %>% group_by(tr) %>% subset(!is.na(mpo1)) %>% summarize(N=n(), geo_mean= exp(mean(log(mpo1), na.rm=T)))   
+neo_t1_N_M<-d %>% group_by(tr) %>% subset(!is.na(neo1)) %>% summarize(N=n(), geo_mean= exp(mean(log(neo1), na.rm=T)))   
+aat_t2_N_M<-d %>% group_by(tr) %>% subset(!is.na(aat2)) %>% summarize(N=n(), geo_mean= exp(mean(log(aat2), na.rm=T)))   
+mpo_t2_N_M<-d %>% group_by(tr) %>% subset(!is.na(mpo2)) %>% summarize(N=n(), geo_mean= exp(mean(log(mpo2), na.rm=T)))   
+neo_t2_N_M<-d %>% group_by(tr) %>% subset(!is.na(neo2)) %>% summarize(N=n(), geo_mean= exp(mean(log(neo2), na.rm=T)))   
+aat_t3_N_M<-d %>% group_by(tr) %>% subset(!is.na(aat3)) %>% summarize(N=n(), geo_mean= exp(mean(log(aat3), na.rm=T)))   
+mpo_t3_N_M<-d %>% group_by(tr) %>% subset(!is.na(mpo3)) %>% summarize(N=n(), geo_mean= exp(mean(log(mpo3), na.rm=T)))   
+neo_t3_N_M<-d %>% group_by(tr) %>% subset(!is.na(neo3)) %>% summarize(N=n(), geo_mean= exp(mean(log(neo3), na.rm=T)))   
 
 
 
 #Create empty matrix to hold the glm results:
-NEO_t1_unadj<-NPO_t1_unadj<-AAT_t1_unadj<-matrix(0, nrow=5, ncol=3)
-NEO_t2_unadj<-NPO_t2_unadj<-AAT_t2_unadj<-matrix(0, nrow=5, ncol=3)
-NEO_t3_unadj<-NPO_t3_unadj<-AAT_t3_unadj<-matrix(0, nrow=5, ncol=3)
+neo_t1_unadj<-mpo_t1_unadj<-aat_t1_unadj<-matrix(0, nrow=5, ncol=6)
+neo_t2_unadj<-mpo_t2_unadj<-aat_t2_unadj<-matrix(0, nrow=5, ncol=6)
+neo_t3_unadj<-mpo_t3_unadj<-aat_t3_unadj<-matrix(0, nrow=5, ncol=6)
 
-res_unadj<-list(NEO_t1_unadj=NEO_t1_unadj, NPO_t1_unadj=NPO_t1_unadj, AAT_t1_unadj=AAT_t1_unadj, 
-                NEO_t2_unadj=NEO_t2_unadj, NPO_t2_unadj=NPO_t2_unadj, AAT_t2_unadj=AAT_t2_unadj, 
-                NEO_t3_unadj=NEO_t3_unadj, NPO_t3_unadj=NPO_t3_unadj, AAT_t3_unadj=AAT_t3_unadj)
+res_unadj<-list(neo_t1_unadj=neo_t1_unadj, mpo_t1_unadj=mpo_t1_unadj, aat_t1_unadj=aat_t1_unadj, 
+                neo_t2_unadj=neo_t2_unadj, mpo_t2_unadj=mpo_t2_unadj, aat_t2_unadj=aat_t2_unadj, 
+                neo_t3_unadj=neo_t3_unadj, mpo_t3_unadj=mpo_t3_unadj, aat_t3_unadj=aat_t3_unadj)
 
 
 #Unadjusted glm models
 for(i in 1:9){
   for(j in 1:5){
-    temp<-washb_glm(Y=Y[,i], tr=d$tr, W=NULL, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)
-    res_unadj[[i]][j,]<-as.numeric(temp$TR[1:3])
-    colnames(res_unadj[[i]])<-c("RD","ci.l","ci.u")
+    #note the log transformation of the outcome prior to running GLM model:
+    temp<-washb_glm(Y=log(Y[,i]), tr=d$tr, W=NULL, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)
+    res_unadj[[i]][j,]<-as.numeric(temp$TR)
+    colnames(res_unadj[[i]])<-c("RD","ci.l","ci.u", "Std. Error", "z value", "Pval")
     rownames(res_unadj[[i]])<-c(c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "Nutrition v Nutrition + WSH", "WSH v Nutrition + WSH"))
   }
 }
 
 
 
+############################
+#Adjusted GLMs
+############################
 
-#adjusted
+#Make vectors of adjustment variable names
 
-
-
-#Create empty matrix to hold the tmle results:
-res_adj<-list(NEO_t1_adj=matrix(0,5,3), NPO_t1_adj=matrix(0,5,3), AAT_t1_adj=matrix(0,5,3), 
-                NEO_t2_adj=matrix(0,5,3), NPO_t2_adj=matrix(0,5,3), AAT_t2_adj=matrix(0,5,3), 
-                NEO_t3_adj=matrix(0,5,3), NPO_t3_adj=matrix(0,5,3), AAT_t3_adj=matrix(0,5,3))
-
-###
-Make sure to select the right W
-XXXXXXXX
-####
-
-Wvars<-c('sex','aged','month','momage','momedu','momheight','Ncomp ','Nlt18','electricity','radio','television','mobile','clock','bicycle','motorcycle','stove','roof','floor','cow','goat','dog','chicken','dminwat','hfiacat','fracode')
-
-
-#Create the fracode staff experience factor
-ad$staffid[ad$staffid==327] = 0
-ad$staffid[ad$staffid==460] = 0
-ad$staffid[ad$staffid==1213] = 0
-ad$staffid[ad$staffid==1400] = 0
-ad$staffid[ad$staffid==1405] = 0
-ad$staffid[ad$staffid==1723] = 0
-ad$staffid[ad$staffid==1727] = 0
-ad$staffid[ad$staffid==1728] = 0
-ad$staffid[ad$staffid==1830] = 0
-ad$staffid[ad$staffid==2105] = 0
-ad$staffid[ad$staffid==2112] = 0
-ad$staffid[ad$staffid==2174] = 0
-ad$staffid[ad$staffid==2217] = 0
-ad$staffid[ad$staffid==2242] = 0
-ad$staffid[ad$staffid==2311] = 0
-ad$staffid[ad$staffid==2321] = 0
-ad$staffid[ad$staffid==2328] = 0
-ad$staffid[ad$staffid==2674] = 0
-ad$staffid[ad$staffid==2847] = 0
-ad$staffid[ad$staffid==3102] = 0
-ad$staffid[ad$staffid==3322] = 0
-ad$staffid[ad$staffid==3323] = 0
-ad$staffid[ad$staffid==3352] = 0
-ad$staffid[ad$staffid==3357] = 0
-ad$staffid[ad$staffid==3408] = 0
-ad$staffid[ad$staffid==3410] = 0
-ad$staffid[ad$staffid==3418] = 0
-ad$staffid[ad$staffid==3420] = 0
-ad$staffid[ad$staffid==3421] = 0
-ad$staffid[ad$staffid==3424] = 0
-ad$staffid[ad$staffid==3425] = 0
-ad$staffid[ad$staffid==3435] = 0
-ad$staffid[ad$staffid==3436] = 0
-ad$staffid[ad$staffid==3437] = 0
-ad$staffid[ad$staffid==3783] = 0
-ad$staffid[ad$staffid==4187] = 0
-ad$staffid[ad$staffid==4328] = 0
-ad$staffid[ad$staffid==4345] = 0
-ad$staffid[ad$staffid==4347] = 0
-ad$staffid[ad$staffid==4348] = 0
-ad$staffid[ad$staffid==4382] = 0
-ad$staffid[ad$staffid==4433] = 0
-ad$staffid[ad$staffid==4438] = 0
-ad$staffid[ad$staffid==4471] = 0
-ad$staffid[ad$staffid==4515] = 0
-ad$staffid[ad$staffid==4518] = 0
-ad$staffid[ad$staffid==4522] = 0
-ad$staffid[ad$staffid==4531] = 0
-ad$staffid[ad$staffid==4548] = 0
-ad$staffid[ad$staffid==4645] = 0
-ad$staffid[ad$staffid==5422] = 0
-ad$staffid[ad$staffid==7383] = 0
-ad$staffid[ad$staffid==8152] = 0
-ad$staffid[ad$staffid==8274] = 0
-ad$staffid[ad$staffid==8604] = 0
-ad$staffid[ad$staffid==8787] = 0
-ad$staffid[ad$staffid==8883] = 0
-ad$staffid[ad$staffid==8884] = 0
-ad$staffid[ad$staffid==9999] = 0
-
-ad$fracode <- factor(ad$staffid)
+Wvars<-c('sex', 'birthord',
+         'momage', 'momheight','momedu','hfiacat',
+         'Nlt18','Ncomp','watmin',
+         'elec', 'asset_wardrobe', 'asset_table', 'asset_chair', 'asset_clock', 
+         'n_asset_khat', 'n_asset_chouki', 'asset_radio', 
+         'asset_tvcol', 'asset_refrig', 'asset_bike',
+         'asset_moto', 'asset_sewmach', 'asset_mobile')
+#Add in time varying covariates:
+Wvars1<-c("aged1", "month1") 
+Wvars2<-c("aged2", "month2") 
+Wvars3<-c("aged3", "month3") 
 
 
+
+#subset time-constant W adjustment set
+W<- subset(d, select=Wvars)
+
+#Clean adjustment variables 
+#Check missingness
+for(i in 1:ncol(W)){
+  print(colnames(W)[i])
+  print(table(is.na(W[,i])))
+}
+
+#Replace missingness for factors with new level
+#in main dataset 
+
+d$birthord[is.na(d$birthord)]<-99
+d$birthord<-factor(d$birthord)
+
+d$asset_clock[is.na(d$asset_clock)]<-99
+d$asset_clock<-factor(d$asset_clock)
 
 #Order data to replicate SL
-ad <- ad[order(ad$block,ad$clusterid,ad$hhid,ad$childid,ad$studyyear),]
+d <- d[order(d$dataid,d$childNo, d$svy),]
 
-
-
-#subset W adjustment set
+#Re-subset W so new missing categories are included
 W<- subset(d, select=Wvars)
 
 #check that all the factor variables are set
@@ -295,49 +251,61 @@ for(i in 1:ncol(W)){
   print(colnames(W)[i])
   print(class(W[,i])  )
 }
-
 #set covariates as factors
-diarW$month<-as.factor(diarW$month)
-diarW$HHS<-as.factor(diarW$HHS)
-diarW$electricity<-as.factor(diarW$electricity)
-diarW$radio<-as.factor(diarW$radio)
-diarW$television<-as.factor(diarW$television)
-diarW$mobile<-as.factor(diarW$mobile)
-diarW$clock<-as.factor(diarW$clock)
-diarW$bicycle<-as.factor(diarW$bicycle)
-diarW$motorcycle<-as.factor(diarW$motorcycle)
-diarW$stove<-as.factor(diarW$stove)
-diarW$roof<-as.factor(diarW$roof)
-diarW$floor<-as.factor(diarW$floor)
-ad$block<-as.factor(ad$block)
+W$sex<-as.factor(W$sex)
+W$momedu<-as.factor(W$momedu)
+W$elec<-as.factor(W$elec)
+W$asset_wardrobe<-as.factor(W$asset_wardrobe)
+W$asset_table<-as.factor(W$asset_table)
+W$asset_chair<-as.factor(W$asset_chair)
+W$asset_clock<-as.factor(W$asset_clock)
+W$asset_radio<-as.factor(W$asset_radio)
+W$asset_tvcol<-as.factor(W$asset_tvcol)
+W$asset_refrig<-as.factor(W$asset_refrig)
+W$asset_bike<-as.factor(W$asset_bike)
+W$asset_moto<-as.factor(W$asset_moto)
+W$asset_sewmach<-as.factor(W$asset_sewmach)
+W$asset_mobile<-as.factor(W$asset_mobile)
+
+
+#Add in time-varying covariates
+W1<- cbind(W, subset(d, select=Wvars1))
+W2<- cbind(W, subset(d, select=Wvars2))
+W3<- cbind(W, subset(d, select=Wvars3))
+
+#Set time-varying covariates as factors
+W1$month<-as.factor(W1$month)
+W2$month<-as.factor(W2$month)
+W3$month<-as.factor(W3$month)
+
+
+#Run GLMs for the adjusted parameter estimates
 
 
 
+#Create empty matrix to hold the tmle results:
+res_adj<-list(neo_t1_adj=matrix(0,5,3), mpo_t1_adj=matrix(0,5,3), aat_t1_adj=matrix(0,5,3), 
+                neo_t2_adj=matrix(0,5,3), mpo_t2_adj=matrix(0,5,3), aat_t2_adj=matrix(0,5,3), 
+                neo_t3_adj=matrix(0,5,3), mpo_t3_adj=matrix(0,5,3), aat_t3_adj=matrix(0,5,3))
 
-#Run TMLE for the adjusted parameter estimates
- #Create empty matrices to hold results
-diar_h1_pr_adj<-matrix(0, nrow=7, ncol=3)
-diar_h1_rd_adj<-matrix(0, nrow=7, ncol=3)
-
-
-
-
-
-for(i in 1:7){
-  temp<-washb_tmle(Y=ad$diar7d, tr=ad$tr, W=diarW, id=ad$block,pair=ad$block,family="binomial", contrast= h1.contrasts[[i]],Q.SL.library=c("SL.mean","SL.glm","SL.bayesglm","SL.gam","SL.glmnet"), seed=67890, print=T)
-  diar_h1_pr_adj[i,1]<-temp$estimates$RR$psi
-  diar_h1_pr_adj[i,2:3]<-temp$estimates$RR$CI
-  #diar_h1_pr_adj[i,4]<-temp$estimates$RR$pvalue
-  diar_h1_rd_adj[i,1]<-temp$estimates$ATE$psi
-  diar_h1_rd_adj[i,2:3]<-temp$estimates$ATE$CI
-  #diar_h1_rd_adj[i,4]<-temp$estimates$ATE$pvalue
-  
-  #temp<-washb_glm(Y=ad$diar7d, tr=ad$tr, pair=ad$block, W=diarW, contrast = h1.contrasts[[i]], id=ad$clusterid, family=poisson(link="log"), print=F, verbose=F)
-  #diar_h1_pr_adj[i,]<-as.matrix(temp$TR)
-  #temp<-washb_glm(Y=ad$diar7d, tr=ad$tr, pair=ad$block, W=diarW, contrast = h1.contrasts[[i]], id=ad$clusterid, family="gaussian", print=F, verbose=F)
-  #diar_h1_rd_adj[i,]<-as.matrix(temp$TR)
+for(i in 1:3){
+  for(j in 1:5){
+  temp<-washb_glm(Y=log(Y[,i]), tr=d$tr, W=W1, id=d$clusterid.x, pair=NULL, family="binomial", contrast= contrasts[[i]],Q.SL.library=c("SL.mean","SL.glm","SL.bayesglm","SL.gam","SL.glmnet"), seed=12345, print=T)
+  res_adj<-temp$TR
+  }
 }
-
+for(i in 1:3){
+  for(j in 1:5){
+  temp<-washb_glm(Y=log(Y[,i]), tr=d$tr, W=W2, id=d$clusterid.x, pair=NULL, family="binomial", contrast= contrasts[[i]],Q.SL.library=c("SL.mean","SL.glm","SL.bayesglm","SL.gam","SL.glmnet"), seed=12345, print=T)
+  res_adj<-temp$TR
+  }
+}
+for(i in 1:3){
+  for(j in 1:5){
+  temp<-washb_glm(Y=log(Y[,i]), tr=d$tr, W=W3, id=d$clusterid.x, pair=NULL, family="binomial", contrast= contrasts[[i]],Q.SL.library=c("SL.mean","SL.glm","SL.bayesglm","SL.gam","SL.glmnet"), seed=12345, print=T)
+  res_adj<-temp$TR
+  }
+}
 
 #colnames(diar_h1_pr_adj)<-c("PR","95CI lb","95CI ub","logPR","logSE","Zval","Pval")
 #colnames(diar_h1_rd_adj)<-c("Risk Diff","95CI lb","95CI ub","SE","Zval","Pval")
@@ -350,30 +318,40 @@ rownames(diar_h1_rd_adj) <- rownames(diar_h1_pr_adj) <- c("Passive C v C","Water
 ##########################################
 #Save objects for replication
 ##########################################
-NEO_t1_unadj_M=res_unadj[[1]]
-NPO_t1_unadj_M=res_unadj[[2]]
-AAT_t1_unadj_M=res_unadj[[3]] 
-NEO_t2_unadj_M=res_unadj[[4]] 
-NPO_t2_unadj_M=res_unadj[[5]]
-AAT_t2_unadj_M=res_unadj[[6]] 
-NEO_t3_unadj_M=res_unadj[[7]]
-NPO_t3_unadj_M=res_unadj[[8]]
-AAT_t3_unadj_M=res_unadj[[9]]
+neo_t1_unadj_M=res_unadj[[1]]
+mpo_t1_unadj_M=res_unadj[[2]]
+aat_t1_unadj_M=res_unadj[[3]] 
+neo_t2_unadj_M=res_unadj[[4]] 
+mpo_t2_unadj_M=res_unadj[[5]]
+aat_t2_unadj_M=res_unadj[[6]] 
+neo_t3_unadj_M=res_unadj[[7]]
+mpo_t3_unadj_M=res_unadj[[8]]
+aat_t3_unadj_M=res_unadj[[9]]
+
+neo_t1_adj_M=res_adj[[1]]
+mpo_t1_adj_M=res_adj[[2]]
+aat_t1_adj_M=res_adj[[3]] 
+neo_t2_adj_M=res_adj[[4]] 
+mpo_t2_adj_M=res_adj[[5]]
+aat_t2_adj_M=res_adj[[6]] 
+neo_t3_adj_M=res_adj[[7]]
+mpo_t3_adj_M=res_adj[[8]]
+aat_t3_adj_M=res_adj[[9]]
 
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
-save(NEO_t1_N_M, NPO_t1_N_M, AAT_t1_N_M,
-     NEO_t2_N_M, NPO_t2_N_M, AAT_t2_N_M, 
-     NEO_t3_N_M, NPO_t3_N_M, AAT_t3_N_M, 
+save(neo_t1_N_M, mpo_t1_N_M, aat_t1_N_M,
+     neo_t2_N_M, mpo_t2_N_M, aat_t2_N_M, 
+     neo_t3_N_M, mpo_t3_N_M, aat_t3_N_M, 
      file="stool_res_N_M.Rdata")
 
 
-save(NEO_t1_unadj_M, NPO_t1_unadj_M, AAT_t1_unadj_M,
-     NEO_t2_unadj_M, NPO_t2_unadj_M, AAT_t2_unadj_M, 
-     NEO_t3_unadj_M, NPO_t3_unadj_M, AAT_t3_unadj_M, 
+save(neo_t1_unadj_M, mpo_t1_unadj_M, aat_t1_unadj_M,
+     neo_t2_unadj_M, mpo_t2_unadj_M, aat_t2_unadj_M, 
+     neo_t3_unadj_M, mpo_t3_unadj_M, aat_t3_unadj_M, 
      file="stool_res_unadj_M.Rdata")
 
-save(NEO_t1_adj_M, NPO_t1_adj_M, AAT_t1_adj_M,
-     NEO_t2_adj_M, NPO_t2_adj_M, AAT_t2_adj_M, 
-     NEO_t3_adj_M, NPO_t3_adj_M, AAT_t3_adj_M, 
+save(neo_t1_adj_M, mpo_t1_adj_M, aat_t1_adj_M,
+     neo_t2_adj_M, mpo_t2_adj_M, aat_t2_adj_M, 
+     neo_t3_adj_M, mpo_t3_adj_M, aat_t3_adj_M, 
      file="stool_res_adj_M.Rdata")

@@ -38,6 +38,19 @@ sort clusterid
 tempfile trdata
 save `trdata'
 
+*--------------------------------------------
+* Extract child birth order from the main study 
+* anthro data
+*--------------------------------------------
+use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/washb-bangladesh-anthro.dta", clear
+gen childNo= substr(childid,2,1)
+duplicates drop dataid childNo, force  //*Only keep one round of data
+keep dataid childNo birthord
+sort dataid childNo	
+
+tempfile birthorder
+save `birthorder'
+
 
 *--------------------------------------------
 * Append 3 rounds of stool collection surveys and rename variables
@@ -354,6 +367,7 @@ tab _merge
 drop if _merge==1
 list dataid childNo svy if _merge==2
 list dataid childNo svy if DOBfromEE==1
+drop _merge
 
 
 ************************************
@@ -377,15 +391,21 @@ gen month = month(date)
 	label var month "Month of sample collection"
 
 	
-	
-	
+************************************
+*Merge in birth order
+************************************
+sort dataid childNo	
+merge dataid childNo using `birthorder'	
+tab _merge
+keep if _merge==3 | _merge==1
+drop _merge
 
 ************************************
 *Reshape to wide
 ************************************
 
 *Temporarily limit variables in dataset to help with reshape
-keep dataid clusterid svy sex DOB nonconsent_reason childNo aliqout1 aliqout2 aliqout3 aliqout4 aliqout5 date aged agem agey month 
+keep dataid clusterid svy sex DOB nonconsent_reason childNo aliqout1 aliqout2 aliqout3 aliqout4 aliqout5 date aged agem agey month birthord
 
 *Reshape to wide
 reshape wide date aged agem agey month  nonconsent_reason aliqout1 aliqout2 aliqout3 aliqout4 aliqout5, i(dataid childNo) j(svy)

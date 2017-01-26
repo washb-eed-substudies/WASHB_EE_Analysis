@@ -375,6 +375,8 @@ gen sex=EEsex1
 
 *Display mismatches between gender across survey rounds
 list dataid EEsex1 EEsex2 EEsex3 sex if EEsex1!=EEsex2 & EEsex1!=. & EEsex2!=. | EEsex1!=EEsex3 & EEsex1!=. & EEsex3!=.  | EEsex2!=EEsex3 & EEsex2!=. & EEsex3!=. 
+*Generate diagnostic variable for inconistent sex
+gen byte inconsist_sex= EEsex1!=EEsex2 & EEsex1!=. & EEsex2!=. | EEsex1!=EEsex3 & EEsex1!=. & EEsex3!=.  | EEsex2!=EEsex3 & EEsex2!=. & EEsex3!=.
 
 	
 *Merge in childid tracking with main study DOBs
@@ -423,6 +425,11 @@ generate sexfromEE byte=1 if EEsex!=. & (MainStudyDataset_diar_sex!=1 & MainStud
 *Count how many sex observations had to come from the EE surveys
 table  sexfromEE 
 
+*Look at where EE and main study genders do not agree
+list dataid childNo EEsex EEsex1 EEsex2 EEsex3 diarsex anthrosex inconsist_sex if  (EEsex!=diarsex & diarsex!=. | EEsex!=anthrosex  & anthrosex!=.) & sexfromEE!=1 & inconsist_sex!=.
+x
+*List out sexes only in EE where sex isn't consistent over time
+list EEsex diarsex anthrosex inconsist_sex if sexfromEE==1 & inconsist_sex==1
 
 *Drop unneeded variables
 drop anthrodob diardob EE_dob MainStudyDataset_anthro_DOB MainStudyDataset_diar_DOB EE_dob1 EEsex1 EE_dob2 EEsex2 EE_dob3 EEsex3 EE_dob EEsex _merge svy diarsex anthrosex MainStudyDataset_diar_sex MainStudyDataset_anthro_sex
