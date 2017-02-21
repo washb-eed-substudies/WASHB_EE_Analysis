@@ -28,6 +28,51 @@ log using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Logs/Andrew/
 *
 *--------------------------------------------
 
+
+*--------------------------------------------
+*Load in the outcome data
+*--------------------------------------------
+import excel using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/telomeres/WASH TL 07292016 (Midline Results).xlsx", sheet ("Sheet1") firstrow clear
+replace TS="" if TS=="No amplification" 
+destring TS, replace
+format TS %16.0g
+rename RandomID RandomID2_telo
+rename sampleid sampid
+rename TS TS2
+gen dataid=substr(sampid,1,5)
+gen childNo=substr(sampid,7,1)
+
+
+keep dataid childNo TS2 sampid RandomID2_telo
+sort dataid childNo
+mean TS2
+tempfile telo_lab_mid
+save `telo_lab_mid'
+
+
+import excel using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/telomeres/WASH TL 11112016 (Endline Results).xlsx", sheet ("Sheet1") firstrow clear
+replace TS="" if TS=="DNA didn't pass QC" 
+destring TS, replace
+format TS %16.0g
+rename RandomID RandomID3_telo
+rename sampleid sampid
+rename TS TS3
+mean TS3
+
+gen dataid=substr(sampid,1,5)
+gen childNo=substr(sampid,7,1)
+
+
+
+keep dataid childNo TS3 RandomID3_telo
+sort dataid childNo
+tempfile telo_lab_end
+save `telo_lab_end'
+
+
+
+
+
 *--------------------------------------------
 * format the treatment assignment information
 *--------------------------------------------
@@ -55,12 +100,11 @@ save `birthorder'
 *--------------------------------------------
 * Append 3 rounds of blood surveys and rename variables
 *--------------------------------------------
-
+cd "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched"
 use Endline/EE_Endline_Blood_CLEANED_data_26June2016, clear
 rename q5 consent
 rename FaId staffid
-keep if consent=="1"
-keep dataid childNo clusterid SampleColDate 
+keep dataid childNo clusterid SampleColDate staffid 
 gen svy=3 //generate surveyyear variable
 
 tempfile blood3
@@ -72,21 +116,22 @@ rename faid staffid
 rename childno childNo
 rename samplecoldate SampleColDate
 destring clusterid, replace
-keep if consent=="1"
-keep dataid childNo clusterid SampleColDate
+keep dataid childNo clusterid SampleColDate staffid
 gen svy=2 //generate surveyyear variable
+
+
 
 tempfile blood2
 save `blood2'
 
 use Baseline/Baseline_Blood_CLEANED_VersionIncorporated_30Sept14, clear
+
 rename q5 consent
 rename faid staffid
 rename childno childNo
 rename samplecoldate SampleColDate
 destring clusterid, replace
-keep if consent=="1"
-keep dataid childNo clusterid SampleColDate 
+keep dataid childNo clusterid SampleColDate staffid
 gen svy=1 //generate surveyyear variable
 
 
@@ -157,6 +202,7 @@ append using `centri2', force nolabel
 append using `centri3', force nolabel
 sort dataid childno
 
+
 *Check for duplicate rows
 sort dataid childno sampid RandomID svy
 duplicates tag dataid childno sampid RandomID svy , generate(dup)
@@ -164,6 +210,9 @@ list dataid childno sampid RandomID svy if dup>0
 drop dup
 
 rename childno childNo 
+
+
+
 
 tempfile centri
 save `centri'
@@ -275,7 +324,7 @@ rename EEdob EE_dob
 
 append using `BL_EE_dob', force nolabel
 append using `ML_EE_dob', force nolabel 
-sort dataid childNo
+sort dataid childNo 
 
 
 
@@ -349,14 +398,44 @@ table  sexfromEE
 
 
 *Drop unneeded variables
-drop anthrodob diardob EE_dob MainStudyDataset_anthro_DOB MainStudyDataset_diar_DOB EE_dob1 EEsex1 EE_dob2 EEsex2 EE_dob3 EEsex3 EE_dob EEsex _merge svy diarsex anthrosex MainStudyDataset_diar_sex MainStudyDataset_anthro_sex
-	
+drop anthrodob diardob EE_dob MainStudyDataset_anthro_DOB MainStudyDataset_diar_DOB EE_dob1 EEsex1 EE_dob2 EEsex2 EE_dob3 EEsex3 EE_dob EEsex _merge svy diarsex anthrosex MainStudyDataset_diar_sex MainStudyDataset_anthro_sex DOBfromEE sexfromEE dup
+
+sort dataid childNo
+tempfile DOB
+save `DOB'
+clear
 
 
+*-----------------
+*Merge together centrifugation, 
+*blood collection survey, and DOBs
+*-----------------
+use `centri'
+sort dataid childNo svy
+merge dataid childNo svy using `blood'
+tab _merge
+br if dataid=="04006" | RandomID=="3549259"
+rename _merge centri_blood_merge
+
+*Midline clusterid is missing from append, so apply endline clusterid to svy==2
+bysort dataid: egen new_clusterid = mean(clusterid)
+replace clusterid=new_clusterid
+drop new_clusterid
+
+*Merge DOBs into blood and centrifugation datasets
+sort dataid childNo
+merge dataid childNo using `DOB'
+tab _merge
+keep if _merge==3
+drop _merge
+
+/*
+x
 *Merge DOBs into blood and centrifugation datasets
 sort dataid childNo
 merge 1:m dataid childNo using `centri'
 tab _merge
+x
 drop if _merge==1
 list dataid childNo svy if _merge==2
 list dataid childNo svy if DOBfromEE==1
@@ -366,19 +445,110 @@ drop _merge
 sort dataid childNo svy
 merge dataid childNo svy using `blood'
 tab _merge
-drop if _merge!=3 //Dropping many rows I need to figure out about
-list dataid childNo svy if _merge==1 //Appear to be lab samples missing field data
-drop _merge 
+br if dataid=="04006" | RandomID=="3549259"
 
+list dataid clusterid childNo svy _merge if _merge==1 //List of lab samples missing field data
+*drop if _merge!=3 //Dropping many rows I need to figure out about
+drop _merge 
+*/
 
 ************************************
-*Generate child ages
+*Clean variables
 ************************************
 gen date = date(SampleColDate, "DMY")
 drop SampleColDate
 format date %d
 	label var date "Date of sample collection"
-	
+
+rename aliquot aliquot_char
+gen aliquot=1
+	replace aliquot=2 if aliquot_char=="Partial Aliquot"
+	replace aliquot=3 if aliquot_char=="Full Aliquot"
+
+
+
+************************************
+*Merge in birth order
+************************************
+sort dataid childNo	
+merge dataid childNo using `birthorder'	
+tab _merge
+keep if _merge==3 | _merge==1
+drop _merge
+
+
+*Generate childid combining dataid and childNo
+generate childid=dataid+childNo
+sort childid svy
+
+tempfile telo
+save `telo'
+
+************************************
+*Merge in excel collection date, dob,
+* and gender changes from lab staff
+************************************
+cd "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/Changes"
+import excel using washb-bd-ee-dob-changes-final.xlsx, sheet("Sheet1") firstrow clear
+drop C
+sort childid 
+tempfile dob_change
+save `dob_change'
+
+import excel using washb-bd-ee-med-gender-changes-final.xlsx, sheet("Sheet2") firstrow clear
+gen byte sex= Correctanswer=="Male"
+keep dataid childNo sex
+*rename Correctanswer sex
+tostring childNo, replace
+sort dataid childNo 
+tempfile sex_change
+save `sex_change'
+
+
+import excel using washb-bd-ee-t1-blood-samplecoldate-changes-final.xlsx, sheet("Sheet1") firstrow clear
+rename t1_blood date
+gen svy=1
+sort childid 
+tempfile t1blood_change
+save `t1blood_change'
+
+
+import excel using washb-bd-ee-t2-blood-samplecoldate-changes-final.xlsx, sheet("Sheet1") firstrow clear
+rename t2_blood date
+gen svy=2
+sort childid 
+tempfile t2blood_change
+save `t2blood_change'
+
+
+clear 
+use `telo' 
+merge m:1 childid using `dob_change', keepusing(dob) update replace
+tab _merge
+drop _merge
+merge m:1  dataid childNo using `sex_change', keepusing(sex) update replace
+tab _merge
+drop if _merge==2
+drop _merge
+
+
+codebook date
+br if childid=="013041"
+sort childid svy
+merge m:1  childid svy using `t1blood_change', keepusing(date) update replace
+tab _merge
+drop _merge
+
+merge m:1  childid svy using `t2blood_change', keepusing(date) update replace
+tab _merge
+drop _merge
+
+codebook date
+
+
+************************************
+*Generate child ages
+************************************
 gen aged = date-DOB
 	label var aged "Age in days (anthro meas)"
 gen double agem = aged/30.4375
@@ -391,38 +561,90 @@ codebook agey
 gen month = month(date)
 	label var month "Month of sample collection"
 
-	
-************************************
-*Merge in birth order
-************************************
-sort dataid childNo	
-merge dataid childNo using `birthorder'	
-tab _merge
-keep if _merge==3 | _merge==1
-drop _merge
 
 
-/*
-*Temporarily generate variables
-gen aged=0
-gen agem=0
-gen agey=0
-gen month=0
-gen birthorder=0
-gen clusterid=0
-gen date=0
-*/
 ************************************
 *Reshape to wide
 ************************************
 
 *Temporarily limit variables in dataset to help with reshape
-keep dataid clusterid svy sex DOB childNo aliquot sampid RandomID date aged agem agey month birthord
+drop if svy==1 //Don't need baseline, and is interfering with reshape
+keep dataid clusterid svy sex DOB childNo aliquot RandomID staffid date aged agem agey month birthord
 
 *Reshape to wide
-reshape wide date aged agem agey month aliquot RandomID, i(dataid childNo sampid) j(svy)
+reshape wide date aged agem agey month aliquot RandomID staffid, i(dataid childNo) j(svy)
 *Check for any duplicates after reshaping
 duplicates list dataid childNo 
+duplicates list dataid
+
+
+
+
+
+************************************
+*Merge in outcome data
+************************************
+
+sort dataid childNo
+merge dataid childNo using `telo_lab_mid'
+tab _merge
+drop _merge
+
+sort dataid childNo
+merge dataid childNo using `telo_lab_end'
+tab _merge
+mean TS3
+
+drop if _merge==2
+mean TS3
+
+
+*Only keep rows with outcome data
+keep if TS2!=. | TS3!=.
+
+*keep if TS2!=.
+*list dataid childNo if agem2==.
+
+
+
+*Generate clusterid for rows missing clusterid
+
+
+drop clusterid
+gen clusterid=substr(dataid,1,3)
+destring clusterid, replace
+sort clusterid
+*br if clusterid==801
+
+/*
+tempfile telo
+save `telo'
+
+cd "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/" 
+use "washb-BD-telo-blind-tr.dta"
+
+sort clusterid
+merge clusterid using `telo'
+tab _merge
+list clusterid if _merge==2
+*/
+
+drop _merge
+sort dataid
+tempfile temp
+save `temp'
+clear
+
+cd "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/"
+use "washb-bangladesh-enrol+animals.dta"
+sort dataid
+merge dataid using `temp'
+tab _merge
+keep if _merge==3
+mean TS2
+mean watmin
+
+*gen childid= dataid+childNo
 
 *Save file 
 label data "BD EE telomere dataset, created by BD-EE-dm-telo.do"

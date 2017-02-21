@@ -22,8 +22,10 @@ load("washb-BD-EE-blind-tr.Rdata")
 levels(treatment$tr)
 treatment$tr <- factor(treatment$tr,levels=c("Control","WSH","Nutrition","Nutrition + WSH"))
 levels(treatment$tr)
+
 #Load in enrollment data for adjusted analysis
-enrol<-read.csv("washb-bangladesh-enrol.csv",stringsAsFactors = TRUE)
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
+enrol<-read.csv("washb-bangladesh-enrol+animals.csv",stringsAsFactors = TRUE)
 
 #Load in urine, stool, and medhistory datasets to track all children 
 #who participated in the eed substudy

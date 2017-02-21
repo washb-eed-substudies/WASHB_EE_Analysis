@@ -370,14 +370,93 @@ list dataid childNo svy if DOBfromEE==1
 drop _merge
 
 
+	
 ************************************
-*Generate child ages
+*Merge in birth order
 ************************************
+sort dataid childNo	
+merge dataid childNo using `birthorder'	
+tab _merge
+keep if _merge==3 | _merge==1
+drop _merge
+
+*generate date
 gen date = date(SampleColDate, "DMY")
 drop SampleColDate
 format date %d
 	label var date "Date of sample collection"
-	
+
+*Generate childid combining dataid and childNo
+generate childid=dataid+childNo
+sort childid svy
+tempfile stool
+save `stool'
+
+************************************
+*Merge in excel collection date, dob,
+* and gender changes from lab staff
+************************************
+cd "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/Changes"
+import excel using washb-bd-ee-t1-stool-samplecoldate-changes-final.xlsx, sheet("Sheet1") firstrow clear
+drop C
+rename t1_stool date
+gen svy=1
+sort childid 
+tempfile date_change1
+save `date_change1'
+
+import excel using washb-bd-ee-t2-stool-samplecoldate-changes-final.xlsx, sheet("Sheet1") firstrow clear
+drop C
+rename t2_stool date
+gen svy=2
+sort childid 
+tempfile date_change2
+save `date_change2'
+
+import excel using washb-bd-ee-t3-stool-samplecoldate-changes-final.xlsx, sheet("Sheet1") firstrow clear
+rename t3_stool date
+gen svy=3
+sort childid 
+tempfile date_change3
+save `date_change3'
+
+import excel using washb-bd-ee-dob-changes-final.xlsx, sheet("Sheet1") firstrow clear
+drop C
+sort childid 
+tempfile dob_change
+save `dob_change'
+
+import excel using washb-bd-ee-med-gender-changes-final.xlsx, sheet("Sheet2") firstrow clear
+gen byte sex= Correctanswer=="Male"
+keep dataid childNo sex
+*rename Correctanswer sex
+tostring childNo, replace
+sort dataid childNo 
+tempfile sex_change
+save `sex_change'
+
+clear 
+use `stool' 
+merge 1:1 childid svy using `date_change1', keepusing(date) update replace
+tab _merge
+drop _merge
+merge 1:1 childid svy using `date_change2', keepusing(date) update replace
+tab _merge
+drop _merge
+merge 1:1 childid svy using `date_change3', keepusing(date) update replace
+tab _merge
+drop _merge
+merge m:1 childid using `dob_change', keepusing(dob) update replace
+tab _merge
+drop _merge
+merge m:1  dataid childNo using `sex_change', keepusing(sex) update replace
+tab _merge
+drop if _merge==2
+drop _merge
+
+************************************
+*Generate child ages
+************************************
 gen aged = date-DOB
 	label var aged "Age in days (anthro meas)"
 gen double agem = aged/30.4375
@@ -390,27 +469,19 @@ codebook agey
 gen month = month(date)
 	label var month "Month of sample collection"
 
-	
-************************************
-*Merge in birth order
-************************************
-sort dataid childNo	
-merge dataid childNo using `birthorder'	
-tab _merge
-keep if _merge==3 | _merge==1
-drop _merge
 
 ************************************
 *Reshape to wide
 ************************************
 
 *Temporarily limit variables in dataset to help with reshape
-keep dataid clusterid svy sex DOB nonconsent_reason childNo aliqout1 aliqout2 aliqout3 aliqout4 aliqout5 date aged agem agey month birthord
+keep dataid clusterid svy sex staffid DOB nonconsent_reason childNo aliqout1 aliqout2 aliqout3 aliqout4 aliqout5 date aged agem agey month birthord
 
 *Reshape to wide
-reshape wide date aged agem agey month  nonconsent_reason aliqout1 aliqout2 aliqout3 aliqout4 aliqout5, i(dataid childNo) j(svy)
+reshape wide date aged agem agey month  nonconsent_reason aliqout1 aliqout2 aliqout3 aliqout4 aliqout5 staffid, i(dataid childNo) j(svy)
 *Check for any duplicates after reshaping
 duplicates list dataid childNo 
+
 
 *Save file 
 label data "BD EE stool dataset, created by BD-EE-dm-stool.do"

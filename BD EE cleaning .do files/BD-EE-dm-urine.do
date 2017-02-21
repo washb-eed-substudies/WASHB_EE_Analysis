@@ -40,6 +40,20 @@ save `trdata'
 
 
 *--------------------------------------------
+* Extract child birth order from the main study 
+* anthro data
+*--------------------------------------------
+use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/washb-bangladesh-anthro.dta", clear
+gen childNo= substr(childid,2,1)
+duplicates drop dataid childNo, force  //*Only keep one round of data
+keep dataid childNo birthord
+sort dataid childNo	
+
+tempfile birthorder
+save `birthorder'
+
+
+*--------------------------------------------
 * Append 3 rounds of stool collection surveys and rename variables
 *--------------------------------------------
 clear
@@ -50,7 +64,7 @@ use Endline/EE_Endline_Urine_MainForm_CLEANED_data_11July2016, clear
 rename FaId staffid
 rename q7 consent
 rename q8 nonconsent_reason 
-rename q9 LMvol
+rename q9 LMvol_t 
 rename q31s1hour2 h2sampid1
 rename q31s2hour2 h2sampid2
 rename q31s3hour2 h2sampid3
@@ -75,9 +89,11 @@ rename q34s9hour5 h5aliqout9_t
 rename q34s10hour5 h5aliqout10_t
 rename q34s11hour5 h5aliqout11_t
 rename q34s12hour5 h5aliqout12_t
+rename q25 urineVol_t
+
        
 *destring clusterid, replace
-keep dataid childNo clusterid staffid SampleColDate NumChildren consent nonconsent_reason LMvol h2sampid1 h2sampid2 h2sampid3 h2sampid4 h2sampid5 h2sampid6 h5sampid7 h5sampid8 h5sampid9 h5sampid10 h5sampid11 h5sampid12 h2aliqout1_t h2aliqout2_t h2aliqout3_t h2aliqout4_t h2aliqout5_t h2aliqout6_t h5aliqout7_t h5aliqout8_t h5aliqout9_t h5aliqout10_t h5aliqout11_t h5aliqout12_t
+keep dataid childNo clusterid staffid SampleColDate NumChildren consent nonconsent_reason LMvol h2sampid1 h2sampid2 h2sampid3 h2sampid4 h2sampid5 h2sampid6 h5sampid7 h5sampid8 h5sampid9 h5sampid10 h5sampid11 h5sampid12 h2aliqout1_t h2aliqout2_t h2aliqout3_t h2aliqout4_t h2aliqout5_t h2aliqout6_t h5aliqout7_t h5aliqout8_t h5aliqout9_t h5aliqout10_t h5aliqout11_t h5aliqout12_t urineVol_t LMvol_t
 
 *generate surveyyear variable
 gen svy=3
@@ -105,7 +121,7 @@ rename q56hour2 preLMnonconsent_reason
 
 destring preLMnonconsent_reason, replace
 
-keep dataid childNo preLMsampid13 preLMsampid14 preLMsampid15 preLMsampid16 preLMsampid17 preLMsampid18 preLMaliqout13_t preLMaliqout14_t preLMaliqout15_t preLMaliqout16_t preLMaliqout17_t preLMaliqout18_t preLMnonconsent_reason
+keep dataid childNo preLMsampid13 preLMsampid14 preLMsampid15 preLMsampid16 preLMsampid17 preLMsampid18 preLMaliqout13_t preLMaliqout14_t preLMaliqout15_t preLMaliqout16_t preLMaliqout17_t preLMaliqout18_t preLMnonconsent_reason 
 
 merge 1:1 dataid childNo using `endline', force
 tab _merge
@@ -119,7 +135,7 @@ use Midline/Urine_Main_Midline_Cleaned_MatchedwEnrollment_2Feb16, clear
 rename faid staffid
 rename q7 consent
 rename q8 nonconsent_reason 
-rename q9 LMvol
+rename q9 LMvol_t 
 rename q31s1hour2 h2sampid1
 rename q31s2hour2 h2sampid2
 rename q31s3hour2 h2sampid3
@@ -147,11 +163,12 @@ rename q34s9hour5 h5aliqout9_t
 rename q34s10hour5 h5aliqout10_t
 rename q34s11hour5 h5aliqout11_t
 rename q34s12hour5 h5aliqout12_t
+rename q25 urineVol_t
 
 destring clusterid nonconsent_reason, replace
 
-keep dataid childNo clusterid staffid SampleColDate NumChildren consent nonconsent_reason LMvol h2sampid1 h2sampid2 h2sampid3 h2sampid4 h2sampid5 h2sampid6 h5sampid7 h5sampid8 h5sampid9 h5sampid10 h5sampid11 h5sampid12 h2aliqout1_t h2aliqout2_t h2aliqout3_t h2aliqout4_t h2aliqout5_t h2aliqout6_t h5aliqout7_t h5aliqout8_t h5aliqout9_t h5aliqout10_t h5aliqout11_t h5aliqout12_t
-
+keep dataid childNo clusterid staffid SampleColDate NumChildren consent nonconsent_reason LMvol h2sampid1 h2sampid2 h2sampid3 h2sampid4 h2sampid5 h2sampid6 h5sampid7 h5sampid8 h5sampid9 h5sampid10 h5sampid11 h5sampid12 h2aliqout1_t h2aliqout2_t h2aliqout3_t h2aliqout4_t h2aliqout5_t h2aliqout6_t h5aliqout7_t h5aliqout8_t h5aliqout9_t h5aliqout10_t h5aliqout11_t h5aliqout12_t urineVol_t LMvol_t
+ 
 *generate surveyyear variable
 gen svy=2
 
@@ -191,7 +208,7 @@ use Baseline/Baseline_Urine_CLEANED_VersionIncorporated_30Sept14, clear
 rename faid staffid
 rename q7 consent
 rename q8 nonconsent_reason 
-rename q9 LMvol
+rename q9 LMvol_t 
 rename q31s1hour2 h2sampid1
 rename q31s2hour2 h2sampid2
 rename q31s3hour2 h2sampid3
@@ -219,10 +236,11 @@ rename q34s9hour5 h5aliqout9_t
 rename q34s10hour5 h5aliqout10_t
 rename q34s11hour5 h5aliqout11_t
 rename q34s12hour5 h5aliqout12_t
+rename q25 urineVol_t
 
 destring clusterid, replace
 
-keep dataid childNo clusterid staffid SampleColDate NumChildren consent nonconsent_reason LMvol h2sampid1 h2sampid2 h2sampid3 h2sampid4 h2sampid5 h2sampid6 h5sampid7 h5sampid8 h5sampid9 h5sampid10 h5sampid11 h5sampid12 h2aliqout1_t h2aliqout2_t h2aliqout3_t h2aliqout4_t h2aliqout5_t h2aliqout6_t h5aliqout7_t h5aliqout8_t h5aliqout9_t h5aliqout10_t h5aliqout11_t h5aliqout12_t 
+keep dataid childNo clusterid staffid SampleColDate NumChildren consent nonconsent_reason LMvol h2sampid1 h2sampid2 h2sampid3 h2sampid4 h2sampid5 h2sampid6 h5sampid7 h5sampid8 h5sampid9 h5sampid10 h5sampid11 h5sampid12 h2aliqout1_t h2aliqout2_t h2aliqout3_t h2aliqout4_t h2aliqout5_t h2aliqout6_t h5aliqout7_t h5aliqout8_t h5aliqout9_t h5aliqout10_t h5aliqout11_t h5aliqout12_t urineVol_t LMvol_t
 
 *generate surveyyear variable
 gen svy=1
@@ -427,7 +445,7 @@ table  sexfromEE
 
 *Look at where EE and main study genders do not agree
 list dataid childNo EEsex EEsex1 EEsex2 EEsex3 diarsex anthrosex inconsist_sex if  (EEsex!=diarsex & diarsex!=. | EEsex!=anthrosex  & anthrosex!=.) & sexfromEE!=1 & inconsist_sex!=.
-x
+
 *List out sexes only in EE where sex isn't consistent over time
 list EEsex diarsex anthrosex inconsist_sex if sexfromEE==1 & inconsist_sex==1
 
@@ -443,18 +461,100 @@ tab _merge
 drop if _merge==1
 list dataid childNo svy if _merge==2
 list dataid childNo svy if DOBfromEE==1
+drop _merge
 
+************************************
+*Merge in birth order
+************************************
+sort dataid childNo	
+merge dataid childNo using `birthorder'	
+tab _merge
+keep if _merge==3 | _merge==1
+drop _merge
 
-
-
-********************************************************************************
-*Generate child ages
-********************************************************************************
+*generate date
 gen date = date(SampleColDate, "DMY")
 drop SampleColDate
 format date %d
 	label var date "Date of sample collection"
-	
+
+
+*Generate childid combining dataid and childNo
+generate childid=dataid+childNo
+sort childid svy
+
+tempfile urine
+save `urine'
+
+************************************
+*Merge in excel collection date, dob,
+* and gender changes from lab staff
+************************************
+cd "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/Changes"
+import excel using washb-bd-ee-t1-urine-samplecoldate-changes-final.xlsx, sheet("Sheet1") firstrow clear
+rename t1_urine date
+gen svy=1
+sort childid 
+tempfile date_change1
+save `date_change1'
+
+import excel using washb-bd-ee-t2-urine-samplecoldate-changes-final.xlsx, sheet("Sheet1") firstrow clear
+drop C
+rename t2_urine date
+gen svy=2
+sort childid 
+tempfile date_change2
+save `date_change2'
+
+import excel using washb-bd-ee-t3-urine-samplecoldate-changes-final.xlsx, sheet("Sheet1") firstrow clear
+rename t3_urine date
+drop C
+gen svy=3
+sort childid 
+tempfile date_change3
+save `date_change3'
+
+import excel using washb-bd-ee-dob-changes-final.xlsx, sheet("Sheet1") firstrow clear
+drop C
+sort childid 
+tempfile dob_change
+save `dob_change'
+
+import excel using washb-bd-ee-med-gender-changes-final.xlsx, sheet("Sheet2") firstrow clear
+gen byte sex= Correctanswer=="Male"
+keep dataid childNo sex
+*rename Correctanswer sex
+tostring childNo, replace
+sort dataid childNo 
+tempfile sex_change
+save `sex_change'
+
+clear 
+use `urine' 
+merge 1:1 childid svy using `date_change1', keepusing(date) update replace
+tab _merge
+drop _merge
+merge 1:1 childid svy using `date_change2', keepusing(date) update replace
+tab _merge
+drop _merge
+merge 1:1 childid svy using `date_change3', keepusing(date) update replace
+tab _merge
+drop _merge
+merge m:1 childid using `dob_change', keepusing(dob) update replace
+tab _merge
+drop _merge
+merge m:1  dataid childNo using `sex_change', keepusing(sex) update replace
+tab _merge
+drop if _merge==2
+drop _merge
+
+
+
+
+
+************************************
+*Generate child ages
+************************************
 gen aged = date-DOB
 	label var aged "Age in days (anthro meas)"
 gen double agem = aged/30.4375
@@ -467,18 +567,17 @@ codebook agey
 gen month = month(date)
 	label var month "Month of sample collection"
 
-
-
+	
 
 ********************************************************************************
 *Reshape to wide
 ********************************************************************************
 
 *Temporarily limit variables in dataset to help with reshape
-keep dataid clusterid svy consent nonconsent_reason childNo DOB sex h2aliqout1_t h2aliqout2_t h2aliqout3_t h2aliqout4_t h2aliqout5_t h2aliqout6_t h5aliqout7_t h5aliqout8_t h5aliqout9_t h5aliqout10_t h5aliqout11_t h5aliqout12_t preLMaliqout13_t preLMaliqout14_t preLMaliqout15_t preLMaliqout16_t preLMaliqout17_t preLMaliqout18_t preLMnonconsent_reason aged agem agey date month
+keep dataid clusterid svy consent nonconsent_reason staffid childNo DOB sex h2aliqout1_t h2aliqout2_t h2aliqout3_t h2aliqout4_t h2aliqout5_t h2aliqout6_t h5aliqout7_t h5aliqout8_t h5aliqout9_t h5aliqout10_t h5aliqout11_t h5aliqout12_t preLMaliqout13_t preLMaliqout14_t preLMaliqout15_t preLMaliqout16_t preLMaliqout17_t preLMaliqout18_t urineVol_t LMvol_t preLMnonconsent_reason aged agem agey date month birthord
 
 *Reshape to wide
-reshape wide consent nonconsent_reason aged agem agey month date h2aliqout1_t h2aliqout2_t h2aliqout3_t h2aliqout4_t h2aliqout5_t h2aliqout6_t h5aliqout7_t h5aliqout8_t h5aliqout9_t h5aliqout10_t h5aliqout11_t h5aliqout12_t  preLMaliqout13_t preLMaliqout14_t preLMaliqout15_t preLMaliqout16_t preLMaliqout17_t preLMaliqout18_t preLMnonconsent_reason, i(dataid childNo) j(svy)
+reshape wide consent nonconsent_reason staffid aged agem agey month date h2aliqout1_t h2aliqout2_t h2aliqout3_t h2aliqout4_t h2aliqout5_t h2aliqout6_t h5aliqout7_t h5aliqout8_t h5aliqout9_t h5aliqout10_t h5aliqout11_t h5aliqout12_t  preLMaliqout13_t preLMaliqout14_t preLMaliqout15_t preLMaliqout16_t preLMaliqout17_t preLMaliqout18_t urineVol_t preLMnonconsent_reason LMvol_t, i(dataid childNo) j(svy)
 *Check for any duplicates after reshaping
 duplicates list dataid childNo 
 
