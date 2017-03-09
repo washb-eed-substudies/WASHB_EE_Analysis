@@ -1,0 +1,446 @@
+
+#---------------------------------------
+# EE-BD-urine-ipcw.R
+#
+# andrew mertens (amertens@berkeley.edu)
+#
+# The analysis script for the WASH Benefits
+# EED substudy -IPCW analysis for missing 
+# outcomes of urine-based biomarkers
+#---------------------------------------
+
+###Load in data
+rm(list=ls())
+try(detach(package:plyr))
+library(foreign)
+library(dplyr)
+library(washb)
+
+
+
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/")
+load("washb-BD-EE-blind-tr.Rdata")
+levels(treatment$tr)
+treatment$tr <- factor(treatment$tr,levels=c("Control","WSH","Nutrition","Nutrition + WSH"))
+levels(treatment$tr)
+#Load in enrollment data for adjusted analysis
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
+enrol<-read.csv("washb-bangladesh-enrol+animals.csv",stringsAsFactors = TRUE)
+
+
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew")
+urine<-read.csv("BD-EE-urine.csv")
+ipcw<-read.csv("BD-EE-ipcw.csv", stringsAsFactors = T) %>% select(-c(tr,block))
+
+
+
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
+outcomes<-read.dta("washb-BD-EE-sim-urine-outcomes-stata12.dta")
+outcomes$childid<-as.numeric(outcomes$childid)
+
+
+dim(urine)
+dim(outcomes)
+urine<-left_join(urine,outcomes, by="childid")
+dim(urine)
+
+
+
+
+
+#Merge in urine outcomes
+urine_outcomes<-subset(urine, select=c(dataid,childNo, 
+                                       staffid1, staffid2, staffid3, 
+                                       month1, month2, month3, 
+                                       aged1, aged2,aged3,
+                                       LMvol_t1,LMvol_t2,LMvol_t3,
+                                       urineVol_t1, urineVol_t2, urineVol_t3,
+                                       Lact1, Lact2, Lact3, 
+                                       Mann1, Mann2, Mann3))
+dim(urine_outcomes)
+d<-merge(ipcw, urine_outcomes, by=c("dataid", "childNo"), all.x=T, all.y=T)
+dim(d)
+
+
+#Merge treatment information 
+dim(d)
+d<-left_join(d,treatment, by="clusterid")
+dim(d)
+table(d$tr)
+
+
+
+#Subset to Control and WSH+N
+d<-subset(d, tr=="Control" | tr=="Nutrition + WSH")
+
+
+
+#Clean covariates for adjusted analysis
+#Set birthorder to 1, >=2, or missing
+class(d$birthord)
+d$birthord[d$birthord>1]<-"2+"
+d$birthord[is.na(d$birthord)]<-"missing"
+d$birthord<-factor(d$birthord)
+
+#Make vectors of adjustment variable names
+Wvars<-c('sex', 'birthord',
+         'momage', 'momheight','momedu','hfiacat',
+         'Nlt18','Ncomp','watmin',
+          'walls', 'floor',
+         'elec', 'asset_wardrobe', 'asset_table', 'asset_chair', 'asset_clock', 
+         'asset_khat', 'asset_chouki', 'asset_radio', 
+         'asset_tv', 'asset_refrig', 'asset_bike',
+         'asset_moto', 'asset_sewmach', 'asset_mobile',
+         'n_cows', 'n_goats', 'n_chickens')
+
+
+
+
+
+#subset time-constant W adjustment set
+W<- subset(d, select=Wvars)
+
+#Clean adjustment variables 
+#Check missingness
+for(i in 1:ncol(W)){
+  print(colnames(W)[i])
+  print(table(is.na(W[,i])))
+}
+
+#Replace missingness for factors with new level
+#in main dataset 
+d$sex<-as.factor(d$sex)
+#d$birthord[is.na(d$birthord)]<-"99"
+d$birthord<-factor(d$birthord)
+
+d$asset_clock[is.na(d$asset_clock)]<-"99"
+d$asset_clock<-factor(d$asset_clock)
+
+#Order data to replicate SL
+d <- d[order(d$dataid,d$childNo, d$svy),]
+
+#Re-subset W so new missing categories are included
+W<- subset(d, select=Wvars)
+
+#check that all the factor variables are set
+for(i in 1:ncol(W)){
+  print(colnames(W)[i])
+  print(class(W[,i])  )
+}
+
+
+#Truncate unrealistic levels of n_chickens to 60
+table(d$n_chickens)
+d$n_chickens[d$n_chickens>60]<-60
+table(d$n_chickens)
+
+
+
+
+#Relevel all factors
+table(d$sex)
+d$sex<-addNA(d$sex)
+  levels(d$sex)[3]<-"missing"
+table(d$sex)
+d$momedu=relevel(d$momedu,ref="No education")
+d$hfiacat=relevel(d$hfiacat,ref="Food Secure")
+    d$hfiacat<-addNA(d$hfiacat)
+d$wall<-factor(d$wall)
+    d$wall<-addNA(d$wall)
+    levels(d$wall)<-c("No improved wall","Improved wall","Missing")
+    d$wall=relevel(d$wall,ref="No improved wall")
+d$floor<-factor(d$floor)
+    d$floor<-addNA(d$floor)
+    levels(d$floor)<-c("No improved floor","Improved floor","Missing")
+    d$floor=relevel(d$floor,ref="No improved floor")
+d$elec<-factor(d$elec)
+    d$elec<-addNA(d$elec)
+    levels(d$elec)<-c("No electricity","Electricity","Missing")
+    d$elec=relevel(d$elec,ref="No electricity")
+d$asset_wardrobe<-factor(d$asset_wardrobe)
+    d$asset_wardrobe<-addNA(d$asset_wardrobe)
+    levels(d$asset_wardrobe)<-c("No wardrobe","Wardrobe","Missing")
+    d$asset_wardrobe=relevel(d$asset_wardrobe,ref="No wardrobe")
+d$asset_table<-factor(d$asset_table)
+    d$asset_table<-addNA(d$asset_table)
+    levels(d$asset_table)<-c("No table","Improved table","Missing")
+    d$asset_table=relevel(d$asset_table,ref="No table")
+d$asset_chair<-factor(d$asset_chair)
+    d$asset_chair<-addNA(d$asset_chair)
+    levels(d$asset_chair)<-c("No chair","Chair","Missing")
+    d$asset_chair=relevel(d$asset_chair,ref="No chair")
+d$asset_clock[is.na(d$asset_clock)]<-99
+    d$asset_clock<-factor(d$asset_clock)
+    d$asset_clock<-addNA(d$asset_clock)
+    levels(d$asset_clock)<-c("No clock","Clock","Missing", "Missing")
+    d$asset_clock=relevel(d$asset_clock,ref="No clock")
+d$asset_khat<-factor(d$asset_khat)
+    d$asset_khat<-addNA(d$asset_khat)
+    levels(d$asset_khat)<-c("No khat","Khat","Missing")
+    d$asset_khat=relevel(d$asset_khat,ref="No khat")
+d$asset_chouki<-factor(d$asset_chouki)
+    d$asset_chouki<-addNA(d$asset_chouki)
+    levels(d$asset_chouki)<-c("No chouki","Chouki","Missing")
+    d$asset_chouki=relevel(d$asset_chouki,ref="No chouki")
+d$asset_tv<-factor(d$asset_tv)
+    d$asset_tv<-addNA(d$asset_tv)
+    levels(d$asset_tv)<-c("No TV","Improved TV","Missing")
+    d$asset_tv=relevel(d$asset_tv,ref="No TV")
+d$asset_refrig<-factor(d$asset_refrig)
+    d$asset_refrig<-addNA(d$asset_refrig)
+    levels(d$asset_refrig)<-c("No refrigerator","Refrigerator","Missing")
+    d$asset_refrig=relevel(d$asset_refrig,ref="No refrigerator")
+d$asset_bike<-factor(d$asset_bike)
+    d$asset_bike<-addNA(d$asset_bike)
+    levels(d$asset_bike)<-c("No bicycle","Bicycle","Missing")
+    d$asset_bike=relevel(d$asset_bike,ref="No bicycle")
+d$asset_moto<-factor(d$asset_moto)
+    d$asset_moto<-addNA(d$asset_moto)
+    levels(d$asset_moto)<-c("No motorcycle","Motorcycle","Missing")
+    d$asset_moto=relevel(d$asset_moto,ref="No motorcycle")
+d$asset_sewmach<-factor(d$asset_sewmach)
+    d$asset_sewmach<-addNA(d$asset_sewmach)
+    levels(d$asset_sewmach)<-c("No sewing machine","Sewing machine","Missing")
+    d$asset_sewmach=relevel(d$asset_sewmach,ref="No sewing machine")
+d$asset_mobile<-factor(d$asset_mobile)
+    d$asset_mobile<-addNA(d$asset_mobile)
+    levels(d$asset_mobile)<-c("No mobile phone","Mobile phone","Missing")
+    d$asset_mobile=relevel(d$asset_mobile,ref="No mobile phone")    
+
+#Re-subset W so new re-leveled factors are included
+W<- subset(d, select=Wvars)
+
+
+
+
+#------------------
+#Generate LM ratio
+#------------------
+
+#XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+#TEMPORARY
+#Add 1 so no 0's
+d$Lact1<-d$Lact1+1
+d$Lact2<-d$Lact2+1
+d$Lact3<-d$Lact3+1
+d$Mann1<-d$Mann1+1
+d$Mann2<-d$Mann2+1
+d$Mann3<-d$Mann3+1
+#XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+#To calculate total lactulose dosed (mg) or total mannitol dosed (mg):
+ #The children ingest a solution of 250 mg/ml lactulose and 50 mg/ml of mannitol in a dose of 2 ml/kg of weight up to 20 ml maximum.
+ #Q9 of the EE urine form is the total volume of LM solution ingested (in ml). For example, a child who ingested 20 ml of LM solution
+#(the maximum dose), would have ingested 1000 mg of mannitol and 5000 mg of lactulose. The 1000 mg and 5000 mg would then be used in the 
+#above formula as the "total mannitol dosed (mg) or total lactulose dosed (mg)".
+d$lact.dose_t1<-d$LMvol_t1*250
+d$lact.dose_t2<-d$LMvol_t2*250
+d$lact.dose_t3<-d$LMvol_t3*250
+d$mann.dose_t1<-d$LMvol_t1*50
+d$mann.dose_t2<-d$LMvol_t2*50
+d$mann.dose_t3<-d$LMvol_t3*50
+
+
+#% lactulose recovery = (urine concentration lactulose (mg/L) * urine volume (L) * 100 / total lactulose dosed (mg))
+d$per.lact.rec_t1<-d$Lact1*(d$urineVol_t1/1000)*100/d$lact.dose_t1
+d$per.lact.rec_t2<-d$Lact2*(d$urineVol_t2/1000)*100/d$lact.dose_t2
+d$per.lact.rec_t3<-d$Lact3*(d$urineVol_t3/1000)*100/d$lact.dose_t3
+
+#% mannitol recovery = (urine concentration mannitol (mg/L) * urine volume (L) * 100 / total mannitol dosed (mg))
+d$per.mann.rec_t1<-d$Mann1*(d$urineVol_t1/1000)*100/d$mann.dose_t1
+d$per.mann.rec_t2<-d$Mann2*(d$urineVol_t2/1000)*100/d$mann.dose_t2
+d$per.mann.rec_t3<-d$Mann3*(d$urineVol_t3/1000)*100/d$mann.dose_t3
+
+
+#LM ratio
+d$LM1<-d$per.lact.rec_t1/d$per.mann.rec_t1
+d$LM2<-d$per.lact.rec_t2/d$per.mann.rec_t2
+d$LM3<-d$per.lact.rec_t3/d$per.mann.rec_t3
+
+#We also need to report Lactulose recovery and Mannitol recovery in mmol/L (as indicated on our table shells).
+    #mmol/L of Lactulose = ??g/ml * 1000 ml/L * 1 mg/1000??g * 1g/1000mg * 1mol/342.296g * 1000mmol/1 mol
+#The above simplifies to (??g/ml) * (1 / 342.296) = mmol/L
+    #mmol/L of Mannitol = ??g/ml * 1000 ml/L * 1 mg/1000??g * 1g/1000mg * 1mol/182.172g * 1000mmol/1 mol
+#The above simplifies to (??g/ml) * (1 / 182.172) = mmol/L
+d$lact.rec.MMOL_t1<-(d$Lact1)*(1/342.296)
+d$lact.rec.MMOL_t2<-(d$Lact2/1000)*(1/342.296)
+d$lact.rec.MMOL_t3<-(d$Lact3/1000)*(1/342.296)
+d$mann.rec.MMOL_t1<-(d$Mann1/1000)*(1/182.172)
+d$mann.rec.MMOL_t2<-(d$Mann2/1000)*(1/182.172)
+d$mann.rec.MMOL_t3<-(d$Mann3/1000)*(1/182.172)
+
+
+d$Lact1<-d$Lact1*(1/342.296)
+d$Lact2<-d$Lact2*(1/342.296)
+d$Lact3<-d$Lact3*(1/342.296)
+
+d$Mann1<-d$Mann1*(1/182.172)
+d$Mann2<-d$Mann2*(1/182.172)
+d$Mann3<-d$Mann3*(1/182.172)
+
+
+
+
+
+
+############################
+#Set up ipcw analysis
+############################
+
+
+
+
+#Create indicators for missingness
+d$Lact1.miss<-ifelse(is.na(d$Lact1),0,1)
+d$Lact2.miss<-ifelse(is.na(d$Lact2),0,1)
+d$Lact3.miss<-ifelse(is.na(d$Lact3),0,1)
+
+d$Mann1.miss<-ifelse(is.na(d$Mann1),0,1)
+d$Mann2.miss<-ifelse(is.na(d$Mann2),0,1)
+d$Mann3.miss<-ifelse(is.na(d$Mann3),0,1)
+
+d$LM1.miss<-ifelse(is.na(d$LM1),0,1)
+d$LM2.miss<-ifelse(is.na(d$LM2),0,1)
+d$LM3.miss<-ifelse(is.na(d$LM3),0,1)
+
+
+
+table(d$Lact1.miss)
+table(d$Lact2.miss)
+table(d$Lact3.miss)
+
+table(d$Mann1.miss)
+table(d$Mann2.miss)
+table(d$Mann3.miss)
+
+table(d$LM1.miss)
+table(d$LM2.miss)
+table(d$LM3.miss)
+
+
+
+
+
+# set missing outcomes to an arbitrary, non-missing value. In this case use 9
+d$Lact1Delta <- d$Lact1
+d$Lact1Delta[d$Lact1.miss==0] <- 9
+
+d$Lact2Delta <- d$Lact2
+d$Lact2Delta[d$Lact2.miss==0] <- 9
+
+d$Lact3Delta <- d$Lact3
+d$Lact3Delta[d$Lact3.miss==0] <- 9
+
+d$Mann1Delta <- d$Mann1
+d$Mann1Delta[d$Mann1.miss==0] <- 9
+
+d$Mann2Delta <- d$Mann2
+d$Mann2Delta[d$Mann2.miss==0] <- 9
+
+d$Mann3Delta <- d$Mann3
+d$Mann3Delta[d$Mann3.miss==0] <- 9
+
+d$LM1Delta <- d$LM1
+d$LM1Delta[d$LM1.miss==0] <- 9
+
+d$LM2Delta <- d$LM2
+d$LM2Delta[d$LM2.miss==0] <- 9
+
+d$LM3Delta <- d$LM3
+d$LM3Delta[d$LM3.miss==0] <- 9
+
+
+#Order for replication:
+d<-d[order(d$block,d$clusterid,d$dataid),]
+  
+#Run the unadjusted ipcw analysis
+Lact_t1_unadj_ipcw_M<-washb_tmle(Y=d$Lact1Delta, Delta=d$Lact1.miss, tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
+Lact_t2_unadj_ipcw_M<-washb_tmle(Y=d$Lact2Delta, Delta=d$Lact2.miss, tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
+Lact_t3_unadj_ipcw_M<-washb_tmle(Y=d$Lact3Delta, Delta=d$Lact3.miss, tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
+
+Mann_t1_unadj_ipcw_M<-washb_tmle(Y=d$Mann1Delta, Delta=d$Mann1.miss, tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
+Mann_t2_unadj_ipcw_M<-washb_tmle(Y=d$Mann2Delta, Delta=d$Mann2.miss, tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
+Mann_t3_unadj_ipcw_M<-washb_tmle(Y=d$Mann3Delta, Delta=d$Mann3.miss, tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
+
+LM_t1_unadj_ipcw_M<-washb_tmle(Y=d$LM1Delta, Delta=d$LM1.miss, tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
+LM_t2_unadj_ipcw_M<-washb_tmle(Y=d$LM2Delta, Delta=d$LM2.miss, tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
+LM_t3_unadj_ipcw_M<-washb_tmle(Y=d$LM3Delta, Delta=d$LM3.miss, tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
+
+
+#Extract estimates
+Lact_t1_unadj_ipcw_M<-as.data.frame(unlist(Lact_t1_unadj_ipcw_M$estimates$ATE))
+Lact_t2_unadj_ipcw_M<-as.data.frame(unlist(Lact_t2_unadj_ipcw_M$estimates$ATE))
+Lact_t3_unadj_ipcw_M<-as.data.frame(unlist(Lact_t3_unadj_ipcw_M$estimates$ATE))
+
+Mann_t1_unadj_ipcw_M<-as.data.frame(unlist(Mann_t1_unadj_ipcw_M$estimates$ATE))
+Mann_t2_unadj_ipcw_M<-as.data.frame(unlist(Mann_t2_unadj_ipcw_M$estimates$ATE))
+Mann_t3_unadj_ipcw_M<-as.data.frame(unlist(Mann_t3_unadj_ipcw_M$estimates$ATE))
+
+LM_t1_unadj_ipcw_M<-as.data.frame(unlist(LM_t1_unadj_ipcw_M$estimates$ATE))
+LM_t2_unadj_ipcw_M<-as.data.frame(unlist(LM_t2_unadj_ipcw_M$estimates$ATE))
+LM_t3_unadj_ipcw_M<-as.data.frame(unlist(LM_t3_unadj_ipcw_M$estimates$ATE))
+
+
+
+
+#Run the adjusted ipcw analysis
+Lact_t1_adj_ipcw_M<-washb_tmle(Y=d$Lact1Delta, Delta=d$Lact1.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
+Lact_t2_adj_ipcw_M<-washb_tmle(Y=d$Lact2Delta, Delta=d$Lact2.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
+Lact_t3_adj_ipcw_M<-washb_tmle(Y=d$Lact3Delta, Delta=d$Lact3.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
+
+Mann_t1_adj_ipcw_M<-washb_tmle(Y=d$Mann1Delta, Delta=d$Mann1.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
+Mann_t2_adj_ipcw_M<-washb_tmle(Y=d$Mann2Delta, Delta=d$Mann2.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
+Mann_t3_adj_ipcw_M<-washb_tmle(Y=d$Mann3Delta, Delta=d$Mann3.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
+
+LM_t1_adj_ipcw_M<-washb_tmle(Y=d$LM1Delta, Delta=d$LM1.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
+LM_t2_adj_ipcw_M<-washb_tmle(Y=d$LM2Delta, Delta=d$LM2.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
+LM_t3_adj_ipcw_M<-washb_tmle(Y=d$LM3Delta, Delta=d$LM3.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
+
+
+
+#Extract estimates
+Lact_t1_adj_ipcw_M<-as.data.frame(unlist(Lact_t1_adj_ipcw_M$estimates$ATE))
+Lact_t2_adj_ipcw_M<-as.data.frame(unlist(Lact_t2_adj_ipcw_M$estimates$ATE))
+Lact_t3_adj_ipcw_M<-as.data.frame(unlist(Lact_t3_adj_ipcw_M$estimates$ATE))
+
+Mann_t1_adj_ipcw_M<-as.data.frame(unlist(Mann_t1_adj_ipcw_M$estimates$ATE))
+Mann_t2_adj_ipcw_M<-as.data.frame(unlist(Mann_t2_adj_ipcw_M$estimates$ATE))
+Mann_t3_adj_ipcw_M<-as.data.frame(unlist(Mann_t3_adj_ipcw_M$estimates$ATE))
+
+LM_t1_adj_ipcw_M<-as.data.frame(unlist(LM_t1_adj_ipcw_M$estimates$ATE))
+LM_t2_adj_ipcw_M<-as.data.frame(unlist(LM_t2_adj_ipcw_M$estimates$ATE))
+LM_t3_adj_ipcw_M<-as.data.frame(unlist(LM_t3_adj_ipcw_M$estimates$ATE))
+
+
+
+
+
+
+
+
+
+
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
+save(Lact_t1_unadj_ipcw_M,
+Lact_t2_unadj_ipcw_M,
+Lact_t3_unadj_ipcw_M,
+Mann_t1_unadj_ipcw_M,
+Mann_t2_unadj_ipcw_M,
+Mann_t3_unadj_ipcw_M,
+LM_t1_unadj_ipcw_M,
+LM_t2_unadj_ipcw_M,
+LM_t3_unadj_ipcw_M,
+Lact_t1_adj_ipcw_M,
+Lact_t2_adj_ipcw_M,
+Lact_t3_adj_ipcw_M,
+Mann_t1_adj_ipcw_M,
+Mann_t2_adj_ipcw_M,
+Mann_t3_adj_ipcw_M,
+LM_t1_adj_ipcw_M,
+LM_t2_adj_ipcw_M,
+LM_t3_adj_ipcw_M,
+file="urine_ipcw_res.Rdata")
+
+
+
+
