@@ -50,7 +50,8 @@ table(is.na(d$svydate))
 
 
 
-#table number of fully collected aliqouts by arm and year
+#table number of fully collected aliqouts by arm and year (May not match with the actually available
+#outcomes due to mismarked aliquots)
 head(d)
 table(d$tr)
 
@@ -89,69 +90,80 @@ aliquotN_t2
 aliquotN_t3
 
 
-#Calculate average age across arms at followup time 1, 2, and 3
-#Survey 1
-#Tabulate overall N, gender, and age 
-overallN1<-d%>% subset(!is.na(aliqout1_t1) & aliqout1_t1>1 & !is.na(agem1)) %>% summarize(N=n(),Median_agem=median(agem1, na.rm=T), Mean_agem=mean(agem1, na.rm=T), Sd_agem=sd(agem1, na.rm=T), nummales=sum(sex), numfemales=n()-sum(sex)) 
-overallN1<-cbind("Overall", overallN1)
-colnames(overallN1)[1]<-"tr"
-
-#Tabulate N, gender, and age across survey rounds
-t1<-d%>% subset(!is.na(aliqout1_t1) & aliqout1_t1>1& !is.na(agem1)) %>% group_by(tr) %>%summarize(N=n(), Median_agem=median(agem1, na.rm=T), Mean_agem=mean(agem1, na.rm=T), Sd_agem=sd(agem1, na.rm=T), nummales=sum(sex), numfemales=n()-sum(sex)) 
-
-
-#Survey 2
-#Tabulate overall N, gender, and age 
-overallN2<-d%>% subset(!is.na(aliqout1_t2) & aliqout1_t2>1 & !is.na(agem2)) %>% summarize(N=n(),Median_agem=median(agem2, na.rm=T), Mean_agem=mean(agem2, na.rm=T), Sd_agem=sd(agem2, na.rm=T), nummales=sum(sex), numfemales=n()-sum(sex)) 
-overallN2<-cbind("Overall", overallN2)
-colnames(overallN2)[1]<-"tr"
-
-#Tabulate N, gender, and age across survey rounds
-t2<-d%>% subset(!is.na(aliqout1_t2) & aliqout1_t2>1 & !is.na(agem2)) %>% group_by(tr) %>%summarize(N=n(), Median_agem=median(agem2, na.rm=T), Mean_agem=mean(agem2, na.rm=T), Sd_agem=sd(agem2, na.rm=T), nummales=sum(sex), numfemales=n()-sum(sex)) 
-
-
-#Survey 3
-#Tabulate overall N, gender, and age 
-overallN3<-d%>% subset(!is.na(aliqout1_t3) & aliqout1_t3>1 & !is.na(agem3)) %>% summarize(N=n(),Median_agem=median(agem3, na.rm=T), Mean_agem=mean(agem3, na.rm=T), Sd_agem=sd(agem3, na.rm=T), nummales=sum(sex, na.rm=T), numfemales=n()-sum(sex, na.rm=T)) 
-overallN3<-cbind("Overall", overallN3)
-colnames(overallN3)[1]<-"tr"
-
-#Tabulate N, gender, and age across survey rounds
-t3<-d%>% subset(!is.na(aliqout1_t3) & aliqout1_t3>1 & !is.na(agem3)) %>% group_by(tr) %>%summarize(N=n(), Median_agem=median(agem3, na.rm=T), Mean_agem=mean(agem3, na.rm=T), Sd_agem=sd(agem3, na.rm=T), nummales=sum(sex, na.rm=T), numfemales=n()-sum(sex, na.rm=T)) 
-
-
-age_t1_stool_M<-rbind(overallN1, t1[c(1,3,4,2),])
-age_t2_stool_M<-rbind(overallN2, t2[c(1,3,4,2),])
-age_t3_stool_M<-rbind(overallN3, t3[c(1,3,4,2),])
-
 
 #Temporarily generate fake outcome data for aat (0.5, sd=0.12), mpo (10000, sd=2500), and neo (2000, sd=250)
-set.seed(12345)
-d$aat1<-round(rnorm(n=nrow(d), mean=13, sd=1),4)
-d$mpo1<-round(rnorm(n=nrow(d), mean=11000, sd=0.12),4)
-d$neo1<-round(rnorm(n=nrow(d), mean=2000, sd=0.12),4)
+#set.seed(12345)
+#d$aat1<-round(rnorm(n=nrow(d), mean=13, sd=1),4)
+#d$mpo1<-round(rnorm(n=nrow(d), mean=11000, sd=0.12),4)
+#d$neo1<-round(rnorm(n=nrow(d), mean=2000, sd=0.12),4)
 
-d$aat2<-round(rnorm(n=nrow(d), mean=12, sd=1.5),4)
-d$mpo2<-round(rnorm(n=nrow(d), mean=9000, sd=0.12),4)
-d$neo2<-round(rnorm(n=nrow(d), mean=2100, sd=0.12),4)
-d$reg1b2<-round(rnorm(n=nrow(d), mean=30, sd=5),4)
+#d$aat2<-round(rnorm(n=nrow(d), mean=12, sd=1.5),4)
+#d$mpo2<-round(rnorm(n=nrow(d), mean=9000, sd=0.12),4)
+#d$neo2<-round(rnorm(n=nrow(d), mean=2100, sd=0.12),4)
+#d$reg1b2<-round(rnorm(n=nrow(d), mean=30, sd=5),4)
 
-d$aat3<-round(rnorm(n=nrow(d), mean=13.5, sd=1.3),4)
-d$mpo3<-round(rnorm(n=nrow(d), mean=10000, sd=0.12),4)
-d$neo3<-round(rnorm(n=nrow(d), mean=1900, sd=0.12),4)
+#d$aat3<-round(rnorm(n=nrow(d), mean=13.5, sd=1.3),4)
+#d$mpo3<-round(rnorm(n=nrow(d), mean=10000, sd=0.12),4)
+#d$neo3<-round(rnorm(n=nrow(d), mean=1900, sd=0.12),4)
 
 
 #Create and save dataset for Audrie:
-stool_simulated_outcomes<-d %>%
-    mutate(childid=as.character(dataid*10+childNo)) %>%
-    select(childid, aat1, mpo1, neo1, aat2, mpo2, neo2, reg1b2, aat3, mpo3, neo3)
-library(stringr)
-stool_simulated_outcomes$childid<-str_pad(stool_simulated_outcomes$childid, 6, pad = "0")
-head(stool_simulated_outcomes)    
+#stool_simulated_outcomes<-d %>%
+#    mutate(childid=as.character(dataid*10+childNo)) %>%
+#    select(childid, aat1, mpo1, neo1, aat2, mpo2, neo2, reg1b2, aat3, mpo3, neo3)
+#library(stringr)
+#stool_simulated_outcomes$childid<-str_pad(stool_simulated_outcomes$childid, 6, pad = "0")
+#head(stool_simulated_outcomes)    
 
 #setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
 #save(stool_simulated_outcomes, file="washb-BD-EE-sim-stool-outcomes.Rdata")
 #write.dta(stool_simulated_outcomes, "washb-BD-EE-sim-stool-outcomes.dta")
+
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
+outcomes<-read.dta("washb-BD-EE-sim-stool-outcomes-stata12.dta")
+outcomes$childid<-as.numeric(outcomes$childid)
+
+dim(d)
+dim(outcomes)
+d<-left_join(d,outcomes, by="childid")
+dim(d)
+
+#Calculate average age across arms at followup time 1, 2, and 3
+d$tr <- factor(d$tr,levels=c("Control","WSH","Nutrition","Nutrition + WSH"))
+
+#Survey 1
+#Tabulate overall N, gender, and age 
+overallN1<-d%>% summarize(N=n(), Mean_agem=mean(agem1, na.rm=T) ,Median_agem=median(agem1, na.rm=T), Sd_agem=sd(agem1, na.rm=T), numfemales=n()-sum(sex), nummales=sum(sex)) 
+overallN1<-cbind("Overall", overallN1)
+colnames(overallN1)[1]<-"tr"
+
+#Tabulate N, gender, and age across survey rounds
+t1<-d%>% group_by(tr) %>%summarize(N=n(), Mean_agem=mean(agem1, na.rm=T), Median_agem=median(agem1, na.rm=T), Sd_agem=sd(agem1, na.rm=T), numfemales=n()-sum(sex), nummales=sum(sex)) 
+#subset((!is.na(aat1)|!is.na(mpo1)|!is.na(neo1))&!is.na(agem1)) %>%
+
+#Survey 2
+#Tabulate overall N, gender, and age 
+overallN2<-d%>% summarize(N=n(), Mean_agem=mean(agem2, na.rm=T), Median_agem=median(agem2, na.rm=T), Sd_agem=sd(agem2, na.rm=T), numfemales=n()-sum(sex), nummales=sum(sex)) 
+overallN2<-cbind("Overall", overallN2)
+colnames(overallN2)[1]<-"tr"
+
+#Tabulate N, gender, and age across survey rounds
+t2<-d%>%  group_by(tr) %>%summarize(N=n(), Mean_agem=mean(agem2, na.rm=T), Median_agem=median(agem2, na.rm=T), Sd_agem=sd(agem2, na.rm=T), numfemales=n()-sum(sex), nummales=sum(sex)) 
+
+
+#Survey 3
+#Tabulate overall N, gender, and age 
+overallN3<-d%>% summarize(N=n(), Mean_agem=mean(agem3, na.rm=T), Median_agem=median(agem3, na.rm=T), Sd_agem=sd(agem3, na.rm=T), numfemales=n()-sum(sex, na.rm=T), nummales=sum(sex, na.rm=T)) 
+overallN3<-cbind("Overall", overallN3)
+colnames(overallN3)[1]<-"tr"
+
+#Tabulate N, gender, and age across survey rounds
+t3<-d%>% group_by(tr) %>%summarize(N=n(), Mean_agem=mean(agem3, na.rm=T), Median_agem=median(agem3, na.rm=T), Sd_agem=sd(agem3, na.rm=T), numfemales=n()-sum(sex, na.rm=T), nummales=sum(sex, na.rm=T)) 
+
+
+age_t1_stool_M<-rbind(overallN1, t1)
+age_t2_stool_M<-rbind(overallN2, t2)
+age_t3_stool_M<-rbind(overallN3, t3)
 
 
 
@@ -163,7 +175,7 @@ head(stool_simulated_outcomes)
 Y<-d %>% select(neo1,mpo1,aat1,neo2,mpo2,aat2,reg1b2,neo3,mpo3,aat3)
 
 #Set contrasts:
-contrasts <- list(c("Control","WSH"), c("Control","Nutrition"), c("Control","Nutrition + WSH"), c("Nutrition","Nutrition + WSH"), c("WSH","Nutrition + WSH"))
+contrasts <- list(c("Control","WSH"), c("Control","Nutrition"), c("Control","Nutrition + WSH"), c("WSH","Nutrition + WSH"), c("Nutrition","Nutrition + WSH"))
 
 
 #Create empty  matrices to hold the Ns and geometric means:
@@ -196,6 +208,7 @@ res_unadj<-list(neo_t1_unadj=neo_t1_unadj, mpo_t1_unadj=mpo_t1_unadj, aat_t1_una
 
 
 
+
 #Unadjusted glm models
 for(i in 1:10){
   for(j in 1:5){
@@ -203,10 +216,57 @@ for(i in 1:10){
     temp<-washb_glm(Y=log(Y[,i]), tr=d$tr, W=NULL, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)
     res_unadj[[i]][j,]<-as.numeric(temp$TR)
     colnames(res_unadj[[i]])<-c("RD","ci.l","ci.u", "Std. Error", "z value", "Pval")
-    rownames(res_unadj[[i]])<-c(c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "Nutrition v Nutrition + WSH", "WSH v Nutrition + WSH"))
+    rownames(res_unadj[[i]])<-c(c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH"))
   }
 }
 
+############################
+#Age and sex adjusted GLMs
+############################
+d$sex<-as.factor(d$sex)
+  d$sex=relevel(d$sex,ref="female")
+
+#Create empty matrix to hold the glm results:
+neo_t1_sex<-mpo_t1_sex<-aat_t1_sex<-matrix(0, nrow=5, ncol=6)
+neo_t2_sex<-mpo_t2_sex<-aat_t2_sex<-reg1b_t2_sex<-matrix(0, nrow=5, ncol=6)
+neo_t3_sex<-mpo_t3_sex<-aat_t3_sex<-matrix(0, nrow=5, ncol=6)
+
+res_sex<-list(neo_t1_sex=neo_t1_sex, mpo_t1_sex=mpo_t1_sex, aat_t1_sex=aat_t1_sex, 
+                neo_t2_sex=neo_t2_sex, mpo_t2_sex=mpo_t2_sex, aat_t2_sex=aat_t2_sex, reg1b_t2_sex=reg1b_t2_sex, 
+                neo_t3_sex=neo_t3_sex, mpo_t3_sex=mpo_t3_sex, aat_t3_sex=aat_t3_sex)
+
+
+
+
+#Age and sex adjusted glm models
+for(i in 1:3){
+  for(j in 1:5){
+    #note the log transformation of the outcome prior to running GLM model:
+    temp<-washb_glm(Y=log(Y[,i]), tr=d$tr, W=cbind(d$sex, d$aged1), id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)
+    res_sex[[i]][j,]<-as.numeric(temp$TR)
+    colnames(res_sex[[i]])<-c("RD","ci.l","ci.u", "Std. Error", "z value", "Pval")
+    rownames(res_sex[[i]])<-c(c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH"))
+  }
+}
+for(i in 4:7){
+  for(j in 1:5){
+    #note the log transformation of the outcome prior to running GLM model:
+    temp<-washb_glm(Y=log(Y[,i]), tr=d$tr, W=cbind(d$sex, d$aged2), id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)
+    res_sex[[i]][j,]<-as.numeric(temp$TR)
+    colnames(res_sex[[i]])<-c("RD","ci.l","ci.u", "Std. Error", "z value", "Pval")
+    rownames(res_sex[[i]])<-c(c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH"))
+  }
+}
+for(i in 8:10){
+  for(j in 1:5){
+    #note the log transformation of the outcome prior to running GLM model:
+    temp<-washb_glm(Y=log(Y[,i]), tr=d$tr, W=cbind(d$sex, d$aged3), id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)
+    res_sex[[i]][j,]<-as.numeric(temp$TR)
+    colnames(res_sex[[i]])<-c("RD","ci.l","ci.u", "Std. Error", "z value", "Pval")
+    rownames(res_sex[[i]])<-c(c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH"))
+  }
+}
+            
 
 
 ############################
@@ -286,10 +346,14 @@ for(i in 1:ncol(W)){
 }
 
 
+#Truncate unrealistic levels of n_chickens to 60
+table(d$n_chickens)
+d$n_chickens[d$n_chickens>60]<-60
+table(d$n_chickens)
+
 
 #Relevel all factors
-W$sex<-as.factor(W$sex)
-  d$sex=relevel(d$sex,ref="female")
+
 d$momedu=relevel(d$momedu,ref="No education")
 d$hfiacat=relevel(d$hfiacat,ref="Food Secure")
     d$hfiacat<-addNA(d$hfiacat)
@@ -448,23 +512,23 @@ res_adj<-list(neo_t1_adj=matrix(0,5,6), mpo_t1_adj=matrix(0,5,6), aat_t1_adj=mat
 
 for(i in 1:3){
   for(j in 1:5){
-  temp<-washb_glm(Y=log(Y[,i]), tr=d$tr, W=W1, id=d$clusterid.x, pair=NULL, family="gaussian", contrast= contrasts[[j]])
+  temp<-washb_glm(Y=log(Y[,i]), tr=d$tr, W=W1, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]])
   res_adj[[i]][j,]<-as.numeric(temp$TR)
   }
 }
 for(i in 4:6){
   for(j in 1:5){
-  temp<-washb_glm(Y=log(Y[,i]), tr=d$tr, W=W2, id=d$clusterid.x, pair=NULL, family="gaussian", contrast= contrasts[[j]])
+  temp<-washb_glm(Y=log(Y[,i]), tr=d$tr, W=W2, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]])
   res_adj[[i]][j,]<-as.numeric(temp$TR)
   }
 }
 for(j in 1:5){
-  temp<-washb_glm(Y=log(Y[,7]), tr=d$tr, W=W3, id=d$clusterid.x, pair=NULL, family="gaussian", contrast= contrasts[[j]])
+  temp<-washb_glm(Y=log(Y[,7]), tr=d$tr, W=W2, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=T)
   res_adj[[7]][j,]<-as.numeric(temp$TR)
 }
 for(i in 8:10){
   for(j in 1:5){
-  temp<-washb_glm(Y=log(Y[,i]), tr=d$tr, W=W3, id=d$clusterid.x, pair=NULL, family="gaussian", contrast= contrasts[[j]])
+  temp<-washb_glm(Y=log(Y[,i]), tr=d$tr, W=W3, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=T)
   res_adj[[i]][j,]<-as.numeric(temp$TR)
   }
 }
@@ -485,6 +549,20 @@ reg1b_t2_unadj_M=res_unadj[[7]]
 neo_t3_unadj_M=res_unadj[[8]]
 mpo_t3_unadj_M=res_unadj[[9]]
 aat_t3_unadj_M=res_unadj[[10]]
+
+
+neo_t1_adj_sex_age_M=res_sex[[1]]
+mpo_t1_adj_sex_age_M=res_sex[[2]]
+aat_t1_adj_sex_age_M=res_sex[[3]] 
+neo_t2_adj_sex_age_M=res_sex[[4]] 
+mpo_t2_adj_sex_age_M=res_sex[[5]]
+aat_t2_adj_sex_age_M=res_sex[[6]] 
+reg1b_t2_adj_sex_age_M=res_sex[[7]] 
+neo_t3_adj_sex_age_M=res_sex[[8]]
+mpo_t3_adj_sex_age_M=res_sex[[9]]
+aat_t3_adj_sex_age_M=res_sex[[10]]
+
+
 
 neo_t1_adj_M=res_adj[[1]]
 mpo_t1_adj_M=res_adj[[2]]
@@ -510,6 +588,11 @@ save(neo_t1_unadj_M, mpo_t1_unadj_M, aat_t1_unadj_M,
      neo_t2_unadj_M, mpo_t2_unadj_M, aat_t2_unadj_M, reg1b_t2_unadj_M,
      neo_t3_unadj_M, mpo_t3_unadj_M, aat_t3_unadj_M, 
      file="stool_res_unadj_M.Rdata")
+
+save(neo_t1_adj_sex_age_M, mpo_t1_adj_sex_age_M, aat_t1_adj_sex_age_M,
+     neo_t2_adj_sex_age_M, mpo_t2_adj_sex_age_M, aat_t2_adj_sex_age_M, reg1b_t2_adj_sex_age_M,
+     neo_t3_adj_sex_age_M, mpo_t3_adj_sex_age_M, aat_t3_adj_sex_age_M, 
+     file="stool_res_adj_sex_age_M.Rdata")
 
 save(neo_t1_adj_M, mpo_t1_adj_M, aat_t1_adj_M,
      neo_t2_adj_M, mpo_t2_adj_M, aat_t2_adj_M, reg1b_t2_adj_M,

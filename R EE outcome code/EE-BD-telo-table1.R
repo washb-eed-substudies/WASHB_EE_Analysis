@@ -15,6 +15,7 @@ library(foreign)
 library(dplyr)
 library(washb)
 library(tidyr)
+library(reshape2)
 
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/")
@@ -39,6 +40,9 @@ dim(d)
 head(d)
 table(d$tr)
 
+#Drop twins so HH characteristics aren't duplicates
+d<-subset(d, childNo!=2)
+
 
 #Merge in enrollment information
 #dim(d)
@@ -52,6 +56,7 @@ table(is.na(d$svydate))
 #Generate table 1
 
 colnames(d)
+
 #vlist <- c("momage","momedu_prim","patedu","agwork","Nlt18","electricity","cementfloor","ironroof","improvedwater","dminwat","treatwat","odmen","odwom","odch38","odchu3","latown","impr_lat","humfeces","wat_avail" , "soap_avail","HHSmod_sev")
 
 vlist <- c("momage","momeduy","dadeduy","dadagri","Nhh","elec","cement","landacre","tubewell","storewat","treatwat","watmin","odmen","odwom","odch815","odch38","odchu3",
@@ -63,6 +68,14 @@ table(vlist %in% colnames(d))
 
 table.dat<-subset(d, select=c("tr", vlist)) %>% subset(tr=="Control" | tr=="Nutrition + WSH")
 
+
+#Change factors to indicators
+for(i in 1:ncol(table.dat)){
+  cat(colnames(table.dat)[i]," : ",class((table.dat[,i])),"\n")
+}
+
+table.dat$hfiacat<-ifelse(table.dat$hfiacat=="Severely Food Insecure" | table.dat$hfiacat=="Moderately Food Insecure", 1,0)
+
 #Calculate number of compounds
 
 table1_mu<-table.dat%>%
@@ -72,7 +85,7 @@ table1_mu<-table.dat%>%
 
 table1_N<-table.dat%>%
         group_by(tr) %>%
-        summarise_each(funs(sum(!is.na(.)))) %>%
+        summarise_each(funs(sum(., na.rm = TRUE))) %>%
         ungroup %>% as.data.frame
 
 table1_sd<-table.dat%>%
@@ -80,7 +93,7 @@ table1_sd<-table.dat%>%
         summarise_each(funs(sd(., na.rm = TRUE))) %>%
         ungroup %>% as.data.frame
 
-Ns<-prop.table(table(table.dat$tr))
+Ns<-table(table.dat$tr)
 balance.tab.mu_M<-rbind(Ns,t((table1_mu[,2:ncol(table1_mu)])))
 balance.tab.n_M<-rbind(Ns,t((table1_N[,2:ncol(table1_N)])))
 balance.tab.sd_M<-rbind(Ns,t((table1_sd[,2:ncol(table1_sd)])))
@@ -90,4 +103,76 @@ balance.tab.sd_M<-rbind(Ns,t((table1_sd[,2:ncol(table1_sd)])))
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
 save(balance.tab.mu_M, balance.tab.n_M, balance.tab.sd_M, 
      file="telo_table1.Rdata")
+
+
+
+
+#Create supplimentary table 1
+#Merge in outcomes
+
+suppd1<-subset(d, !is.na(TS2))
+suppd2<-subset(d, !is.na(TS2) & is.na(TS3))
+dim(suppd1)
+dim(suppd2)
+
+suppd1$col<-1
+suppd2$col<-2
+
+
+#Telomere substudy enrolled at Year 1
+s1.table.dat<-subset(suppd1, select=c("tr","col", vlist)) %>% subset(tr=="Control" | tr=="Nutrition + WSH") #%>% subset(., select= -tr)
+#Telomere substudy lost to follow-up at Year 2
+s2.table.dat<-subset(suppd2, select=c("tr","col", vlist)) %>% subset(tr=="Control" | tr=="Nutrition + WSH") #%>% subset(., select= -tr)
+
+#combine:
+s.table.dat<-rbind(s1.table.dat,s2.table.dat)
+head(s.table.dat)
+
+#Change factors to indicators
+for(i in 1:ncol(s.table.dat)){
+  cat(colnames(s.table.dat)[i]," : ",class((s.table.dat[,i])),"\n")
+}
+
+s.table.dat$hfiacat<-ifelse(s.table.dat$hfiacat=="Severely Food Insecure" | s.table.dat$hfiacat=="Moderately Food Insecure", 1,0)
+
+#Supplimentary table 1 column 2
+s.table1_mu<-s.table.dat%>%
+        group_by(col, tr) %>%
+        summarise_each(funs(mean(., na.rm = TRUE))) %>%
+        ungroup %>% 
+        as.data.frame
+
+s.table1_N<-s.table.dat%>%
+        group_by(col, tr) %>%
+        summarise_each(funs(sum(., na.rm = TRUE))) %>%
+        ungroup %>% 
+        as.data.frame
+
+s.table1_sd<-s.table.dat%>%
+        group_by(col, tr) %>%
+        summarise_each(funs(sd(., na.rm = TRUE))) %>%
+        ungroup %>% 
+        as.data.frame
+
+
+s.balance.tab.mu_M<-s.table1_mu
+s.balance.tab.n_M<-s.table1_N
+s.balance.tab.sd_M<-s.table1_sd
+save(s.balance.tab.mu_M, s.balance.tab.n_M, s.balance.tab.sd_M, 
+     file="telo_s.table1.Rdata")
+
+
+
+ls()
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Audrie")
+load("telomere_enrol_supp_baseline_char_tst2.Rdata")
+load("telomere_enrol_supp_baseline_char_lost_tst3.Rdata")
+tst2.supp.balance.tab.mu_L[-1,]-t(s.balance.tab.mu_M[1:2,-c(1:2)])
+tst2.supp.balance.tab.n_L[-1,]-t(s.balance.tab.n_M[1:2,-c(1:2)])     
+tst2.supp.balance.tab.sd_L[-1,]-t(s.balance.tab.sd_M[1:2,-c(1:2)]) 
+
+lost.tst3.supp.balance.tab.mu_L[-1,]-t(s.balance.tab.mu_M[3:4,-c(1:2)])
+lost.tst3.supp.balance.tab.n_L[-1,]-t(s.balance.tab.n_M[3:4,-c(1:2)])
+lost.tst3.supp.balance.tab.sd_L[-1,]-t(s.balance.tab.sd_M[3:4,-c(1:2)])
+
 

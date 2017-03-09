@@ -19,9 +19,14 @@ library(washb)
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/")
 load("washb-BD-telo-blind-tr.Rdata")
+#setwd("C:/Users/andre/Dropbox/HBGDki/WASH Benefits Analysis/0. Data/WBB-primary-outcome-datasets/")
+#load("washb-bangladesh-tr.Rdata")
+#d$clusterid<-as.numeric(d$clusterid)
+#treatment<-d
+
 levels(treatment$tr)
-treatment$tr <- factor(treatment$tr,levels=c("Control","Nutrition + WSH"))
-levels(treatment$tr)
+#treatment$tr <- factor(treatment$tr,levels=c("Control","Nutrition + WSH"))
+#levels(treatment$tr)
 #Load in enrollment data for adjusted analysis
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
 enrol<-read.csv("washb-bangladesh-enrol+animals.csv",stringsAsFactors = TRUE)
@@ -39,12 +44,7 @@ table(d$tr)
  table(is.na(d$tr))
  
 
-#Merge in enrollment information
-#dim(d)
-#dim(enrol)
-#d<-left_join(d,enrol, by=c("dataid"))
-#dim(d)
-
+ 
 
 #test that all rows are matched to enrollment data
 table(is.na(d$svydate)) 
@@ -54,29 +54,13 @@ table(is.na(d$svydate))
 #table number of fully collected aliqouts by arm and year
 head(d)
 
-t1_N<-d%>% subset(aliquot1>1)%>%group_by(tr) %>%summarize(sample1=n()) 
 t2_N<-d%>% subset(aliquot2>1)%>%group_by(tr) %>%summarize(sample2=n()) 
 t3_N<-d%>% subset(aliquot3>1)%>%group_by(tr) %>%summarize(sample3=n()) 
-
-
-cbind(t1_N,t2_N[,2],t3_N[,2])
-
-#Note: Why are there time 1 aliquots? For telo, should only be midline and endline
-
+cbind(t2_N,t3_N[,2])
 
 
 
 #Calculate average age across arms at followup time 1, 2, and 3
-#Survey 1
-#Tabulate overall N, gender, and age 
-overallN1<-d%>% subset(!is.na(aliquot1) &  aliquot1>1) %>% summarize(N=n(),Median_agem=median(agem1, na.rm=T), Mean_agem=mean(agem1, na.rm=T), Sd_agem=sd(agem1, na.rm=T), nummales=sum(sex), numfemales=n()-sum(sex)) 
-overallN1<-cbind("Overall", overallN1)
-colnames(overallN1)[1]<-"tr"
-
-#Tabulate N, gender, and age across survey rounds
-t1<-d%>% subset(!is.na( aliquot1) &  aliquot1>1) %>% group_by(tr) %>%summarize(N=n(), Median_agem=median(agem1, na.rm=T), Mean_agem=mean(agem1, na.rm=T), Sd_agem=sd(agem1, na.rm=T), nummales=sum(sex), numfemales=n()-sum(sex)) 
-
-
 #Survey 2
 #Tabulate overall N, gender, and age 
 overallN2<-d%>% subset(!is.na(TS2)) %>% summarize(N=n(),Median_agem=median(agem2, na.rm=T), Mean_agem=mean(agem2, na.rm=T), Sd_agem=sd(agem2, na.rm=T), nummales=sum(sex), numfemales=n()-sum(sex)) 
@@ -101,22 +85,31 @@ rbind(overallN1, t1)
 age_t2_blood_M<-rbind(overallN2, t2)
 age_t3_blood_M<-rbind(overallN3, t3)
 
+#Reorder columns to match Audrie
+age_t2_blood_M<-age_t2_blood_M[,c(1,2,4,3,5,7,6)]
+age_t3_blood_M<-age_t3_blood_M[,c(1,2,4,3,5,7,6)]
 
-#d%>% subset(!is.na(TS2)& tr=="Control")  %>%summarize(N=n(), Median_agem=median(agem2, na.rm=T), Mean_agem=mean(agem2, na.rm=T), Sd_agem=sd(agem2, na.rm=T), nummales=sum(sex), numfemales=n()-sum(sex), Missing=sum(is.na(agem2))) 
 
 
 ############################
 #Calculate unadjusted outcomes:
 ############################
 
+#Calculate change in TS between T=2 and T=3
+d$TS_delta<-d$TS3-d$TS2
+
+
 #N's and geometric means
     ts_t2_N_M<-d %>% group_by(tr) %>% subset(!is.na(TS2)) %>% summarize(N=n(), mean= mean(TS2, na.rm=T))   
     ts_t3_N_M<-d %>% group_by(tr) %>% subset(!is.na(TS3)) %>% summarize(N=n(), mean= mean(TS3, na.rm=T))   
+    delta_ts_N_M<-d %>% group_by(tr) %>% subset(!is.na(TS_delta)) %>% summarize(N=n(), mean= mean(TS_delta, na.rm=T))   
 
 #Unadjusted glm models
     ts_t2_unadj_M<-washb_glm(Y=d$TS2, tr=d$tr, W=NULL, id=d$block.x, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), print=F)$TR
     ts_t3_unadj_M<-washb_glm(Y=d$TS3, tr=d$tr, W=NULL, id=d$block.x, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), print=F)$TR
+    delta_ts_unadj_M<-washb_glm(Y=d$TS_delta, tr=d$tr, W=NULL, id=d$block.x, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), print=F)$TR
 
+    
 
 ############################
 #Adjusted GLMs-sex and age
@@ -126,6 +119,7 @@ d$sex<-as.factor(d$sex)
 #Run GLMs for the sex/age adjusted parameter estimates
     ts_t2_adj_sex_age_M<-washb_glm(Y=d$TS2, tr=d$tr, W=cbind(d$sex, d$aged2), id=d$block.x, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), print=F)$TR
     ts_t3_adj_sex_age_M<-washb_glm(Y=d$TS3, tr=d$tr, W=cbind(d$sex, d$aged3), id=d$block.x, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), print=F)$TR
+    delta_ts_adj_sex_age_M<-washb_glm(Y=d$TS_delta, tr=d$tr, W=cbind(d$sex, d$aged2, d$aged3), id=d$block.x, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), print=F)$TR
 
 
     
@@ -187,12 +181,22 @@ for(i in 1:ncol(W)){
   print(colnames(W)[i])
   print(class(W[,i])  )
 }
+
+#Truncate unrealistic levels of n_chickens to 60
+table(d$n_chickens)
+d$n_chickens[d$n_chickens>60]<-60
+table(d$n_chickens)
+
+
 #Relevel all factors
-W$sex<-as.factor(W$sex)
+table(d$sex)
+d$sex<-as.factor(d$sex)
+  levels(d$sex)<-c("female","male")
   d$sex=relevel(d$sex,ref="female")
 d$momedu=relevel(d$momedu,ref="No education")
 d$hfiacat=relevel(d$hfiacat,ref="Food Secure")
     d$hfiacat<-addNA(d$hfiacat)
+    levels(d$hfiacat)[length(levels(d$hfiacat))]<-"missing"
 d$wall<-factor(d$wall)
     d$wall<-addNA(d$wall)
     levels(d$wall)<-c("No improved wall","Improved wall","Missing")
@@ -254,33 +258,41 @@ d$asset_mobile<-factor(d$asset_mobile)
     d$asset_mobile<-addNA(d$asset_mobile)
     levels(d$asset_mobile)<-c("No mobile phone","Mobile phone","Missing")
     d$asset_mobile=relevel(d$asset_mobile,ref="No mobile phone")    
-
+d$momheight
+    
 #Re-subset W so new re-leveled factors are included
 W<- subset(d, select=Wvars)
 
 
 #Add in time-varying covariates
-W1<- cbind(W, subset(d, select=Wvars1))
 W2<- cbind(W, subset(d, select=Wvars2))
 W3<- cbind(W, subset(d, select=Wvars3))
+W_delta<- cbind(W, subset(d, select=Wvars2), subset(d, select=Wvars3))
 
 #Replace missingness in time varying covariates as a new level
-W1$month1[is.na(W1$month1)]<-"missing"
 W2$month2[is.na(W2$month2)]<-"missing"
 W3$month3[is.na(W3$month3)]<-"missing"
-W1$staffid1[is.na(W1$staffid1)]<-"missing"
 W2$staffid2[is.na(W2$staffid2)]<-"missing"
 W3$staffid3[is.na(W3$staffid3)]<-"missing"
 
 
 
 #Set time-varying covariates as factors
-W1$month1<-as.factor(W1$month1)
 W2$month2<-as.factor(W2$month2)
 W3$month3<-as.factor(W3$month3)
-W1$staffid1<-factor(W1$staffid1)
 W2$staffid2<-factor(W2$staffid2)
 W3$staffid3<-factor(W3$staffid3)
+
+W_delta$month2<-as.factor(W_delta$month2)
+W_delta$month3<-as.factor(W_delta$month3)
+W_delta$staffid2<-factor(W_delta$staffid2)
+W_delta$staffid3<-factor(W_delta$staffid3)
+W_delta$month2<-addNA(W_delta$month2)
+W_delta$month3<-addNA(W_delta$month3)
+W_delta$staffid2<-addNA(W_delta$staffid2)
+W_delta$staffid3<-addNA(W_delta$staffid3)
+
+
 
 #Check missingness:
 
@@ -291,6 +303,7 @@ cbind(d$TS2,W2) %>% subset(!is.na(d$TS2)) %>% apply(., 2, function(x) print(tabl
 #Run GLMs for the adjusted parameter estimates
     ts_t2_adj_M<-washb_glm(Y=d$TS2, tr=d$tr, W=W2, id=d$block.x, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), print=T)$TR
     ts_t3_adj_M<-washb_glm(Y=d$TS3, tr=d$tr, W=W3, id=d$block.x, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), print=T)$TR
+    delta_ts_adj_M<-washb_glm(Y=d$TS_delta, tr=d$tr, W=W_delta, id=d$block.x, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), print=T)$TR
 
 
 
@@ -301,12 +314,12 @@ for(i in 1:ncol(W2)){
 
     
 #Save combined telomere dataset for comparison with Audrie
-library(stringr)
-d$childid<-str_pad(d$childid, 6, pad = "0")
-head(d)    
+#library(stringr)
+#d$childid<-str_pad(d$childid, 6, pad = "0")
+#head(d)    
 
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
-write.dta(d, "washb-BD-EE-telo_Andrew.dta")
+#setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
+#write.dta(d, "washb-BD-EE-telo_Andrew.dta")
 
     
 
@@ -315,9 +328,13 @@ write.dta(d, "washb-BD-EE-telo_Andrew.dta")
 ############################
     ts_t2_subgroup_M<-washb_glm(Y=d$TS2, tr=d$tr, W=subset(d, select=sex), V="sex", id=d$block.x, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), print=T)$lincom
     ts_t3_subgroup_M<-washb_glm(Y=d$TS3, tr=d$tr, W=subset(d, select=sex), V="sex", id=d$block.x, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), print=T)$lincom
+    delta_ts_subgroup_M<-washb_glm(Y=d$TS_delta, tr=d$tr, W=subset(d, select=sex), V="sex", id=d$block.x, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), print=T)$lincom
 
 
-
+    #Strip out "missing" row
+    ts_t2_subgroup_M<-ts_t2_subgroup_M[1:2,]
+    ts_t3_subgroup_M<-ts_t3_subgroup_M[1:2,]
+    delta_ts_subgroup_M<-delta_ts_subgroup_M[1:2,]
 
 ############################
 #SL analysis of Telomere Quartiles
@@ -348,21 +365,6 @@ write.dta(d, "washb-BD-EE-telo_Andrew.dta")
 
 #By arm, permutation test of each quartile to lowest
 
-############################
-#-missing data imputation
-# with IPW 
-############################
-
-#Create indicator for missingness
-d$TS2.miss<-ifelse(is.na(d$TS2),0,1)
-d$TS3.miss<-ifelse(is.na(d$TS3),0,1)
-
-ts_t2_ipw_unadj_M<-washb_tmle(Y=d$TS2, tr=d$tr, W=W2, id=d$block.x, Delta=d$TS2.miss, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=F)
-ts_t3_ipw_unadj_M<-washb_tmle(Y=d$TS3, tr=d$tr, W=W3, id=d$block.x, Delta=d$TS3.miss, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=F)
-
-#Extract estimates
-ts_t2_ipw_unadj_M<-cbind(ts_t2_ipw_unadj_M$estimates$ATE$psi,t(ts_t2_ipw_unadj_M$estimates$ATE$CI),ts_t2_ipw_unadj_M$estimates$ATE$pval)
-ts_t3_ipw_unadj_M<-cbind(ts_t3_ipw_unadj_M$estimates$ATE$psi,t(ts_t3_ipw_unadj_M$estimates$ATE$CI),ts_t3_ipw_unadj_M$estimates$ATE$pval)
 
  
 ##########################################
@@ -372,8 +374,10 @@ ts_t3_ipw_unadj_M<-cbind(ts_t3_ipw_unadj_M$estimates$ATE$psi,t(ts_t3_ipw_unadj_M
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
 save(age_t2_blood_M, age_t3_blood_M, ts_t2_N_M, ts_t3_N_M,ts_t2_unadj_M, ts_t3_unadj_M, ts_t2_adj_sex_age_M, ts_t3_adj_sex_age_M, ts_t2_adj_M, ts_t3_adj_M,
-     ts_t2_ipw_unadj_M, ts_t3_ipw_unadj_M, ts_t2_subgroup_M, ts_t3_subgroup_M,
+     ts_t2_subgroup_M, ts_t3_subgroup_M, delta_ts_N_M, delta_ts_unadj_M, delta_ts_adj_M, delta_ts_adj_sex_age_M, delta_ts_subgroup_M,
      file="telo_res.Rdata")
+
+
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
 save(d, file="telo_figure_data.Rdata")
