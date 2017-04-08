@@ -16,36 +16,56 @@ library(dplyr)
 library(washb)
 
 
-
+#Load in blinded treatment information
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/")
 load("washb-BD-EE-blind-tr.Rdata")
 levels(treatment$tr)
 treatment$tr <- factor(treatment$tr,levels=c("Control","WSH","Nutrition","Nutrition + WSH"))
 levels(treatment$tr)
+
+#Load in L/M outcomes
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew")
+outcomes<-read.dta("washb-BD-EE-urine-outcomes-stata12.dta")
+
+
+#Load in urine survey data
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew/")
+urine<-read.csv("BD-EE-urine.csv")
+
+
 #Load in enrollment data for adjusted analysis
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
 enrol<-read.csv("washb-bangladesh-enrol+animals.csv",stringsAsFactors = TRUE)
 
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew")
-urine<-read.csv("BD-EE-urine.csv",stringsAsFactors = TRUE)
 
+
+#Merge L/M outcomes
+dim(urine)
+dim(outcomes)
+outcomes$childid<-as.numeric(outcomes$childid)
+d<-left_join(urine,outcomes, by="childid")
+#d<-cbind(d,outcomes)
+dim(d)
+
+#Remove empty row
+dim(d)
+d<-d[!(is.na(d$childNo) & is.na(d$dataid)),]
+dim(d)
 
 #Merge treatment information 
-dim(urine)
-d<-left_join(urine,treatment, by="clusterid")
+dim(d)
+d<-left_join(d,treatment, by="clusterid")
 dim(d)
 head(d)
 table(d$tr)
 
-#Check single row not merging to treatment
-d[is.na(d$tr),]
-#Seems to be blank row. Drop
-d<-d[!is.na(d$tr),]
+
 
 
 #Merge in enrollment information
 dim(d)
 dim(enrol)
+d$dataid<-as.numeric(d$dataid)
 d<-left_join(d,enrol, by="dataid")
 dim(d)
 
@@ -122,33 +142,33 @@ aliquotN_t3[c(1,3,4,2),c(1:2,8,14)]
 #Calculate average age across arms at followup time 1, 2, and 3
 #Survey 1
 #Tabulate overall N, gender, and age 
-overallN1<-d%>% summarize(N=n(),Median_agem=median(agem1, na.rm=T), Mean_agem=mean(agem1, na.rm=T), Sd_agem=sd(agem1, na.rm=T), nummales=sum(sex), numfemales=n()-sum(sex)) 
+overallN1<-d%>% subset(!(is.na(d$Lact1)|is.na(d$Mann1))) %>% summarize(N=n(),Median_agem=median(agem1, na.rm=T), Mean_agem=mean(agem1, na.rm=T), Sd_agem=sd(agem1, na.rm=T), nummales=sum(sex), numfemales=n()-sum(sex)) 
 overallN1<-cbind("Overall", overallN1)
 colnames(overallN1)[1]<-"tr"
 #subset(!is.na(h2aliqout1_t1) & h2aliqout1_t1>1 | !is.na(h5aliqout7_t1) & h5aliqout7_t1>1) 
 
 #Tabulate N, gender, and age across survey rounds
-t1<-d %>% group_by(tr) %>%summarize(N=n(), Median_agem=median(agem1, na.rm=T), Mean_agem=mean(agem1, na.rm=T), Sd_agem=sd(agem1, na.rm=T), nummales=sum(sex), numfemales=n()-sum(sex)) 
+t1<-d %>% subset(!(is.na(d$Lact1)|is.na(d$Mann1))) %>% group_by(tr) %>%summarize(N=n(), Median_agem=median(agem1, na.rm=T), Mean_agem=mean(agem1, na.rm=T), Sd_agem=sd(agem1, na.rm=T), nummales=sum(sex), numfemales=n()-sum(sex)) 
 
 
 #Survey 2
 #Tabulate overall N, gender, and age 
-overallN2<-d %>% summarize(N=n(),Median_agem=median(agem2, na.rm=T), Mean_agem=mean(agem2, na.rm=T), Sd_agem=sd(agem2, na.rm=T), nummales=sum(sex), numfemales=n()-sum(sex)) 
+overallN2<-d %>% subset(!(is.na(d$Lact2)|is.na(d$Mann2))) %>% summarize(N=n(),Median_agem=median(agem2, na.rm=T), Mean_agem=mean(agem2, na.rm=T), Sd_agem=sd(agem2, na.rm=T), nummales=sum(sex), numfemales=n()-sum(sex)) 
 overallN2<-cbind("Overall", overallN2)
 colnames(overallN2)[1]<-"tr"
 
 #Tabulate N, gender, and age across survey rounds
-t2<-d%>% group_by(tr) %>%summarize(N=n(), Median_agem=median(agem2, na.rm=T), Mean_agem=mean(agem2, na.rm=T), Sd_agem=sd(agem2, na.rm=T), nummales=sum(sex), numfemales=n()-sum(sex)) 
+t2<-d%>% subset(!(is.na(d$Lact2)|is.na(d$Mann2))) %>% group_by(tr) %>%summarize(N=n(), Median_agem=median(agem2, na.rm=T), Mean_agem=mean(agem2, na.rm=T), Sd_agem=sd(agem2, na.rm=T), nummales=sum(sex), numfemales=n()-sum(sex)) 
 
 
 #Survey 3
 #Tabulate overall N, gender, and age 
-overallN3<-d%>% summarize(N=n(),Median_agem=median(agem3, na.rm=T), Mean_agem=mean(agem3, na.rm=T), Sd_agem=sd(agem3, na.rm=T), nummales=sum(sex, na.rm=T), numfemales=n()-sum(sex, na.rm=T)) 
+overallN3<-d%>% subset(!(is.na(d$Lact3)|is.na(d$Mann3))) %>% summarize(N=n(),Median_agem=median(agem3, na.rm=T), Mean_agem=mean(agem3, na.rm=T), Sd_agem=sd(agem3, na.rm=T), nummales=sum(sex, na.rm=T), numfemales=n()-sum(sex, na.rm=T)) 
 overallN3<-cbind("Overall", overallN3)
 colnames(overallN3)[1]<-"tr"
 
 #Tabulate N, gender, and age across survey rounds
-t3<-d %>% group_by(tr) %>%summarize(N=n(), Median_agem=median(agem3, na.rm=T), Mean_agem=mean(agem3, na.rm=T), Sd_agem=sd(agem3, na.rm=T), nummales=sum(sex, na.rm=T), numfemales=n()-sum(sex, na.rm=T)) 
+t3<-d %>% subset(!(is.na(d$Lact3)|is.na(d$Mann3))) %>% group_by(tr) %>%summarize(N=n(), Median_agem=median(agem3, na.rm=T), Mean_agem=mean(agem3, na.rm=T), Sd_agem=sd(agem3, na.rm=T), nummales=sum(sex, na.rm=T), numfemales=n()-sum(sex, na.rm=T)) 
 
 
 age_t1_urine_M<-rbind(overallN1, t1)
@@ -182,39 +202,53 @@ age_t3_urine_M<-age_t3_urine_M[,c(1,2,4,3,5,7,6)]
 #library(stringr)
 #urine_simulated_outcomes$childid<-str_pad(urine_simulated_outcomes$childid, 6, pad = "0")
 #head(urine_simulated_outcomes)    
+# 
+# #setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
+# #save(urine_simulated_outcomes, file="washb-BD-EE-sim-urine-outcomes.Rdata")
+# #write.dta(urine_simulated_outcomes, "washb-BD-EE-sim-urine-outcomes.dta")
+# setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
+# outcomes<-read.dta("washb-BD-EE-sim-urine-outcomes-stata12.dta")
+# outcomes$childid<-as.numeric(outcomes$childid)
+# 
+# 
+# dim(d)
+# dim(outcomes)
+# d<-left_join(d,outcomes, by="childid")
+# #d<-cbind(d,outcomes)
+# dim(d)
+# 
+# #Add 1 so no 0's
+# d$Lact1<-d$Lact1+1
+# d$Lact2<-d$Lact2+1
+# d$Lact3<-d$Lact3+1
+# d$Mann1<-d$Mann1+1
+# d$Mann2<-d$Mann2+1
+# d$Mann3<-d$Mann3+1
+# 
+# mean(d$Lact1, na.rm=T)
+# mean(d$Lact2, na.rm=T)
+# mean(d$Lact3, na.rm=T)
+# mean(d$Mann1, na.rm=T)
+# mean(d$Mann1, na.rm=T)
+# mean(d$Mann1, na.rm=T)
 
-#setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
-#save(urine_simulated_outcomes, file="washb-BD-EE-sim-urine-outcomes.Rdata")
-#write.dta(urine_simulated_outcomes, "washb-BD-EE-sim-urine-outcomes.dta")
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
-outcomes<-read.dta("washb-BD-EE-sim-urine-outcomes-stata12.dta")
-outcomes$childid<-as.numeric(outcomes$childid)
 
 
-dim(d)
-dim(outcomes)
-d<-left_join(d,outcomes, by="childid")
-#d<-cbind(d,outcomes)
-dim(d)
 
-#Add 1 so no 0's
-d$Lact1<-d$Lact1+1
-d$Lact2<-d$Lact2+1
-d$Lact3<-d$Lact3+1
-d$Mann1<-d$Mann1+1
-d$Mann2<-d$Mann2+1
-d$Mann3<-d$Mann3+1
 
-mean(d$Lact1, na.rm=T)
-mean(d$Lact2, na.rm=T)
-mean(d$Lact3, na.rm=T)
-mean(d$Mann1, na.rm=T)
-mean(d$Mann1, na.rm=T)
-mean(d$Mann1, na.rm=T)
 
 #------------------
 #Generate LM ratio
 #------------------
+
+#Destring urine and LM volume
+d$urineVol_t1<-as.numeric(d$urineVol_t1)
+d$urineVol_t2<-as.numeric(d$urineVol_t2)
+d$urineVol_t3<-as.numeric(d$urineVol_t3)
+d$LMvol_t1<-as.numeric(d$LMvol_t1)
+d$LMvol_t2<-as.numeric(d$LMvol_t2)
+d$LMvol_t3<-as.numeric(d$LMvol_t3)
+
 #To calculate total lactulose dosed (mg) or total mannitol dosed (mg):
  #The children ingest a solution of 250 mg/ml lactulose and 50 mg/ml of mannitol in a dose of 2 ml/kg of weight up to 20 ml maximum.
  #Q9 of the EE urine form is the total volume of LM solution ingested (in ml). For example, a child who ingested 20 ml of LM solution (the maximum dose), would have ingested 1000 mg of mannitol and 5000 mg of lactulose. The 1000 mg and 5000 mg would then be used in the above formula as the "total mannitol dosed (mg) or total lactulose dosed (mg)".
@@ -259,14 +293,13 @@ mean(d$Lact1, na.rm=T)
 mean(d$LMvol_t1, na.rm=T)
 mean(d$Mann1, na.rm=T)
 
-d$lact.rec.MMOL_t1<-(d$Lact1)*(1/342.296)
+d$lact.rec.MMOL_t1<-(d$Lact1/1000)*(1/342.296)
 d$lact.rec.MMOL_t2<-(d$Lact2/1000)*(1/342.296)
 d$lact.rec.MMOL_t3<-(d$Lact3/1000)*(1/342.296)
 d$mann.rec.MMOL_t1<-(d$Mann1/1000)*(1/182.172)
 d$mann.rec.MMOL_t2<-(d$Mann2/1000)*(1/182.172)
 d$mann.rec.MMOL_t3<-(d$Mann3/1000)*(1/182.172)
 mean(d$lact.rec.MMOL_t1, na.rm=T)
-
 
 ############################
 #Calculate outcomes:
@@ -280,10 +313,6 @@ d$Mann1<-d$Mann1*(1/182.172)
 d$Mann2<-d$Mann2*(1/182.172)
 d$Mann3<-d$Mann3*(1/182.172)
 
-
-#dataframe of urine biomarkers:
-Y<-d %>% select(Lact1,Mann1,LM1,Lact2,Mann2,LM2,Lact3,Mann3,LM3)
-mean(Y[,1], na.rm=T)
 
 #------------------
 #N's and geometric means
@@ -313,6 +342,9 @@ lm_t3_N_M<-d %>% group_by(tr) %>% subset(!is.na(LM3)) %>% summarize(N=n(), mean=
 #------------------
 #Unadjusted GLM
 #------------------
+
+#dataframe of urine biomarkers:
+Y<-d %>% select(Lact1,Mann1,LM1,Lact2,Mann2,LM2,Lact3,Mann3,LM3)
 
 #Set contrasts:
 contrasts <- list(c("Control","WSH"), c("Control","Nutrition"), c("Control","Nutrition + WSH"), c("WSH","Nutrition + WSH"), c("Nutrition","Nutrition + WSH"))
@@ -633,7 +665,7 @@ res_adj<-list(lact_t1_adj=matrix(0,5,6), mann_t1_adj=matrix(0,5,6), lm_t1_adj=ma
 
 for(i in 1:3){
   for(j in 1:5){
-  temp<-washb_glm(Y=log(Y[,i]), tr=d$tr, W=W1, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]])
+  temp<-washb_glm(Y=log(Y[,i]), tr=d$tr, W=W1, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=T)
   res_adj[[i]][j,]<-as.numeric(temp$TR)
   }
 }

@@ -76,7 +76,8 @@ save `telo_lab_end'
 *--------------------------------------------
 * format the treatment assignment information
 *--------------------------------------------
-use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/washb-bangladesh-blind-tr.dta", clear
+*use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/washb-bangladesh-blind-tr.dta", clear
+use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/washb-bangladesh-tr.dta", clear
 
 destring clusterid, replace
 sort clusterid
@@ -645,6 +646,7 @@ mean TS2
 mean watmin
 
 *gen childid= dataid+childNo
+
 
 *Save file 
 label data "BD EE telomere dataset, created by BD-EE-dm-telo.do"

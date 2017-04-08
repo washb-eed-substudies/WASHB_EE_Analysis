@@ -321,7 +321,7 @@ ts_t3_unadj_ipcw_M
 delta_ts_unadj_ipcw_M
 
 #Run the ipcw analysis
-ts_t2_adj_ipcw_M<-washb_tmle(Y=d$TS2Delta, tr=d$tr, W=W, id=d$block, Delta=d$TS2.miss, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=F)
+ts_t2_adj_ipcw_M<-washb_tmle(Y=d$TS2Delta, tr=d$tr, W=W, id=d$block, Delta=d$TS2.miss, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
 ts_t3_adj_ipcw_M<-washb_tmle(Y=d$TS3Delta, tr=d$tr, W=W, id=d$block, Delta=d$TS3.miss, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=F)
 delta_ts_adj_ipcw_M<-washb_tmle(Y=d$TS_deltaDelta, tr=d$tr, W=W, id=d$block, Delta=d$TS_delta.miss, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=F)
 

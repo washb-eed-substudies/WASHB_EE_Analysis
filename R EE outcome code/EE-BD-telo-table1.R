@@ -19,7 +19,10 @@ library(reshape2)
 
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/")
-load("washb-BD-telo-blind-tr.Rdata")
+#load("washb-BD-telo-blind-tr.Rdata")
+load("washb-bangladesh-tr.Rdata")
+d$clusterid<-as.numeric(d$clusterid)
+treatment<-d
 levels(treatment$tr)
 treatment$tr <- factor(treatment$tr,levels=c("Control","Nutrition + WSH"))
 levels(treatment$tr)
@@ -119,6 +122,7 @@ suppd1$col<-1
 suppd2$col<-2
 
 
+
 #Telomere substudy enrolled at Year 1
 s1.table.dat<-subset(suppd1, select=c("tr","col", vlist)) %>% subset(tr=="Control" | tr=="Nutrition + WSH") #%>% subset(., select= -tr)
 #Telomere substudy lost to follow-up at Year 2
@@ -155,9 +159,16 @@ s.table1_sd<-s.table.dat%>%
         as.data.frame
 
 
+s.Ns<-table(s.table.dat$tr, s.table.dat$col)
+s.Ns<-c(s.Ns[1,1],s.Ns[2,1],s.Ns[1,2],s.Ns[2,2])
+
+
 s.balance.tab.mu_M<-s.table1_mu
 s.balance.tab.n_M<-s.table1_N
 s.balance.tab.sd_M<-s.table1_sd
+s.balance.tab.mu_M[,1]<-s.Ns
+s.balance.tab.n_M[,1]<-s.Ns
+s.balance.tab.sd_M[,1]<-s.Ns
 save(s.balance.tab.mu_M, s.balance.tab.n_M, s.balance.tab.sd_M, 
      file="telo_s.table1.Rdata")
 

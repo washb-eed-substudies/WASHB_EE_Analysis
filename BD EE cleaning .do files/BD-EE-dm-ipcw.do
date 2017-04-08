@@ -3,35 +3,61 @@ set more off
 clear all
 
 
-log using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Logs/Andrew/BD-dm-EE-stool.log", text replace
+log using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Logs/Andrew/BD-dm-EE-ipcw.log", text replace
 
 *--------------------------------------------
-* BD-EE-dm-stool.do
+* BD-EE-dm-telo.do
 *
 * andrew mertens (amertens@berkeley.edu)
 *
 * process the Bangladesh EED substudy time 1,2, and 3
-* stool data for analysis
+* urine data for analysis
 *
 *--------------------------------------------
 
 
 
+*--------------------------------------------
+* Load in excel collection date, dob,
+* and gender changes from lab staff
+*--------------------------------------------
+
+cd "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/"
+insheet using "washb-bangladesh-track-compound.csv"
+
+keep dataid miss1reason
+sort dataid
+
+tempfile hhtracking
+save `hhtracking'
+
 
 *--------------------------------------------
-* input files:
-*
-*  Treatment assignments 
-*    washb-bangladesh-blind-tr.dta
-* 
-*
-*
+* Load in excel collection date, dob,
+* and gender changes from lab staff
 *--------------------------------------------
+
+cd "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/Changes"
+import excel using washb-bd-ee-dob-changes-final.xlsx, sheet("Sheet1") firstrow clear
+drop C
+sort childid 
+tempfile dob_change
+save `dob_change'
+
+import excel using washb-bd-ee-med-gender-changes-final.xlsx, sheet("Sheet2") firstrow clear
+gen byte sex= Correctanswer=="Male"
+keep dataid childNo sex
+*rename Correctanswer sex
+tostring childNo, replace
+sort dataid childNo 
+tempfile sex_change
+save `sex_change'
+
 
 *--------------------------------------------
 * format the treatment assignment information
 *--------------------------------------------
-*use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/washb-bangladesh-blind-tr.dta", clear
+*use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/washb-BD-telo-blind-tr.dta", clear
 use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/washb-bangladesh-tr.dta", clear
 
 destring clusterid, replace
@@ -53,129 +79,6 @@ tempfile birthorder
 save `birthorder'
 
 
-*--------------------------------------------
-* Append 3 rounds of stool collection surveys and rename variables
-*--------------------------------------------
-clear
-cd "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched"
-
-use Endline/EE_Endline_Stool_CLEANED_data_7Sept2016, clear
-
-rename q7s1 sampid1
-rename q7s2 sampid2 
-rename q7s3 sampid3
-rename q7s4 sampid4
-rename q7s5 sampid5
-rename q7s6 sampid6
-rename q8s1 randid1
-rename q8s2 randid2 
-rename q8s3 randid3
-rename q8s4 randid4
-rename q8s5 randid5
-rename q8s6 randid6
-rename q10s1 aliqout1_t
-rename q10s2 aliqout2_t
-rename q10s3 aliqout3_t
-rename q10s4 aliqout4_t
-rename q10s5 aliqout5_t
-rename q10s6 aliqout6_t
-rename q11 nonconsent_reason 
-rename FaId staffid
-
-destring clusterid, replace
-
-keep dataid clusterid mid childNo staffid SampleColDate sampid1 sampid2 sampid3 sampid4 sampid5 sampid6 randid1 randid2 randid3 randid4 randid5 randid6 aliqout1_t aliqout2_t aliqout3_t aliqout4_t aliqout5_t aliqout6_t nonconsent_reason 
-
-
-*generate surveyyear variable
-gen svy=3
-
-tempfile c_stool3
-save `c_stool3'
-
-use Midline/Stool_Midline_Cleaned_MatchedwEnrollment_2Feb16, clear
-
-rename q7s1 sampid1
-rename q7s2 sampid2 
-rename q7s3 sampid3
-rename q7s4 sampid4
-rename q7s5 sampid5
-rename q8s1 randid1
-rename q8s2 randid2 
-rename q8s3 randid3
-rename q8s4 randid4
-rename q8s5 randid5
-rename q10s1 aliqout1_t
-rename q10s2 aliqout2_t
-rename q10s3 aliqout3_t
-rename q10s4 aliqout4_t
-rename q10s5 aliqout5_t
-rename q11 nonconsent_reason 
-rename faid staffid
-rename samplecoldate SampleColDate
-rename childno childNo
-
-destring clusterid, replace
-
-keep dataid clusterid mid childNo staffid SampleColDate sampid1 sampid2 sampid3 sampid4 sampid5 randid1 randid2 randid3 randid4 randid5 aliqout1_t aliqout2_t aliqout3_t aliqout4_t aliqout5_t nonconsent_reason 
-
-*generate surveyyear variable
-gen svy=2
-
-tempfile c_stool2
-save `c_stool2'
-
-use Baseline/Baseline_Stool_CLEANED_VersionIncorporated_26Jan15, clear
-
-rename q7s1 sampid1
-rename q7s2 sampid2 
-rename q7s3 sampid3
-rename q7s4 sampid4
-rename q7s5 sampid5
-rename q8s1 randid1
-rename q8s2 randid2 
-rename q8s3 randid3
-rename q8s4 randid4
-rename q8s5 randid5
-rename q10s1 aliqout1_t
-rename q10s2 aliqout2_t
-rename q10s3 aliqout3_t
-rename q10s4 aliqout4_t
-rename q10s5 aliqout5_t
-rename q11 nonconsent_reason 
-rename faid staffid
-rename samplecoldate SampleColDate
-rename childno childNo
-
-destring clusterid, replace
-
-keep dataid clusterid mid childNo staffid SampleColDate sampid1 sampid2 sampid3 sampid4 sampid5  randid1 randid2 randid3 randid4 randid5 aliqout1_t aliqout2_t aliqout3_t aliqout4_t aliqout5_t nonconsent_reason 
-
-
-*generate surveyyear variable
-gen svy=1
-
-
-
-*Append midline and endline anthropometry
-append using `c_stool2', force nolabel
-append using `c_stool3', force nolabel
-sort dataid childNo
-
-*Appear to be fully duplicated observations (rows). List and drop here: 
-duplicates tag dataid childNo sampid1 sampid2 sampid3 sampid4 sampid5 svy, generate(dup)
-list dataid clusterid SampleColDate childNo sampid1 nonconsent_reason svy dup if dup>0
-duplicates drop dataid childNo sampid1 sampid2 sampid3 sampid4 sampid5 svy, force
-
-*Dataset cleaning
-replace nonconsent_reason=0 if nonconsent_reason==.
-
-
-tempfile stool
-save `stool' 
-
-
-
 
 
 
@@ -183,7 +86,7 @@ save `stool'
 *Calculate child age at each sample collection
 ********************************************************************************
 *First, merge in main study DOB from anthro and diar datasets
-use washb-bangladesh-anthro, clear
+use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/washb-bangladesh-anthro.dta", clear
 
 duplicates tag dataid childid, generate(dup)
 keep if childid=="T1" | childid=="T2"
@@ -202,7 +105,8 @@ duplicates list dataid childNo
 tempfile anthro
 save `anthro'
 
-use washb-bangladesh-diar, clear
+
+use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/washb-bangladesh-diar.dta", clear
 keep if childid=="T1" | childid=="T2"
 
 gen childNo= substr(childid,2,1)
@@ -230,12 +134,10 @@ save `mainDOB'
 
 
 
-
-
-
 *Merge in the EE medical history files for the child date of birth for the 58 children
 *not in the main study
     *Save relevent parts of baseline childid tracking
+cd "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/"
 use Baseline/Baseline_ChildID_CLEANED_VersionIncorporated_20Oct15, clear
 rename q15 EEdob
 rename childno childNo
@@ -283,7 +185,7 @@ rename EEdob EE_dob
 
 append using `BL_EE_dob', force nolabel
 append using `ML_EE_dob', force nolabel 
-sort dataid childNo
+sort dataid childNo 
 
 
 
@@ -357,96 +259,21 @@ table  sexfromEE
 
 
 *Drop unneeded variables
-drop anthrodob diardob EE_dob MainStudyDataset_anthro_DOB MainStudyDataset_diar_DOB EE_dob1 EEsex1 EE_dob2 EEsex2 EE_dob3 EEsex3 EE_dob EEsex _merge svy diarsex anthrosex MainStudyDataset_diar_sex MainStudyDataset_anthro_sex
-	
+drop anthrodob diardob EE_dob MainStudyDataset_anthro_DOB MainStudyDataset_diar_DOB EE_dob1 EEsex1 EE_dob2 EEsex2 EE_dob3 EEsex3 EE_dob EEsex _merge svy diarsex anthrosex MainStudyDataset_diar_sex MainStudyDataset_anthro_sex DOBfromEE sexfromEE dup
 
-
-*Merge DOBs into urine dataset
 sort dataid childNo
-merge 1:m dataid childNo using `stool'
-tab _merge
-drop if _merge==1
-list dataid childNo svy if _merge==2
-list dataid childNo svy if DOBfromEE==1
-drop _merge
 
 
-	
+
+
 ************************************
-*Merge in birth order
+*Update sexs and DOBs
 ************************************
-sort dataid childNo	
-merge dataid childNo using `birthorder'	
-tab _merge
-keep if _merge==3 | _merge==1
-drop _merge
-
-*generate date
-gen date = date(SampleColDate, "DMY")
-drop SampleColDate
-format date %d
-	label var date "Date of sample collection"
 
 *Generate childid combining dataid and childNo
 generate childid=dataid+childNo
-sort childid svy
-tempfile stool
-save `stool'
-
-************************************
-*Merge in excel collection date, dob,
-* and gender changes from lab staff
-************************************
-cd "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/Changes"
-import excel using washb-bd-ee-t1-stool-samplecoldate-changes-final.xlsx, sheet("Sheet1") firstrow clear
-drop C
-rename t1_stool date
-gen svy=1
 sort childid 
-tempfile date_change1
-save `date_change1'
 
-import excel using washb-bd-ee-t2-stool-samplecoldate-changes-final.xlsx, sheet("Sheet1") firstrow clear
-drop C
-rename t2_stool date
-gen svy=2
-sort childid 
-tempfile date_change2
-save `date_change2'
-
-import excel using washb-bd-ee-t3-stool-samplecoldate-changes-final.xlsx, sheet("Sheet1") firstrow clear
-rename t3_stool date
-gen svy=3
-sort childid 
-tempfile date_change3
-save `date_change3'
-
-import excel using washb-bd-ee-dob-changes-final.xlsx, sheet("Sheet1") firstrow clear
-drop C
-sort childid 
-tempfile dob_change
-save `dob_change'
-
-import excel using washb-bd-ee-med-gender-changes-final.xlsx, sheet("Sheet2") firstrow clear
-gen byte sex= Correctanswer=="Male"
-keep dataid childNo sex
-*rename Correctanswer sex
-tostring childNo, replace
-sort dataid childNo 
-tempfile sex_change
-save `sex_change'
-
-clear 
-use `stool' 
-merge 1:1 childid svy using `date_change1', keepusing(date) update replace
-tab _merge
-drop _merge
-merge 1:1 childid svy using `date_change2', keepusing(date) update replace
-tab _merge
-drop _merge
-merge 1:1 childid svy using `date_change3', keepusing(date) update replace
-tab _merge
-drop _merge
 merge m:1 childid using `dob_change', keepusing(dob) update replace
 tab _merge
 drop _merge
@@ -455,9 +282,26 @@ tab _merge
 drop if _merge==2
 drop _merge
 
+
+
+************************************
+*Merge in birth order
+************************************
+sort dataid childNo	
+merge dataid childNo using `birthorder'	
+tab _merge
+*keep if _merge==3 
+drop _merge
+
+
+
+
+
+
 ************************************
 *Generate child ages
 ************************************
+/*
 gen aged = date-DOB
 	label var aged "Age in days (anthro meas)"
 gen double agem = aged/30.4375
@@ -469,26 +313,77 @@ codebook agey
 * Month of measurement
 gen month = month(date)
 	label var month "Month of sample collection"
+*/
+
+
+
+
+sort dataid
+tempfile temp
+save `temp'
+clear
+
+cd "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/"
+use "washb-bangladesh-enrol+animals.dta"
+sort dataid
+merge dataid using `temp'
+tab _merge
+*keep if _merge==3
 
 
 ************************************
-*Reshape to wide
+*Merge in treatment data
 ************************************
 
-*Temporarily limit variables in dataset to help with reshape
-keep dataid childid clusterid svy sex staffid DOB nonconsent_reason childNo aliqout1 aliqout2 aliqout3 aliqout4 aliqout5 date aged agem agey month birthord
+*Generate clusterid for treatment merging
+drop clusterid
+gen clusterid=substr(dataid,1,3)
+destring clusterid, replace
+sort clusterid
 
-*Reshape to wide
-reshape wide date aged agem agey month  nonconsent_reason aliqout1 aliqout2 aliqout3 aliqout4 aliqout5 staffid, i(dataid childNo) j(svy)
-*Check for any duplicates after reshaping
-duplicates list dataid childNo 
+drop _merge
+sort clusterid  
+merge clusterid  using `trdata'
+tab _merge
 
 
+************************************
+*Merge in HH tracking data data
+************************************
+
+
+drop _merge
+destring dataid, replace
+sort dataid
+merge dataid using `hhtracking'
+tab _merge
+*keep if _merge==3
+drop _merge
+drop if miss1reason=="No live birth"
+
+duplicates list dataid
+duplicates list dataid childNo
 
 *Save file 
-label data "BD EE stool dataset, created by BD-EE-dm-stool.do"
-saveold "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew/BD-EE-stool.dta", replace version(12)
-outsheet using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew/BD-EE-stool.csv", comma replace
+label data "BD EE ipcw dataset, created by BD-EE-dm-ipcw.do"
+saveold "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew/BD-EE-ipcw.dta", replace version(12)
+outsheet using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew/BD-EE-ipcw.csv", comma replace
 clear
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

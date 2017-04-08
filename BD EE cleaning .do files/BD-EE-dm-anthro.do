@@ -675,14 +675,22 @@ gen byte whzminus3 = whz < -3
 
 
 * restrict to variables used in the analysis
-keep dataid childNo clusterid female date DOB month length svy aged agem agey month headcir laz waz whz bmiz hcz laz_x waz_x whz_x hcz_x lazminus2 bmiz_x lazminus3 wazminus2 wazminus3 whzminus3 whzminus2
+keep dataid childNo date DOB month length svy aged agem agey month headcir laz waz whz bmiz hcz laz_x waz_x whz_x hcz_x lazminus2 bmiz_x lazminus3 wazminus2 wazminus3 whzminus3 whzminus2
 
 *check childid formatting for R merge
 *format childid %9.0f
 
 
+*reshape to wide
+*Reshape to wide
+reshape wide date aged agem agey month length headcir laz waz whz bmiz hcz laz_x waz_x whz_x hcz_x lazminus2 bmiz_x lazminus3 wazminus2 wazminus3 whzminus3 whzminus2, i(dataid childNo) j(svy)
+*Check for any duplicates after reshaping
+duplicates list dataid childNo 
+duplicates list dataid
+
+
 compress
-sort dataid childNo svy
+sort dataid childNo 
 label data "Bangladesh EE anthropometry analysis dataset, created by BD-EE-dm-anthro.do"
 saveold "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew/BD-EE-anthro.dta", replace version(12)
 outsheet using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew/BD-EE-anthro.csv", comma replace

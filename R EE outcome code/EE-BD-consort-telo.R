@@ -21,7 +21,10 @@ consort<-read.csv("BD-EE-consort.csv")
 consort<-subset(consort, select= -tr) #Remove blinded EED treatments
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/")
-load("washb-BD-telo-blind-tr.Rdata")
+#load("washb-BD-telo-blind-tr.Rdata")
+load("washb-bangladesh-tr.Rdata")
+d$clusterid<-as.numeric(d$clusterid)
+treatment<-d
 levels(treatment$tr)
 treatment$tr <- factor(treatment$tr,levels=c("Control","Nutrition + WSH"))
 levels(treatment$tr)
@@ -43,12 +46,12 @@ table(d$tr)
 d<-subset(d, svy!=1)
 
 #Tabulate number of compounds
-d %>% group_by(tr) %>%
-  distinct(dataid) %>%
-  summarize(n.compound=n())
+#d %>% group_by(tr) %>%
+#  distinct(dataid) %>%
+#  summarize(n.compound=n())
 
-d %>% distinct(dataid) %>%
-  summarize(n.compound=n())
+#d %>% distinct(dataid) %>%
+#  summarize(n.compound=n())
 
 #-----------------------------
 #Subsample target
@@ -128,40 +131,5 @@ NotLost %>% group_by(svy, tr) %>% distinct(dataid, childno) %>%summarize(N=n())
 
 
 
-
-
-
-
-telo1<-telo %>% 
-  subset(aliquot2>1)
-telo2<-telo %>% 
-  subset(aliquot3>1)
-
-
-
-
-# Compounds
-
-
-  left_join(telo1,treatment, by="clusterid") %>%
-  group_by(tr) %>% distinct(clusterid) %>%
-  summarize(compounds1.N=n())
-  
-  left_join(telo2,treatment, by="clusterid") %>%
-  group_by(tr) %>% distinct(clusterid) %>%
-  summarize(compounds2.N=n())  
-  
-
-# Index children (any child with blood)
-
-  left_join(telo1,treatment, by="clusterid") %>%
-  group_by(tr) %>% #distinct(dataid) %>%
-  summarize(index1.N=n())
-  
-  left_join(telo2,treatment, by="clusterid") %>%
-  group_by(tr) %>% #distinct(dataid) %>%
-  summarize(index2.N=n())  
-  
-  
 
   

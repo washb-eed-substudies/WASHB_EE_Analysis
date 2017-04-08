@@ -31,7 +31,8 @@ log using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Logs/Andrew/
 *--------------------------------------------
 * format the treatment assignment information
 *--------------------------------------------
-use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/washb-bangladesh-blind-tr.dta", clear
+*use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/washb-BD-EE-blind-tr.dta", clear
+use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/washb-bangladesh-tr.dta", clear
 
 destring clusterid, replace
 sort clusterid
@@ -335,7 +336,7 @@ append using `EL_EE_dob', force
 
 
 *Variable cleaning
-rename q17 aged
+rename q17 aged_medform
 rename q5 consent
 
 
@@ -358,8 +359,9 @@ drop _merge dup DOBfromEE sexfromEE
 
 
 *generate date
-gen date = date(SampleColDate, "DMY")
-drop SampleColDate
+*gen date = date(SampleColDate, "DMY")
+*drop SampleColDate
+rename SampleColDate date
 format date %d
 	label var date "Date of sample collection"
 
@@ -442,7 +444,7 @@ gen month = month(date)
 ************************************
 
 *Reshape to wide
-reshape wide consent SampleColDate agem agey aged numchildren EE_dob month date, i(dataid childNo) j(svy)
+reshape wide consent agem agey aged numchildren EE_dob month date, i(dataid childNo) j(svy)
 *Check for any duplicates after reshaping
 duplicates list dataid childNo 
 

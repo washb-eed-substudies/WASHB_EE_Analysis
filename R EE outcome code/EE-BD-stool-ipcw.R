@@ -68,8 +68,8 @@ table(d$tr)
 
 
 
-#Subset to Control and WSH+N
-d<-subset(d, tr=="Control" | tr=="Nutrition + WSH")
+#Subset to EED arms
+d<-subset(d, tr=="Control" | tr=="WSH" | tr=="Nutrition" | tr=="Nutrition + WSH")
 
 
 
@@ -283,82 +283,105 @@ d$reg1b2Delta[d$reg1b2.miss==0] <- 9
 d<-d[order(d$block,d$clusterid,d$dataid),]
   
 #Run the unadjusted ipcw analysis
-aat_t1_unadj_ipcw_M<-washb_tmle(Y=d$aat1Delta, Delta=d$aat1.miss, tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
-aat_t2_unadj_ipcw_M<-washb_tmle(Y=d$aat2Delta, Delta=d$aat2.miss, tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
-aat_t3_unadj_ipcw_M<-washb_tmle(Y=d$aat3Delta, Delta=d$aat3.miss, tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
 
-mpo_t1_unadj_ipcw_M<-washb_tmle(Y=d$mpo1Delta, Delta=d$mpo1.miss, tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
-mpo_t2_unadj_ipcw_M<-washb_tmle(Y=d$mpo2Delta, Delta=d$mpo2.miss, tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
-mpo_t3_unadj_ipcw_M<-washb_tmle(Y=d$mpo3Delta, Delta=d$mpo3.miss, tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
 
-neo_t1_unadj_ipcw_M<-washb_tmle(Y=d$neo1Delta, Delta=d$neo1.miss, tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
-neo_t2_unadj_ipcw_M<-washb_tmle(Y=d$neo2Delta, Delta=d$neo2.miss, tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
-neo_t3_unadj_ipcw_M<-washb_tmle(Y=d$neo3Delta, Delta=d$neo3.miss, tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
+#Create empty matrix to hold the glm results:
+neo_t1_unadj<-mpo_t1_unadj<-aat_t1_unadj<-matrix(0, nrow=5, ncol=5)
+neo_t2_unadj<-mpo_t2_unadj<-aat_t2_unadj<-reg1b_t2_unadj<-matrix(0, nrow=5, ncol=5)
+neo_t3_unadj<-mpo_t3_unadj<-aat_t3_unadj<-matrix(0, nrow=5, ncol=5)
 
-reg1b_t2_unadj_ipcw_M<-washb_tmle(Y=d$reg1b2Delta, Delta=d$reg1b2.miss, tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
+res_unadj<-list(neo_t1_unadj=neo_t1_unadj, mpo_t1_unadj=mpo_t1_unadj, aat_t1_unadj=aat_t1_unadj, 
+                neo_t2_unadj=neo_t2_unadj, mpo_t2_unadj=mpo_t2_unadj, aat_t2_unadj=aat_t2_unadj, reg1b_t2_unadj=reg1b_t2_unadj, 
+                neo_t3_unadj=neo_t3_unadj, mpo_t3_unadj=mpo_t3_unadj, aat_t3_unadj=aat_t3_unadj)
 
 
 
 
+#Unadjusted glm models
+
+#dataframe of stool biomarkers:
+Y<-d %>% select(neo1Delta,mpo1Delta,aat1Delta,neo2Delta,mpo2Delta,aat2Delta,reg1b2Delta,neo3Delta,mpo3Delta,aat3Delta)
+
+#dataframe of stool missingness:
+miss<-d %>% select(neo1.miss,mpo1.miss,aat1.miss,neo2.miss,mpo2.miss,aat2.miss,reg1b2.miss,neo3.miss,mpo3.miss,aat3.miss)
+
+
+#Set contrasts:
+contrasts <- list(c("Control","WSH"), c("Control","Nutrition"), c("Control","Nutrition + WSH"), c("WSH","Nutrition + WSH"), c("Nutrition","Nutrition + WSH"))
+
+
+
+temp<-washb_tmle(Y=log(d$aat1Delta), Delta=d$aat1.miss, tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
+
+
+for(i in 1:10){
+  for(j in 1:5){
+    #note the log transformation of the outcome prior to running GLM model:
+    temp<-washb_tmle(Y=log(Y[,i]), Delta=miss[,i], tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], Q.SL.library = c("SL.glm"), seed=12345, print=T)
+    cat(i," : ",j, "\n")
+    res_unadj[[i]][j,]<-(t(unlist(temp$estimates$ATE)))
+    colnames(res_unadj[[i]])<-c("psi","var.psi","ci.l","ci.u", "Pval")
+    rownames(res_unadj[[i]])<-c(c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH"))
+  }
+}
+
+#Extract estimates
+
+neo_t1_unadj_ipcw_M<-res_unadj[[1]]
+neo_t2_unadj_ipcw_M<-res_unadj[[4]]
+neo_t3_unadj_ipcw_M<-res_unadj[[8]]
+
+mpo_t1_unadj_ipcw_M<-res_unadj[[2]]
+mpo_t2_unadj_ipcw_M<-res_unadj[[5]]
+mpo_t3_unadj_ipcw_M<-res_unadj[[9]]
+
+aat_t1_unadj_ipcw_M<-res_unadj[[3]]
+aat_t2_unadj_ipcw_M<-res_unadj[[6]]
+aat_t3_unadj_ipcw_M<-res_unadj[[10]]
+
+reg_t2_unadj_ipcw_M<-res_unadj[[7]]
 
 
 
 
+
+#Create empty matrix to hold the glm results:
+
+
+res_adj<-list(neo_t1_adj=matrix(0,5,5), mpo_t1_adj=matrix(0,5,5), aat_t1_adj=matrix(0,5,5), 
+                neo_t2_adj=matrix(0,5,5), mpo_t2_adj=matrix(0,5,5), aat_t2_adj=matrix(0,5,5),  reg1b_t2_adj=matrix(0,5,5),
+                neo_t3_adj=matrix(0,5,5), mpo_t3_adj=matrix(0,5,5), aat_t3_adj=matrix(0,5,5))
+
+
+
+
+for(i in 1:10){
+  for(j in 1:5){
+    #note the log transformation of the outcome prior to running GLM model:
+    temp<-washb_tmle(Y=log(Y[,i]), Delta=miss[,i], tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], Q.SL.library = c("SL.glm"), seed=12345, print=T)
+    cat(i," : ",j, "\n")
+    res_adj[[i]][j,]<-(t(unlist(temp$estimates$ATE)))
+    colnames(res_adj[[i]])<-c("psi","var.psi","ci.l","ci.u", "Pval")
+    rownames(res_adj[[i]])<-c(c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH"))
+  }
+}
 
 
 
 #Extract estimates
-aat_t1_unadj_ipcw_M<-as.data.frame(unlist(aat_t1_unadj_ipcw_M$estimates$ATE))
-aat_t2_unadj_ipcw_M<-as.data.frame(unlist(aat_t2_unadj_ipcw_M$estimates$ATE))
-aat_t3_unadj_ipcw_M<-as.data.frame(unlist(aat_t3_unadj_ipcw_M$estimates$ATE))
+neo_t1_adj_ipcw_M<-res_adj[[1]]
+neo_t2_adj_ipcw_M<-res_adj[[4]]
+neo_t3_adj_ipcw_M<-res_adj[[8]]
 
-mpo_t1_unadj_ipcw_M<-as.data.frame(unlist(mpo_t1_unadj_ipcw_M$estimates$ATE))
-mpo_t2_unadj_ipcw_M<-as.data.frame(unlist(mpo_t2_unadj_ipcw_M$estimates$ATE))
-mpo_t3_unadj_ipcw_M<-as.data.frame(unlist(mpo_t3_unadj_ipcw_M$estimates$ATE))
+mpo_t1_adj_ipcw_M<-res_adj[[2]]
+mpo_t2_adj_ipcw_M<-res_adj[[5]]
+mpo_t3_adj_ipcw_M<-res_adj[[9]]
 
-neo_t1_unadj_ipcw_M<-as.data.frame(unlist(neo_t1_unadj_ipcw_M$estimates$ATE))
-neo_t2_unadj_ipcw_M<-as.data.frame(unlist(neo_t2_unadj_ipcw_M$estimates$ATE))
-neo_t3_unadj_ipcw_M<-as.data.frame(unlist(neo_t3_unadj_ipcw_M$estimates$ATE))
+aat_t1_adj_ipcw_M<-res_adj[[3]]
+aat_t2_adj_ipcw_M<-res_adj[[6]]
+aat_t3_adj_ipcw_M<-res_adj[[10]]
 
-reg1b_t2_unadj_ipcw_M<-as.data.frame(unlist(reg1b_t2_unadj_ipcw_M$estimates$ATE))
-
-
-
-#Run the adjusted ipcw analysis
-aat_t1_adj_ipcw_M<-washb_tmle(Y=d$aat1Delta, Delta=d$aat1.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
-aat_t2_adj_ipcw_M<-washb_tmle(Y=d$aat2Delta, Delta=d$aat2.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
-aat_t3_adj_ipcw_M<-washb_tmle(Y=d$aat3Delta, Delta=d$aat3.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
-
-mpo_t1_adj_ipcw_M<-washb_tmle(Y=d$mpo1Delta, Delta=d$mpo1.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
-mpo_t2_adj_ipcw_M<-washb_tmle(Y=d$mpo2Delta, Delta=d$mpo2.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
-mpo_t3_adj_ipcw_M<-washb_tmle(Y=d$mpo3Delta, Delta=d$mpo3.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
-
-neo_t1_adj_ipcw_M<-washb_tmle(Y=d$neo1Delta, Delta=d$neo1.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
-neo_t2_adj_ipcw_M<-washb_tmle(Y=d$neo2Delta, Delta=d$neo2.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
-neo_t3_adj_ipcw_M<-washb_tmle(Y=d$neo3Delta, Delta=d$neo3.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
-
-reg1b_t2_adj_ipcw_M<-washb_tmle(Y=d$reg1b2Delta, Delta=d$reg1b2.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
-
-
-#Extract estimates
-aat_t1_adj_ipcw_M<-as.data.frame(unlist(aat_t1_adj_ipcw_M$estimates$ATE))
-aat_t2_adj_ipcw_M<-as.data.frame(unlist(aat_t2_adj_ipcw_M$estimates$ATE))
-aat_t3_adj_ipcw_M<-as.data.frame(unlist(aat_t3_adj_ipcw_M$estimates$ATE))
-
-mpo_t1_adj_ipcw_M<-as.data.frame(unlist(mpo_t1_adj_ipcw_M$estimates$ATE))
-mpo_t2_adj_ipcw_M<-as.data.frame(unlist(mpo_t2_adj_ipcw_M$estimates$ATE))
-mpo_t3_adj_ipcw_M<-as.data.frame(unlist(mpo_t3_adj_ipcw_M$estimates$ATE))
-
-neo_t1_adj_ipcw_M<-as.data.frame(unlist(neo_t1_adj_ipcw_M$estimates$ATE))
-neo_t2_adj_ipcw_M<-as.data.frame(unlist(neo_t2_adj_ipcw_M$estimates$ATE))
-neo_t3_adj_ipcw_M<-as.data.frame(unlist(neo_t3_adj_ipcw_M$estimates$ATE))
-
-reg1b_t2_adj_ipcw_M<-as.data.frame(unlist(reg1b_t2_adj_ipcw_M$estimates$ATE))
-
-
-
-
-
+reg_t2_adj_ipcw_M<-res_adj[[7]]
 
 
 
@@ -373,7 +396,7 @@ mpo_t3_unadj_ipcw_M,
 neo_t1_unadj_ipcw_M,
 neo_t2_unadj_ipcw_M,
 neo_t3_unadj_ipcw_M,
-reg1b_t2_unadj_ipcw_M,
+reg_t2_unadj_ipcw_M,
 aat_t1_adj_ipcw_M,
 aat_t2_adj_ipcw_M,
 aat_t3_adj_ipcw_M,
@@ -382,8 +405,9 @@ mpo_t2_adj_ipcw_M,
 mpo_t3_adj_ipcw_M,
 neo_t1_adj_ipcw_M,
 neo_t2_adj_ipcw_M,
+
 neo_t3_adj_ipcw_M,
-reg1b_t2_adj_ipcw_M, 
+reg_t2_adj_ipcw_M, 
 file="stool_ipcw_res.Rdata")
 
 

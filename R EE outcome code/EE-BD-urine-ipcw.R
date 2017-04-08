@@ -27,15 +27,14 @@ levels(treatment$tr)
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
 enrol<-read.csv("washb-bangladesh-enrol+animals.csv",stringsAsFactors = TRUE)
 
-
+#Load in urine survey and ipcw datasets
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew")
 urine<-read.csv("BD-EE-urine.csv")
 ipcw<-read.csv("BD-EE-ipcw.csv", stringsAsFactors = T) %>% select(-c(tr,block))
 
-
-
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
-outcomes<-read.dta("washb-BD-EE-sim-urine-outcomes-stata12.dta")
+#Load in L/M outcomes
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew")
+outcomes<-read.dta("washb-BD-EE-urine-outcomes-stata12.dta")
 outcomes$childid<-as.numeric(outcomes$childid)
 
 
@@ -68,10 +67,6 @@ d<-left_join(d,treatment, by="clusterid")
 dim(d)
 table(d$tr)
 
-
-
-#Subset to Control and WSH+N
-d<-subset(d, tr=="Control" | tr=="Nutrition + WSH")
 
 
 
@@ -354,64 +349,89 @@ d$LM3Delta[d$LM3.miss==0] <- 9
 d<-d[order(d$block,d$clusterid,d$dataid),]
   
 #Run the unadjusted ipcw analysis
-Lact_t1_unadj_ipcw_M<-washb_tmle(Y=d$Lact1Delta, Delta=d$Lact1.miss, tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
-Lact_t2_unadj_ipcw_M<-washb_tmle(Y=d$Lact2Delta, Delta=d$Lact2.miss, tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
-Lact_t3_unadj_ipcw_M<-washb_tmle(Y=d$Lact3Delta, Delta=d$Lact3.miss, tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
 
-Mann_t1_unadj_ipcw_M<-washb_tmle(Y=d$Mann1Delta, Delta=d$Mann1.miss, tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
-Mann_t2_unadj_ipcw_M<-washb_tmle(Y=d$Mann2Delta, Delta=d$Mann2.miss, tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
-Mann_t3_unadj_ipcw_M<-washb_tmle(Y=d$Mann3Delta, Delta=d$Mann3.miss, tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
+#dataframes of urine biomarkers and missingness:
+Y<-d %>% select(Lact1Delta,Mann1Delta,LM1Delta,
+                Lact2Delta,Mann2Delta,LM2Delta,
+                Lact3Delta,Mann3Delta,LM3Delta)
+miss<-d %>% select(Lact1.miss,Mann1.miss,LM1.miss,
+                Lact2.miss,Mann2.miss,LM2.miss,
+                Lact3.miss,Mann3.miss,LM3.miss)
 
-LM_t1_unadj_ipcw_M<-washb_tmle(Y=d$LM1Delta, Delta=d$LM1.miss, tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
-LM_t2_unadj_ipcw_M<-washb_tmle(Y=d$LM2Delta, Delta=d$LM2.miss, tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
-LM_t3_unadj_ipcw_M<-washb_tmle(Y=d$LM3Delta, Delta=d$LM3.miss, tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
+#Set contrasts:
+contrasts <- list(c("Control","WSH"), c("Control","Nutrition"), c("Control","Nutrition + WSH"), c("WSH","Nutrition + WSH"), c("Nutrition","Nutrition + WSH"))
+
+
+#Create empty matrix to hold the glm results:
+lact_t1_unadj<-mann_t1_unadj<-lm_t1_unadj<-matrix(0, nrow=5, ncol=5)
+lact_t2_unadj<-mann_t2_unadj<-lm_t2_unadj<-matrix(0, nrow=5, ncol=5)
+lact_t3_unadj<-mann_t3_unadj<-lm_t3_unadj<-matrix(0, nrow=5, ncol=5)
+
+res_unadj<-list(lact_t1_unadj=lact_t1_unadj, mann_t1_unadj=mann_t1_unadj, lm_t1_unadj=lm_t1_unadj, 
+                lact_t2_unadj=lact_t2_unadj, mann_t2_unadj=mann_t2_unadj, lm_t2_unadj=lm_t2_unadj, 
+                lact_t3_unadj=lact_t3_unadj, mann_t3_unadj=mann_t3_unadj, lm_t3_unadj=lm_t3_unadj)
+
+
+
+#Unadjusted glm models
+for(i in 1:ncol(Y)){
+  for(j in 1:5){
+    #note the log transformation of the outcome prior to running GLM model:
+    temp<-washb_tmle(Y=log(Y[,i]), Delta=miss[,i], tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], Q.SL.library = c("SL.glm"), seed=12345, print=T)
+    cat(i," : ",j, "\n")
+    res_unadj[[i]][j,]<-(t(unlist(temp$estimates$ATE)))
+    colnames(res_unadj[[i]])<-c("psi","var.psi","ci.l","ci.u", "Pval")
+    rownames(res_unadj[[i]])<-c(c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH"))
+  }
+}
+
 
 
 #Extract estimates
-Lact_t1_unadj_ipcw_M<-as.data.frame(unlist(Lact_t1_unadj_ipcw_M$estimates$ATE))
-Lact_t2_unadj_ipcw_M<-as.data.frame(unlist(Lact_t2_unadj_ipcw_M$estimates$ATE))
-Lact_t3_unadj_ipcw_M<-as.data.frame(unlist(Lact_t3_unadj_ipcw_M$estimates$ATE))
+l1_unadj_ipcw_M<-res_unadj[[1]]
+l2_unadj_ipcw_M<-res_unadj[[4]]
+l3_unadj_ipcw_M<-res_unadj[[7]]
 
-Mann_t1_unadj_ipcw_M<-as.data.frame(unlist(Mann_t1_unadj_ipcw_M$estimates$ATE))
-Mann_t2_unadj_ipcw_M<-as.data.frame(unlist(Mann_t2_unadj_ipcw_M$estimates$ATE))
-Mann_t3_unadj_ipcw_M<-as.data.frame(unlist(Mann_t3_unadj_ipcw_M$estimates$ATE))
+m1_unadj_ipcw_M<-res_unadj[[2]]
+m2_unadj_ipcw_M<-res_unadj[[5]]
+m3_unadj_ipcw_M<-res_unadj[[8]]
 
-LM_t1_unadj_ipcw_M<-as.data.frame(unlist(LM_t1_unadj_ipcw_M$estimates$ATE))
-LM_t2_unadj_ipcw_M<-as.data.frame(unlist(LM_t2_unadj_ipcw_M$estimates$ATE))
-LM_t3_unadj_ipcw_M<-as.data.frame(unlist(LM_t3_unadj_ipcw_M$estimates$ATE))
-
+lmr1_unadj_ipcw_M<-res_unadj[[3]]
+lmr2_unadj_ipcw_M<-res_unadj[[6]]
+lmr3_unadj_ipcw_M<-res_unadj[[9]]
 
 
 
 #Run the adjusted ipcw analysis
-Lact_t1_adj_ipcw_M<-washb_tmle(Y=d$Lact1Delta, Delta=d$Lact1.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
-Lact_t2_adj_ipcw_M<-washb_tmle(Y=d$Lact2Delta, Delta=d$Lact2.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
-Lact_t3_adj_ipcw_M<-washb_tmle(Y=d$Lact3Delta, Delta=d$Lact3.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
+res_adj<-list(lact_t1_adj=matrix(0,5,5), mann_t1_adj=matrix(0,5,5), lm_t1_adj=matrix(0,5,5), 
+                lact_t2_adj=matrix(0,5,5), mann_t2_adj=matrix(0,5,5), lm_t2_adj=matrix(0,5,5),  
+                lact_t3_adj=matrix(0,5,5), mann_t3_adj=matrix(0,5,5), lm_t3_adj=matrix(0,5,5))
 
-Mann_t1_adj_ipcw_M<-washb_tmle(Y=d$Mann1Delta, Delta=d$Mann1.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
-Mann_t2_adj_ipcw_M<-washb_tmle(Y=d$Mann2Delta, Delta=d$Mann2.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
-Mann_t3_adj_ipcw_M<-washb_tmle(Y=d$Mann3Delta, Delta=d$Mann3.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
 
-LM_t1_adj_ipcw_M<-washb_tmle(Y=d$LM1Delta, Delta=d$LM1.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
-LM_t2_adj_ipcw_M<-washb_tmle(Y=d$LM2Delta, Delta=d$LM2.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
-LM_t3_adj_ipcw_M<-washb_tmle(Y=d$LM3Delta, Delta=d$LM3.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
-
+for(i in 1:ncol(Y)){
+  for(j in 1:5){
+    #note the log transformation of the outcome prior to running GLM model:
+    temp<-washb_tmle(Y=log(Y[,i]), Delta=miss[,i], tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], Q.SL.library = c("SL.glm"), seed=12345, print=T)
+    cat(i," : ",j, "\n")
+    res_adj[[i]][j,]<-(t(unlist(temp$estimates$ATE)))
+    colnames(res_adj[[i]])<-c("psi","var.psi","ci.l","ci.u", "Pval")
+    rownames(res_adj[[i]])<-c(c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH"))
+  }
+}
 
 
 #Extract estimates
-Lact_t1_adj_ipcw_M<-as.data.frame(unlist(Lact_t1_adj_ipcw_M$estimates$ATE))
-Lact_t2_adj_ipcw_M<-as.data.frame(unlist(Lact_t2_adj_ipcw_M$estimates$ATE))
-Lact_t3_adj_ipcw_M<-as.data.frame(unlist(Lact_t3_adj_ipcw_M$estimates$ATE))
+l1_adj_ipcw_M<-res_adj[[1]]
+l2_adj_ipcw_M<-res_adj[[4]]
+l3_adj_ipcw_M<-res_adj[[7]]
 
-Mann_t1_adj_ipcw_M<-as.data.frame(unlist(Mann_t1_adj_ipcw_M$estimates$ATE))
-Mann_t2_adj_ipcw_M<-as.data.frame(unlist(Mann_t2_adj_ipcw_M$estimates$ATE))
-Mann_t3_adj_ipcw_M<-as.data.frame(unlist(Mann_t3_adj_ipcw_M$estimates$ATE))
+m1_adj_ipcw_M<-res_adj[[2]]
+m2_adj_ipcw_M<-res_adj[[5]]
+m3_adj_ipcw_M<-res_adj[[8]]
 
-LM_t1_adj_ipcw_M<-as.data.frame(unlist(LM_t1_adj_ipcw_M$estimates$ATE))
-LM_t2_adj_ipcw_M<-as.data.frame(unlist(LM_t2_adj_ipcw_M$estimates$ATE))
-LM_t3_adj_ipcw_M<-as.data.frame(unlist(LM_t3_adj_ipcw_M$estimates$ATE))
-
-
+lmr1_adj_ipcw_M<-res_adj[[3]]
+lmr2_adj_ipcw_M<-res_adj[[6]]
+lmr3_adj_ipcw_M<-res_adj[[9]]
 
 
 
@@ -421,24 +441,24 @@ LM_t3_adj_ipcw_M<-as.data.frame(unlist(LM_t3_adj_ipcw_M$estimates$ATE))
 
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
-save(Lact_t1_unadj_ipcw_M,
-Lact_t2_unadj_ipcw_M,
-Lact_t3_unadj_ipcw_M,
-Mann_t1_unadj_ipcw_M,
-Mann_t2_unadj_ipcw_M,
-Mann_t3_unadj_ipcw_M,
-LM_t1_unadj_ipcw_M,
-LM_t2_unadj_ipcw_M,
-LM_t3_unadj_ipcw_M,
-Lact_t1_adj_ipcw_M,
-Lact_t2_adj_ipcw_M,
-Lact_t3_adj_ipcw_M,
-Mann_t1_adj_ipcw_M,
-Mann_t2_adj_ipcw_M,
-Mann_t3_adj_ipcw_M,
-LM_t1_adj_ipcw_M,
-LM_t2_adj_ipcw_M,
-LM_t3_adj_ipcw_M,
+save(l1_unadj_ipcw_M,
+l2_unadj_ipcw_M,
+l3_unadj_ipcw_M,
+m1_unadj_ipcw_M,
+m2_unadj_ipcw_M,
+m3_unadj_ipcw_M,
+lmr1_unadj_ipcw_M,
+lmr2_unadj_ipcw_M,
+lmr3_unadj_ipcw_M,
+l1_adj_ipcw_M,
+l2_adj_ipcw_M,
+l3_adj_ipcw_M,
+m1_adj_ipcw_M,
+m2_adj_ipcw_M,
+m3_adj_ipcw_M,
+lmr1_adj_ipcw_M,
+lmr2_adj_ipcw_M,
+lmr3_adj_ipcw_M,
 file="urine_ipcw_res.Rdata")
 
 

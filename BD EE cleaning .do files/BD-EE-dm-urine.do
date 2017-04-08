@@ -574,7 +574,7 @@ gen month = month(date)
 ********************************************************************************
 
 *Temporarily limit variables in dataset to help with reshape
-keep dataid clusterid svy consent nonconsent_reason staffid childNo DOB sex h2aliqout1_t h2aliqout2_t h2aliqout3_t h2aliqout4_t h2aliqout5_t h2aliqout6_t h5aliqout7_t h5aliqout8_t h5aliqout9_t h5aliqout10_t h5aliqout11_t h5aliqout12_t preLMaliqout13_t preLMaliqout14_t preLMaliqout15_t preLMaliqout16_t preLMaliqout17_t preLMaliqout18_t urineVol_t LMvol_t preLMnonconsent_reason aged agem agey date month birthord
+keep childid dataid clusterid svy consent nonconsent_reason staffid childNo DOB sex h2aliqout1_t h2aliqout2_t h2aliqout3_t h2aliqout4_t h2aliqout5_t h2aliqout6_t h5aliqout7_t h5aliqout8_t h5aliqout9_t h5aliqout10_t h5aliqout11_t h5aliqout12_t preLMaliqout13_t preLMaliqout14_t preLMaliqout15_t preLMaliqout16_t preLMaliqout17_t preLMaliqout18_t urineVol_t LMvol_t preLMnonconsent_reason aged agem agey date month birthord
 
 *Reshape to wide
 reshape wide consent nonconsent_reason staffid aged agem agey month date h2aliqout1_t h2aliqout2_t h2aliqout3_t h2aliqout4_t h2aliqout5_t h2aliqout6_t h5aliqout7_t h5aliqout8_t h5aliqout9_t h5aliqout10_t h5aliqout11_t h5aliqout12_t  preLMaliqout13_t preLMaliqout14_t preLMaliqout15_t preLMaliqout16_t preLMaliqout17_t preLMaliqout18_t urineVol_t preLMnonconsent_reason LMvol_t, i(dataid childNo) j(svy)

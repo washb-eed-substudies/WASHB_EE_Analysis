@@ -12,10 +12,16 @@
 # BD-telo-t3.pdf
 # --------------------------------------
 
-
+rm(list=ls())
 library(RColorBrewer)
 library(scales)
 library(foreign)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(ggthemes) 
+library(gridExtra)
+
 
 # --------------------------------------
 # load the analysis data and output
@@ -31,25 +37,32 @@ load("telo_res.Rdata")
 # rename analysis output objects
 # for convenience
 # --------------------------------------
-t2sum  <- TS_t2_N_M
-t2diff <- TS_t2_unadj
+t2sum  <- ts_t2_N_M
+t2diff <- ts_t2_unadj_M
 
-t3sum  <- TS_t3_N_M
-t3diff <- TS_t3_unadj
+t3sum  <- ts_t3_N_M
+t3diff <- ts_t3_unadj_M
+
+
+levels(t2sum$tr)[7]<-levels(t3sum$tr)[7]<-"N + WSH"
+
 
 
 #---------------------------------------
 # clean the analysis data
 #---------------------------------------
 
-# subset to the relevant measurement
+#Rename Nutrition + WSH
+levels(d$tr)[7]<-"N+WSH"
 
+# subset to the relevant measurement
 ad2 <- subset(d, !is.na(TS2) & !is.na(tr))
 dim(ad2)
 ad3 <- subset(d, !is.na(TS3) & !is.na(tr))
 dim(ad3)
 
-
+ad2$bp<-3274 + 2413*ad2$TS2
+ad3$bp<-3274 + 2413*ad3$TS3
 
 # --------------------------------------
 # plotting and analysis function
@@ -75,16 +88,16 @@ lazdenplot <- function(x,y,namex,namey,dstats,main,letter,cols,ylab=TRUE,mulab=T
 
 	# make the empty plot
 	op <- par(xpd=FALSE,mar=c(5,5,6,2)+0.1)
-	ytics <- seq(0,0.4,by=0.1)
-	xtics <- seq(-5,2,by=1)
+	ytics <- seq(0,3,by=0.5)
+	xtics <- seq(0,3,by=0.5)
 	plot(density(x),type="n",
 		main="",
-		ylim=c(0,0.5),yaxt="n",ylab="",
-		xlim=c(-5.1,2),xaxt="n",xlab="",
+		ylim=c(0,3),yaxt="n",ylab="",
+		xlim=c(0,2),xaxt="n",xlab="",
 		las=1,bty="n"
 		)
 		axis(1,at=xtics,las=1,cex.axis=1.5)
-		mtext("Length for Age Z-score (LAZ)",side=1,line=3)
+		mtext("T/S Ratio",side=1,line=3)
 		if(ylab==TRUE) {
 		  axis(2,at=ytics,las=1,cex.axis=1.5,lwd=0,lwd.ticks=1)
 		  mtext("Kernel Density",side=2,line=3.5)
@@ -113,7 +126,7 @@ lazdenplot <- function(x,y,namex,namey,dstats,main,letter,cols,ylab=TRUE,mulab=T
 		if(mulab==TRUE) {
 			segments(x0=mean(x),y0=miny-0.015,y1=0.05,col="gray40",lty=2)
 			segments(x0=mean(y),y0=miny-0.015,y1=0.05,col="gray40",lty=2)
-			text(x=mean(c(x,y)),y=0.07,"Group Means",col="gray40",cex=1)
+			text(x=mean(c(x,y)),y=0.2,"Group Means",col="gray40",cex=1)
 
 		}
 		# segments(x0=mean(x),y0=miny-0.015,y1=max(dx$y)+0.05,col="gray40",lty=2)
@@ -133,23 +146,23 @@ lazdenplot <- function(x,y,namex,namey,dstats,main,letter,cols,ylab=TRUE,mulab=T
 
 		# draw a small table in the upper right
 		#txs <- c(-1,0,1.1,2)
-		txs <- c(-3.4,-2.6,-1.5,-0.6)
+		txs <- c(1,1.25,1.5,1.75)
 		txs2 <- c(2.2)
 		# mtext("LAZ",side=3,line=0,at=txs[1],adj=1)
 			mtext(c("","N","Mean","SD"),side=3,line=0,at=txs,cex=1,adj=1)
 		mtext(namex,side=3,line=-1.2,at=txs[1],adj=1,col=cols[1])
 			mtext(format(length(x),big.mark=","),side=3,line=-1.2,at=txs[2],adj=1,cex=0.9,col=cols[1])
-			mtext(sprintf("%1.2f",mean(x)),side=3,line=-1.2,at=txs[3],adj=1,cex=0.9,col=cols[1])
-			mtext(sprintf("%1.2f",sd(x))  ,side=3,line=-1.2,at=txs[4],adj=1,cex=0.9,col=cols[1])
+			mtext(sprintf("%1.3f",mean(x)),side=3,line=-1.2,at=txs[3],adj=1,cex=0.9,col=cols[1])
+			mtext(sprintf("%1.3f",sd(x))  ,side=3,line=-1.2,at=txs[4],adj=1,cex=0.9,col=cols[1])
 		mtext(namey,side=3,line=-2.4,at=txs[1],adj=1,col=cols[2])
 			mtext(format(length(y),big.mark=","),side=3,line=-2.4,at=txs[2],adj=1,cex=0.9,col=cols[2])
-			mtext(sprintf("%1.2f",mean(y)),side=3,line=-2.4,at=txs[3],adj=1,cex=0.9,col=cols[2])
-			mtext(sprintf("%1.2f",sd(y))  ,side=3,line=-2.4,at=txs[4],adj=1,cex=0.9,col=cols[2])
+			mtext(sprintf("%1.3f",mean(y)),side=3,line=-2.4,at=txs[3],adj=1,cex=0.9,col=cols[2])
+			mtext(sprintf("%1.3f",sd(y))  ,side=3,line=-2.4,at=txs[4],adj=1,cex=0.9,col=cols[2])
 
-		mtext("Diff. (95% CI)",side=3,line=0,at=txs2,adj=1)
-			mtext(diff,side=3,line=-2.4,at=txs2,adj=1,col="gray20",cex=0.9)
+		#mtext("Diff. (95% CI)",side=3,line=0,at=txs2,adj=1)
+		#	mtext(diff,side=3,line=-2.4,at=txs2,adj=1,col="gray20",cex=0.9)
 
-		mtext(paste("t-test p =",sprintf("%1.3f",dstats[5])),side=3,line=-4,at=txs2,adj=1,col="gray20",cex=0.9)
+		#mtext(paste("t-test p =",sprintf("%1.3f",dstats[5])),side=3,line=-4,at=txs2,adj=1,col="gray20",cex=0.9)
 
 		par(op)
 }
@@ -174,50 +187,22 @@ orange = "#EEA722"
 yellow = "#FFEE33"
 grey = "#777777"
 cols=c(black,teal,green,chartr,orange,red,magent,blue,yellow)
+cols=c(orange,blue)
 
 
 
+#lo <- layout(mat=matrix(1:2,nrow=1,ncol=2,byrow=T))
+#lazdenplot(x=ad2$bp[ad2$tr=="Control"],y=ad2$bp[ad2$tr=="Nutrition + WSH"],namex="Control",namey="Nutrition + WSH", dstats=NULL, main="TS ratio, Year 1",letter="a",cols=cols[c(1,2)],mulab=TRUE)
+#lazdenplot(x=ad3$bp[ad2$tr=="Control"],y=ad3$bp[ad3$tr=="Nutrition + WSH"],namex="Control",namey="Nutrition + WSH", dstats=NULL, main="TS ratio, Year 2",letter="b",cols=cols[c(1,2)],mulab=TRUE)
 
 
 
-
-lazdenplot(x=ad2$TS2[ad2$tr=="Control"],y=ad2$TS2[ad2$tr=="Nutrition + WSH"],namex="Control",namey="Nutrition + WSH", dstats=t1diffh1[1,], main="Nutrition + WSH v. Control",letter="a",cols=cols[c(1,2)],mulab=TRUE)
-
-x=ad2$TS2[ad2$tr=="Control"]
-y=ad2$TS2[ad2$tr=="Nutrition + WSH"]
-namex="Control"
-namey="Nutrition + WSH"
-dstats=t1diffh1[1,]
-main="Nutrition + WSH v. Control"
-letter="a"
-cols=cols[c(1,2)]
-mulab=TRUE
-
-
-
-
-
-# setwd("C:/Users/andre/Dropbox/WBK-primary-analysis/Results/")
+# set up a layout
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Figures/")
-pdf("telo-density2.pdf",width=15,height=15)
-
-# set up a layout
-lo <- layout(mat=matrix(1:9,nrow=3,ncol=3,byrow=T))
-
-lazdenplot(x=ad1$laz[ad1$tr=="Control"],y=ad1$laz[ad1$tr=="Nutrition + WSH"],namex="Control",namey="Nutrition + WSH", dstats=t1diffh1[1,], main="Nutrition + WSH v. Control",letter="a",cols=cols[c(1,2)],mulab=TRUE)
-
-dev.off()
-
-# --------------------------------------
-#  make a multi-panel density plot - year 2
-# --------------------------------------
-#setwd("C:/Users/andre/Dropbox/WBK-primary-analysis/Results/")
-setwd("~/Dropbox/WBK-primary-analysis/Results/")
-pdf("Figures/kenya-laz2.pdf",width=15,height=15)
-# set up a layout
-lo <- layout(mat=matrix(1:9,nrow=3,ncol=3,byrow=T))
-
-lazdenplot(x=ad2$laz[ad2$tr=="Control"],y=ad2$laz[ad1$tr=="Nutrition + WSH"],namex="Control",namey="Nutrition + WSH", dstats=t1diffh1[1,],  main="Nutrition + WSH v. Control",letter="a",cols=cols[c(1,2)],mulab=TRUE)
+pdf("telo-density.pdf",width=8,height=10)
+lo <- layout(mat=matrix(1:2,nrow=2,ncol=1,byrow=F))
+lazdenplot(x=ad2$TS2[ad2$tr=="Control"],y=ad2$TS2[ad2$tr=="N+WSH"],namex="Control",namey="N + WSH", dstats=NULL, main="T/S ratio, Year 1",letter="a",cols=cols[c(1,2)],mulab=TRUE)
+lazdenplot(x=ad3$TS3[ad3$tr=="Control"],y=ad3$TS3[ad3$tr=="N+WSH"],namex="Control",namey="N + WSH", dstats=NULL, main="T/S ratio, Year 2",letter="b",cols=cols[c(1,2)],mulab=TRUE)
 
 
 dev.off()

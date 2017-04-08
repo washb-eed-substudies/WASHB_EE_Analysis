@@ -18,7 +18,10 @@ library(washb)
 
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/")
-load("washb-BD-telo-blind-tr.Rdata")
+#load("washb-BD-telo-blind-tr.Rdata")
+load("washb-bangladesh-tr.Rdata")
+d$clusterid<-as.numeric(d$clusterid)
+treatment<-d
 #setwd("C:/Users/andre/Dropbox/HBGDki/WASH Benefits Analysis/0. Data/WBB-primary-outcome-datasets/")
 #load("washb-bangladesh-tr.Rdata")
 #d$clusterid<-as.numeric(d$clusterid)
@@ -326,6 +329,14 @@ for(i in 1:ncol(W2)){
 ############################
 #Subgroup analysis
 ############################
+    
+    #N's and geometric means
+    ts_t2_N_subgroup_M<-d %>% group_by(sex, tr) %>% subset(!is.na(TS2)) %>% summarize(N=n(), mean= mean(TS2, na.rm=T))   
+    ts_t3_N_subgroup_M<-d %>% group_by(sex, tr) %>% subset(!is.na(TS3)) %>% summarize(N=n(), mean= mean(TS3, na.rm=T))   
+    delta_ts_N_subgroup_M<-d %>% group_by(sex, tr) %>% subset(!is.na(TS_delta)) %>% summarize(N=n(), mean= mean(TS_delta, na.rm=T))   
+  
+    
+    
     ts_t2_subgroup_M<-washb_glm(Y=d$TS2, tr=d$tr, W=subset(d, select=sex), V="sex", id=d$block.x, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), print=T)$lincom
     ts_t3_subgroup_M<-washb_glm(Y=d$TS3, tr=d$tr, W=subset(d, select=sex), V="sex", id=d$block.x, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), print=T)$lincom
     delta_ts_subgroup_M<-washb_glm(Y=d$TS_delta, tr=d$tr, W=subset(d, select=sex), V="sex", id=d$block.x, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), print=T)$lincom
@@ -375,13 +386,13 @@ for(i in 1:ncol(W2)){
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
 save(age_t2_blood_M, age_t3_blood_M, ts_t2_N_M, ts_t3_N_M,ts_t2_unadj_M, ts_t3_unadj_M, ts_t2_adj_sex_age_M, ts_t3_adj_sex_age_M, ts_t2_adj_M, ts_t3_adj_M,
      ts_t2_subgroup_M, ts_t3_subgroup_M, delta_ts_N_M, delta_ts_unadj_M, delta_ts_adj_M, delta_ts_adj_sex_age_M, delta_ts_subgroup_M,
+     ts_t2_N_subgroup_M, ts_t3_N_subgroup_M, delta_ts_N_subgroup_M,
      file="telo_res.Rdata")
 
 
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
 save(d, file="telo_figure_data.Rdata")
-
 
 
 
