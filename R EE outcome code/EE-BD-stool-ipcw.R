@@ -34,13 +34,35 @@ ipcw<-read.csv("BD-EE-ipcw.csv", stringsAsFactors = T) %>% select(-c(tr,block))
 
 
 
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
-outcomes<-read.dta("washb-BD-EE-sim-stool-outcomes-stata12.dta")
-outcomes$childid<-as.numeric(outcomes$childid)
+#Load in lab outcomes
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew")
+outcomes<-read.dta("BD-EE-stool-outcomes-Stata12.dta")
+
+#divide the reg value by 1000 to convert it to ug/ml 
+outcomes$t2_reg<-outcomes$t2_reg/1000
+
+#divide all the aat values by 1000000 to convert it to mg/g
+outcomes$t1_aat<-outcomes$t1_aat/1000000
+outcomes$t2_aat<-outcomes$t2_aat/1000000
+outcomes$t3_aat<-outcomes$t3_aat/1000000
+
+#Rename outcomes:
+outcomes <- outcomes %>%
+  rename(aat1=t1_aat,
+         aat2=t2_aat,
+         aat3=t3_aat,
+         mpo1=t1_mpo,
+         mpo2=t2_mpo,
+         mpo3=t3_mpo,
+         neo1=t1_neo,
+         neo2=t2_neo,
+         neo3=t3_neo,
+         reg1b2=t2_reg)
 
 
 dim(stool)
 dim(outcomes)
+outcomes$childid<-as.numeric(outcomes$childid)
 stool<-left_join(stool,outcomes, by="childid")
 dim(stool)
 

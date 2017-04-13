@@ -26,14 +26,48 @@ levels(treatment$tr)
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
 enrol<-read.csv("washb-bangladesh-enrol+animals.csv",stringsAsFactors = TRUE)
 
-
+#Load in stool survey data
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew")
 stool<-read.csv("BD-EE-stool.csv")
 
+#Load in lab outcomes
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew")
+outcomes<-read.dta("BD-EE-stool-outcomes-Stata12.dta")
+
+#divide the reg value by 1000 to convert it to ug/ml 
+outcomes$t2_reg<-outcomes$t2_reg/1000
+
+#divide all the aat values by 1000000 to convert it to mg/g
+outcomes$t1_aat<-outcomes$t1_aat/1000000
+outcomes$t2_aat<-outcomes$t2_aat/1000000
+outcomes$t3_aat<-outcomes$t3_aat/1000000
+
+#Rename outcomes:
+outcomes <- outcomes %>%
+  rename(aat1=t1_aat,
+         aat2=t2_aat,
+         aat3=t3_aat,
+         mpo1=t1_mpo,
+         mpo2=t2_mpo,
+         mpo3=t3_mpo,
+         neo1=t1_neo,
+         neo2=t2_neo,
+         neo3=t3_neo,
+         reg1b2=t2_reg)
+
+
+#Merge outcomes
+dim(stool)
+dim(outcomes)
+outcomes$childid<-as.numeric(outcomes$childid)
+d<-left_join(stool,outcomes, by="childid")
+#d<-cbind(d,outcomes)
+dim(d)
+
 
 #Merge treatment information 
-dim(stool)
-d<-left_join(stool,treatment, by="clusterid")
+dim(d)
+d<-left_join(d,treatment, by="clusterid")
 dim(d)
 head(d)
 table(d$tr)
@@ -119,17 +153,17 @@ aliquotN_t3
 #save(stool_simulated_outcomes, file="washb-BD-EE-sim-stool-outcomes.Rdata")
 #write.dta(stool_simulated_outcomes, "washb-BD-EE-sim-stool-outcomes.dta")
 
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
-outcomes<-read.dta("washb-BD-EE-sim-stool-outcomes-stata12.dta")
-outcomes$childid<-as.numeric(outcomes$childid)
-
-dim(d)
-dim(outcomes)
-d<-left_join(d,outcomes, by="childid")
-dim(d)
+# setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
+# outcomes<-read.dta("washb-BD-EE-sim-stool-outcomes-stata12.dta")
+# outcomes$childid<-as.numeric(outcomes$childid)
+# 
+# dim(d)
+# dim(outcomes)
+# d<-left_join(d,outcomes, by="childid")
+# dim(d)
 
 #Calculate average age across arms at followup time 1, 2, and 3
-d$tr <- factor(d$tr,levels=c("Control","WSH","Nutrition","Nutrition + WSH"))
+#d$tr <- factor(d$tr,levels=c("Control","WSH","Nutrition","Nutrition + WSH"))
 
 #Survey 1
 #Tabulate overall N, gender, and age 
