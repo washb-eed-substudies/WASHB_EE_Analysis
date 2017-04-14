@@ -38,128 +38,111 @@ ls()
 # Unadjusted difference processing
 #-----------------------------------
 
+#Compile N's
+aat_N1<-cbind("AAT","T1", rownames(aat_t1_N_M), as.data.frame(aat_t1_N_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
+neo_N1<-cbind("NEO","T1", rownames(neo_t1_N_M), as.data.frame(neo_t1_N_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
+mpo_N1<-cbind("MPO","T1", rownames(mpo_t1_N_M), as.data.frame(mpo_t1_N_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
+ml_N1<-cbind("LM","T1", rownames(lm_t1_N_M), as.data.frame(lm_t1_N_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
+
+aat_N2<-cbind("AAT","T2", rownames(aat_t2_N_M), as.data.frame(aat_t2_N_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
+neo_N2<-cbind("NEO","T2", rownames(neo_t2_N_M), as.data.frame(neo_t2_N_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
+mpo_N2<-cbind("MPO","T2", rownames(mpo_t2_N_M), as.data.frame(mpo_t2_N_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
+ml_N2<-cbind("LM","T2", rownames(lm_t2_N_M), as.data.frame(lm_t2_N_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
+reg_N2<-cbind("REG","T2", rownames(reg1b_t2_N_M), as.data.frame(reg1b_t2_N_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
+
+aat_N3<-cbind("AAT","T3", rownames(aat_t3_N_M), as.data.frame(aat_t3_N_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
+neo_N3<-cbind("NEO","T3", rownames(neo_t3_N_M), as.data.frame(neo_t3_N_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
+mpo_N3<-cbind("MPO","T3", rownames(mpo_t3_N_M), as.data.frame(mpo_t3_N_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
+ml_N3<-cbind("LM","T3", rownames(lm_t3_N_M), as.data.frame(lm_t3_N_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
+
+
+
+
+
+
+#Compile differences
 aat_dif1<-cbind("AAT","T1", rownames(aat_t1_unadj_M), as.data.frame(aat_t1_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
 neo_dif1<-cbind("NEO","T1", rownames(neo_t1_unadj_M), as.data.frame(neo_t1_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
 mpo_dif1<-cbind("MPO","T1", rownames(mpo_t1_unadj_M), as.data.frame(mpo_t1_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
 ml_dif1<-cbind("LM","T1", rownames(lm_t1_unadj_M), as.data.frame(lm_t1_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
 
+aat_dif2<-cbind("AAT","T2", rownames(aat_t2_unadj_M), as.data.frame(aat_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+neo_dif2<-cbind("NEO","T2", rownames(neo_t2_unadj_M), as.data.frame(neo_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+mpo_dif2<-cbind("MPO","T2", rownames(mpo_t2_unadj_M), as.data.frame(mpo_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+ml_dif2<-cbind("LM","T2", rownames(lm_t2_unadj_M), as.data.frame(lm_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+reg_dif2<-cbind("REG","T2", rownames(reg1b_t2_unadj_M), as.data.frame(reg1b_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
 
-
-#Construct dataframe of prevalence results
-dif_wb<-(rbind(
-ec_tw_dif,
-ec_sw_dif,
-ec_p_dif,
-ec_h_dif,
-ec_f_dif,
-ec_s_dif,
-ec_y_dif))
-rownames(dif_wb)<-NULL
-dif_wb<-cbind(dif_wb[,1:2],rep(9999, nrow(dif_wb)),dif_wb[,3:8])
-colnames(dif_wb)<-c("Location","TR", "N", "Dif","lower.ci","upper.ci", "SD","Robust SE")
-
-levels(dif_wb$TR)<-c("S","WSH")
-dif_wb[,3:ncol(dif_wb)]<-round(dif_wb[,3:ncol(dif_wb)],2)
-
-dif_wb$TR.N<-paste0(dif_wb$TR, "\n(N=\n",dif_wb$N,")")
-dif_wb$round<-"World Bank"
-#dif_wb$dif.perc<-paste0(dif_wb$difalence*100, "%")
-dif_wb$N<-paste0("(N=\n",dif_wb$N,")")
-
-dif_wb$TR<-factor(dif_wb$TR)
-dif_wb$TR = factor(dif_wb$TR,c("C","W","S","H","WSH","N","WSH+N"))
-
-#Add in N's from mn objects
-#dif_wb.N<-mn_wb[mn_wb$TR!="C",3]
-#dif_wb$TR.N<-paste0(dif_wb$TR, "\n", dif_wb.N)
-
-#Remove N's from axis labels
-dif_wb$TR.N<-dif_wb$TR
+aat_dif3<-cbind("AAT","T3", rownames(aat_t3_unadj_M), as.data.frame(aat_t3_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+neo_dif3<-cbind("NEO","T3", rownames(neo_t3_unadj_M), as.data.frame(neo_t3_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+mpo_dif3<-cbind("MPO","T3", rownames(mpo_t3_unadj_M), as.data.frame(mpo_t3_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+ml_dif3<-cbind("LM","T3", rownames(lm_t3_unadj_M), as.data.frame(lm_t3_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
 
 
 
-#-----------------------------------
-# Midline log difference processing
-#-----------------------------------
 
-ec_tw_dif_mid_a<-cbind("Tubewell", rownames(ec_tw_dif_h1_unadj_mid_a), as.data.frame(ec_tw_dif_h1_unadj_mid_a)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8")) 
-ec_sw_dif_mid_a<-cbind("Stored water", rownames(ec_sw_dif_h1_unadj_mid_a), as.data.frame( ec_sw_dif_h1_unadj_mid_a)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8")) 
-ec_h_dif_mid_a<-cbind("Hands", rownames(ec_h_dif_h1_unadj_mid_a), as.data.frame( ec_h_dif_h1_unadj_mid_a)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8")) 
-ec_t_dif_mid_a<-cbind("Toys", rownames(t(ec_t_dif_h1_unadj_mid_a)), as.data.frame( t(ec_t_dif_h1_unadj_mid_a))) %>% `rownames<-`(NULL) %>%  setNames(., c("1","2","3","4","5","6","7","8")) 
+#Construct dataframes of results
+dif_df<-(rbind(
+aat_dif1,
+neo_dif1,
+mpo_dif1,
+ml_dif1,
+aat_dif2,
+neo_dif2,
+mpo_dif2,
+ml_dif2,
+reg_dif2,
+aat_dif3,
+neo_dif3,
+mpo_dif3,
+ml_dif3
+))
+rownames(dif_df)<-NULL
+#dif_df<-cbind(dif_df[,1:3],rep(9999, nrow(dif_df)),dif_df[,4:8])
+colnames(dif_df)<-c("Location","round","TR", "Dif","lower.ci","upper.ci", "SD","Robust SE")
+levels(dif_df$TR)
+levels(dif_df$TR)<-c("C v N", "C v N+WSH", "C v WSH", "N v N + WSH", "WSH v N+WSH")
 
-#Construct dataframe of difalence results
-dif_mid<-(rbind(
-ec_tw_dif_mid_a,
-ec_sw_dif_mid_a,
-ec_h_dif_mid_a,
-ec_t_dif_mid_a))
-rownames(dif_mid)<-NULL
-dif_mid<-cbind(dif_mid[,1:2],rep(9999, nrow(dif_mid)),dif_mid[,3:8])
-colnames(dif_mid)<-c("Location","TR", "N", "Dif","lower.ci","upper.ci", "SD","Robust SE")
-levels(dif_mid$TR)
-levels(dif_mid$TR)<-c("W","WSH","H")
-dif_mid[,3:ncol(dif_mid)]<-round(dif_mid[,3:ncol(dif_mid)],2)
-
-dif_mid$TR.N<-paste0(dif_mid$TR, "\n(N=\n",dif_mid$N,")")
-dif_mid$round<-"Year 1"
-#dif_mid$dif.perc<-paste0(dif_mid$difalence*100, "%")
-dif_mid$N<-paste0("(N=\n",dif_mid$N,")")
-
-dif_mid$TR<-factor(dif_mid$TR)
-dif_mid$TR = factor(dif_mid$TR,c("C","W","S","H","WSH","N","WSH+N"))
-
-#Add in N's from mn objects
-#dif_mid.N<-mn_mid[mn_mid$TR!="C",3]
-#dif_mid$TR.N<-paste0(dif_mid$TR, "\n", dif_mid.N)
-
-#Remove N's from axis labels
-dif_mid$TR.N<-dif_mid$TR
-
-#-----------------------------------
-# Endline log difference processing
-#-----------------------------------
+dif_df$Location<-factor(dif_df$Location)
+dif_df$round<-factor(dif_df$round)
+dif_df$TR<-factor(dif_df$TR)
+#dif_df$TR = factor(dif_df$TR,c("C","W","S","H","WSH","N","WSH+N"))
 
 
-ec_tw_dif_end_a<-cbind("Tubewell", rownames(ec_tw_dif_h1_unadj_end_a), as.data.frame(ec_tw_dif_h1_unadj_end_a)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8")) 
-ec_sw_dif_end_a<-cbind("Stored water", rownames(ec_sw_dif_h1_unadj_end_a), as.data.frame( ec_sw_dif_h1_unadj_end_a)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8")) 
-ec_h_dif_end_a<-cbind("Hands", rownames(ec_h_dif_h1_unadj_end_a), as.data.frame( ec_h_dif_h1_unadj_end_a)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8")) 
-ec_t_dif_end_a<-cbind("Toys", rownames(t(ec_t_dif_h1_unadj_end_a)), as.data.frame( t(ec_t_dif_h1_unadj_end_a))) %>% `rownames<-`(NULL) %>%  setNames(., c("1","2","3","4","5","6","7","8")) 
-ec_f_dif_end_a<-cbind("Food", rownames(ec_f_dif_h1_unadj_end_a), as.data.frame( ec_f_dif_h1_unadj_end_a)) %>% `rownames<-`(NULL) %>%  setNames(., c("1","2","3","4","5","6","7","8")) 
 
-#Construct dataframe of difalence results
-dif_end<-(rbind(
-ec_tw_dif_end_a,
-ec_sw_dif_end_a,
-ec_h_dif_end_a,
-ec_t_dif_end_a,
-ec_f_dif_end_a))
-rownames(dif_end)<-NULL
-dif_end<-cbind(dif_end[,1:2],rep(9999, nrow(dif_end)),dif_end[,3:8])
-colnames(dif_end)<-c("Location","TR", "N", "Dif","lower.ci","upper.ci", "SD","Robust SE")
-
-levels(dif_end$TR)
-levels(dif_end$TR)<-c("W","WSH","H")
-dif_end[,3:ncol(dif_end)]<-round(dif_end[,3:ncol(dif_end)],2)
-
-dif_end$TR.N<-paste0(dif_end$TR, "\n(N=\n",dif_end$N,")")
-dif_end$round<-"Year 2"
-#dif_end$dif.perc<-paste0(dif_end$difalence*100, "%")
-dif_end$N<-paste0("(N=\n",dif_end$N,")")
-
-dif_end$TR<-factor(dif_end$TR)
-dif_end$TR = factor(dif_end$TR,c("C","W","S","H","WSH","N","WSH+N"))
-
-#Add in N's from mn objects
-#dif_end.N<-mn_end[mn_end$TR!="C",3]
-#dif_end$TR.N<-paste0(dif_end$TR, "\n", dif_end.N)
-
-#Remove N's from axis labels
-dif_end$TR.N<-dif_end$TR
+dif_df<-dif_df[,1:6]
 
 
-dif.dat<-rbind(dif_wb,dif_mid, dif_end)
+N_df<-(rbind(
+aat_N1,
+neo_N1,
+mpo_N1,
+ml_N1,
+aat_N2,
+neo_N2,
+mpo_N2,
+ml_N2,
+reg_N2,
+aat_N3,
+neo_N3,
+mpo_N3,
+ml_N3
+))
 
 
+#Drop H2 comparisons
+dif_df<-subset(dif_df, TR!="WSH v N+WSH" & TR!="N v N + WSH")
+
+#Round numeric columns
+dif_df[,4]<-as.numeric(sprintf("%1.2f",dif_df[,4]))
+dif_df[,5]<-as.numeric(sprintf("%1.2f",dif_df[,5]))
+dif_df[,6]<-as.numeric(sprintf("%1.2f",dif_df[,6]))
+
+#Add comparison group for colors
+dif_df$comp.TR<-rep(c("WSH","N","N+WSH"),13)
+
+
+#Formated comparison for x-axis printing
+dif_df$TR.format<-paste0("C vs.\n",dif_df$comp.TR)
 
 
 #-------------------------------------------
@@ -180,12 +163,15 @@ cred <- "#EE3333"
 corange <- "#EEA722"
 cyellow <- "#FFEE33"
 cgrey <- "#777777"
-cols=c(C=cblack,W=cblue,S=cteal,H=cgreen,WSH=corange,N=cred,"WSH+N"=cmagent)
+# cols=c(C=cblack,W=cblue,S=cteal,H=cgreen,WSH=corange,N=cred,"WSH+N"=cmagent)
+# cols=c(C=cblack,W=cblue,S=cteal,H=cgreen,WSH=corange)
 
-cols=c(C=cblack,W=cblue,S=cteal,H=cgreen,WSH=corange)
+cols=c("C v WSH"=corange,"C v N"=cred,"C v N+WSH"=cmagent)
+
 
 
 arms=c("C", "W", "S", "H", "WSH")
+
 
 # general label plot
 ulabplot <- function(title) {
@@ -197,39 +183,39 @@ ulabplot <- function(title) {
 }
 
 
-#Order prevalence data
-unique(prev.dat$Location)
-unique(prev.dat$TR)
-unique(prev.dat$round)
-prev.dat$Location<-factor(prev.dat$Location)
-table(prev.dat$Location)
-prev.dat$Location<-factor(prev.dat$Location, c("Tubewell", "Stored water", "Hands", "Toys", "Food", "Ponds", "Soil", "Flies"))
-table(prev.dat$Location)
-prev.dat$TR
+#Order data
+# unique(prev.dat$Location)
+# unique(prev.dat$TR)
+# unique(prev.dat$round)
+# prev.dat$Location<-factor(prev.dat$Location)
+# table(prev.dat$Location)
+# prev.dat$Location<-factor(prev.dat$Location, c("Tubewell", "Stored water", "Hands", "Toys", "Food", "Ponds", "Soil", "Flies"))
+# table(prev.dat$Location)
+# prev.dat$TR
 
 #for(i in 1:24){
-prevplot<-function(d, i){
+prevplot<-function(d, i, yrange=c(-0.5,0.5)){
   
   if(nrow(d)==0){
        op <- par(mar=c(3,1,2,0)+0.1)
     	ulabplot("")
     	
-         mtext(ifelse(i<10,
-                      c("Tubewell", "Stored water", "Hands", "Toys", "Food", "Ponds", "Soil", "Flies")[i-1],
+         mtext(ifelse(i<7,
+                      c("AAT", "NEO", "MPO", "LM Ratio", "REG1b")[i-1],
                         ""),
                         side=3,line=0.25,col="gray20",cex=1)
 
   }else{
   
-  ytics <- seq(0,100,by=10)  #<----------Set the Y-axis range here
+  ytics <- seq(yrange[1],yrange[2],by=.1)  #<----------Set the Y-axis range here
 
 
-if(i==1 | i==10 | i==19){
+if(i==1 | i==7 | i==13){
    op <- par(mar=c(3,0,2,1)+0.1)
 
-	if(i==1){ulabplot("E.coli \nprevalence \nat early \nassessment \n(%)")}
-	if(i==10){ulabplot("E.coli \nprevalence \nat one-year \nassessment \n(%)")}
-	if(i==19){ulabplot("E.coli \nprevalence \nat two-year \nassessment \n(%)")}
+	if(i==1){ulabplot("3 Month\nDifference")}
+	if(i==7){ulabplot("Year 1\nDifference")}
+	if(i==13){ulabplot("Year 2\nDifference")}
 
    	#,side=2,line=3,las=1)
 
@@ -238,27 +224,26 @@ if(i==1 | i==10 | i==19){
    op <- par(mar=c(3,1,2,0)+0.1)
 
    # set up an empty plot
-MidPts <- barplot(1:5,names.arg=NA,border=NA,col=NA,
-	ylim=c(range(ytics)[1],range(ytics)[2]+5),ylab="",yaxt="n",
+MidPts <- barplot(1:3,names.arg=NA,border=NA,col=NA,
+	ylim=c(range(yrange)[1],range(yrange)[2]),ylab="",yaxt="n",
 	las=1,bty="n"
 	)
 	segments(x0=0,x1=max(MidPts+0.5),y0=ytics,lty=2,lwd=1,col="gray80")
-	if(i==2 | i==11 | i==20){
+	if(i==2 | i==8 | i==14){
 	    axis(2,at=ytics,las=1)
 	}
-	#Vector of arms to plot:
-	which.arms<-arms %in% d$TR
+
 	
 	# plot estimates
-	arrows(x0=MidPts[which.arms], y0=d$lower.ci, y1=d$upper.ci, col=cols[which.arms],lwd=2,length=0.05,angle=90,code=3)
-	points(MidPts[which.arms],d$Prevalence,pch=21,cex=1.5,lwd=1,col=cols[which.arms],bg="white")
-	points(MidPts[which.arms],d$Prevalence,pch=21,cex=1.5,lwd=0,col=cols[which.arms],bg=alpha(cols[which.arms],alpha=0.5))
-	#text(x=MidPts[which.arms]+0.05,y=d$TR.N,pos=4,cex=1,col=cols[which.arms],font=1)
+	arrows(x0=MidPts, y0=d$lower.ci, y1=d$upper.ci, col=cols,lwd=2,length=0.05,angle=90,code=3)
+	points(MidPts,d$Dif,pch=21,cex=1.5,lwd=1,col=cols,bg="white")
+	points(MidPts,d$Dif,pch=21,cex=1.5,lwd=0,col=cols,bg=alpha(cols,alpha=0.5))
+	#text(x=MidPts+0.05,y=d$TR.N,pos=4,cex=1,col=cols,font=1)
 	  # X-axis labels
-  mtext(d$TR.N,side=1,line=2,at=MidPts[which.arms],col=cols[which.arms],cex=0.6,las=1)
+  mtext(d$TR.format,side=1,line=2,at=MidPts,col=cols,cex=0.8,las=1)
   #mtext(d$Location,side=3,line=0.25,col="gray20",cex=1)
-           mtext(ifelse(i<10,
-                      c("Tubewell", "Stored water", "Hands", "Toys", "Food", "Ponds", "Soil", "Flies")[i-1],
+           mtext(ifelse(i<7,
+                      c("AAT", "NEO", "MPO", "LM Ratio", "REG1b")[i-1],
                         ""),
                         side=3,line=0.25,col="gray20",cex=1)
   }
@@ -272,71 +257,26 @@ MidPts <- barplot(1:5,names.arg=NA,border=NA,col=NA,
 	# }
 }
 
+dif_df
 
-  
-setwd("C:/Users/andre/Dropbox/WASHB EML/Results/Figures")
-pdf("Env Prevalence Plot_draft.pdf",width=10,height=8.5, paper="USr")
-    #op <- par(mar=c(1,9,9,0)+0.1,xpd=TRUE)
-lo <- layout(mat=matrix(1:27,ncol=9,nrow=3,byrow=T),widths=c(1,1,1,1,1,1,1,1,1))
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Figures")
+pdf("EE Difference Plot_draft.pdf",width=10,height=8.5, paper="USr")
+lo <- layout(mat=matrix(1:18,ncol=6,nrow=3,byrow=T),widths=c(1,1,1,1,1,1))
 op <- par(mar=c(4,1,3,0.5)+0.1)
 
-    i<-c(1,1,1)
-    prevplot(d=prev.dat[prev.dat$Location==levels(prev.dat$Location)[i[1]] & prev.dat$round==unique(prev.dat$round)[i[2]],], i[3])
-    i<-c(1,1,2)
-    prevplot(d=prev.dat[prev.dat$Location==levels(prev.dat$Location)[i[1]] & prev.dat$round==unique(prev.dat$round)[i[2]],], i[3])
-    i<-c(2,1,3)
-    prevplot(d=prev.dat[prev.dat$Location==levels(prev.dat$Location)[i[1]] & prev.dat$round==unique(prev.dat$round)[i[2]],], i[3])
-    i<-c(3,1,4)
-    prevplot(d=prev.dat[prev.dat$Location==levels(prev.dat$Location)[i[1]] & prev.dat$round==unique(prev.dat$round)[i[2]],], i[3])
-    i<-c(4,1,5)
-    prevplot(d=prev.dat[prev.dat$Location==levels(prev.dat$Location)[i[1]] & prev.dat$round==unique(prev.dat$round)[i[2]],], i[3])
-    i<-c(5,1,6)
-    prevplot(d=prev.dat[prev.dat$Location==levels(prev.dat$Location)[i[1]] & prev.dat$round==unique(prev.dat$round)[i[2]],], i[3])
-    i<-c(6,1,7)
-    prevplot(d=prev.dat[prev.dat$Location==levels(prev.dat$Location)[i[1]] & prev.dat$round==unique(prev.dat$round)[i[2]],], i[3])
-    i<-c(7,1,8)
-    prevplot(d=prev.dat[prev.dat$Location==levels(prev.dat$Location)[i[1]] & prev.dat$round==unique(prev.dat$round)[i[2]],], i[3])
- 
-    i<-c(8,1,9)
-    prevplot(d=prev.dat[prev.dat$Location==levels(prev.dat$Location)[i[1]] & prev.dat$round==unique(prev.dat$round)[i[2]],], i[3])
-    i<-c(1,2,10)
-    prevplot(d=prev.dat[prev.dat$Location==levels(prev.dat$Location)[i[1]] & prev.dat$round==unique(prev.dat$round)[i[2]],], i[3])
-    i<-c(1,2,11)
-    prevplot(d=prev.dat[prev.dat$Location==levels(prev.dat$Location)[i[1]] & prev.dat$round==unique(prev.dat$round)[i[2]],], i[3])
-    i<-c(2,2,12)
-    prevplot(d=prev.dat[prev.dat$Location==levels(prev.dat$Location)[i[1]] & prev.dat$round==unique(prev.dat$round)[i[2]],], i[3])
-    i<-c(3,2,13)
-    prevplot(d=prev.dat[prev.dat$Location==levels(prev.dat$Location)[i[1]] & prev.dat$round==unique(prev.dat$round)[i[2]],], i[3])
-    i<-c(4,2,14)
-    prevplot(d=prev.dat[prev.dat$Location==levels(prev.dat$Location)[i[1]] & prev.dat$round==unique(prev.dat$round)[i[2]],], i[3])
-    i<-c(5,2,15)
-    prevplot(d=prev.dat[prev.dat$Location==levels(prev.dat$Location)[i[1]] & prev.dat$round==unique(prev.dat$round)[i[2]],], i[3])
-    i<-c(6,2,16)
-    prevplot(d=prev.dat[prev.dat$Location==levels(prev.dat$Location)[i[1]] & prev.dat$round==unique(prev.dat$round)[i[2]],], i[3])
-    i<-c(7,2,17)
-    prevplot(d=prev.dat[prev.dat$Location==levels(prev.dat$Location)[i[1]] & prev.dat$round==unique(prev.dat$round)[i[2]],], i[3])
-    i<-c(8,2,18)
-    prevplot(d=prev.dat[prev.dat$Location==levels(prev.dat$Location)[i[1]] & prev.dat$round==unique(prev.dat$round)[i[2]],], i[3])
-    i<-c(1,3,19)
-    prevplot(d=prev.dat[prev.dat$Location==levels(prev.dat$Location)[i[1]] & prev.dat$round==unique(prev.dat$round)[i[2]],], i[3])
-    i<-c(1,3,20)
-    prevplot(d=prev.dat[prev.dat$Location==levels(prev.dat$Location)[i[1]] & prev.dat$round==unique(prev.dat$round)[i[2]],], i[3])
-    i<-c(2,3,21)
-    prevplot(d=prev.dat[prev.dat$Location==levels(prev.dat$Location)[i[1]] & prev.dat$round==unique(prev.dat$round)[i[2]],], i[3])
-    i<-c(3,3,22)
-    prevplot(d=prev.dat[prev.dat$Location==levels(prev.dat$Location)[i[1]] & prev.dat$round==unique(prev.dat$round)[i[2]],], i[3])
-    i<-c(4,3,23)
-    prevplot(d=prev.dat[prev.dat$Location==levels(prev.dat$Location)[i[1]] & prev.dat$round==unique(prev.dat$round)[i[2]],], i[3])
-    i<-c(5,3,24)
-    prevplot(d=prev.dat[prev.dat$Location==levels(prev.dat$Location)[i[1]] & prev.dat$round==unique(prev.dat$round)[i[2]],], i[3])
-    i<-c(6,3,25)
-    prevplot(d=prev.dat[prev.dat$Location==levels(prev.dat$Location)[i[1]] & prev.dat$round==unique(prev.dat$round)[i[2]],], i[3])
-    i<-c(7,3,26)
-    prevplot(d=prev.dat[prev.dat$Location==levels(prev.dat$Location)[i[1]] & prev.dat$round==unique(prev.dat$round)[i[2]],], i[3])
-    i<-c(8,3,27)
-    prevplot(d=prev.dat[prev.dat$Location==levels(prev.dat$Location)[i[1]] & prev.dat$round==unique(prev.dat$round)[i[2]],], i[3])
+i<-1
+for(j in 1:3){
+  for(k in 1:6){
+    ifelse(k==1,k<-1,k<-k-1)
+    prevplot(d=dif_df[dif_df$Location==levels(dif_df$Location)[k] & dif_df$round==levels(dif_df$round)[j],], i, yrange=c(-0.5,0.5))
+    i<-i+1
+    }
+  }
 
 dev.off()
+
+ 
+
 
 
 

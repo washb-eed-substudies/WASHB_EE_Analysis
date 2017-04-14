@@ -64,6 +64,7 @@ red = "#EE3333"
 orange = "#EEA722"
 yellow = "#FFEE33"
 grey = "#777777"
+pink = "#f442d4"
 # cols=c(black,teal,green,chartr,orange,red,magent,blue,yellow)
 #cols=c(black,chartr,blue,teal,green,orange,red,magent)
 
@@ -73,7 +74,7 @@ grey = "#777777"
 # the composite figure
 #-------------------------------
 
-SLAb.plotLong <- function(Ab1,Ab2,mu1,mu2,diff,labels=c("Control","N+WSH"),letter="",ylabel=FALSE, ysize=c(1,2), point_col=1, linecols=c(green,yellow)) {
+SLAb.plotLong <- function(Ab1,Ab2,mu1,mu2,diff,labels=c("Control","N+WSH"),letter="",ylabel=FALSE, ysize=c(1,2), point_col=1, linecols=c(green,pink)) {
   # plot individual level trajectories between measurements
   
   # Ab1 : log10 antibody level for each individual at measurement 1

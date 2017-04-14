@@ -276,12 +276,29 @@ delta_ts_adj_M
 
 age_t2_blood_M
 age_t3_blood_M
-
-glm_print<-function(obj){
+ 
+glm_print<-function(obj, t=F){
   #obj<-ts_t2_unadj_M
-  obj<-t(as.matrix(rnd(obj[1:3],2)))
+  #obj<-t(as.matrix(rnd(obj[c(1:3,6)],2)))
+  #obj<-ts_t2_unadj_M
+  if(t==F){
+        obj<-as.data.frame((obj))
+  }else{
+        obj<-as.data.frame(t(obj))
+  }
+  flag=F
+  if(as.numeric(obj[6])<0.05){obj[6]<-paste0(sprintf("%1.3f",obj[c(6)]),"*")
+                              flag=T}
+  if(flag==F){
+  obj<-t(as.matrix(c(sprintf("%1.2f",obj[c(1:3)]),
+                     sprintf("%1.3f",obj[c(6)]))))    
+  }else{
+   obj<-t(as.matrix(c(sprintf("%1.2f",obj[c(1:3)]),
+                     obj[c(6)])))       
+  }
+
   #rownames(obj)<-colnames(obj)<-NULL
-  out<-paste(obj[1],"(",obj[2],",",obj[3],")", sep="")
+  out<-paste(obj[1],"(",obj[2],",",obj[3],") P=",obj[4], sep="")
   return(out)
 }
 
@@ -300,15 +317,19 @@ tab2[6,6]<-glm_print(delta_ts_adj_M)
 colnames(tab2)<-NULL
 
 tab2[,1]<-as.character(tab2[,1])
-tab2[c(2,4,6),1]<-rep("Nutrition + Water + Sanitation + Handwashing",3)
+tab2[c(1,3,5),1]<-rep("~~~Control",3)
+tab2[c(2,4,6),1]<-rep("~~~N+WSH",3)
 
 blank=rep("",5)
 tab2<-as.matrix(tab2)
-tab2<-rbind(t(c("\\textbf{After 1 year of intervention (age x months)}",blank)),
+tab2<-rbind(t(c("\\textbf{After 1 year of intervention}",blank)),
+            t(c("\\textbf{(age \\textasciitilde 14 months)}",blank)),
             tab2[1:2,],
-            t(c("\\textbf{After 2 years of intervention (age x months)}",blank)),
+            t(c("\\textbf{After 2 years of intervention}",blank)),
+            t(c("\\textbf{(age \\textasciitilde 28 months)}",blank)),
             tab2[3:4,],
-            t(c("\\textbf{$\\Delta$ Telomere length between 1 to 2-Year follow-up}",blank)),
+            t(c("\\textbf{Change in Telomere length}",blank)),
+            t(c("\\textbf{between year 1 and 2}",blank)),
             tab2[5:6,])
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Tables/")
@@ -330,28 +351,23 @@ ts_t3_subgroup_M
 
 
 
-glm_print<-function(obj){
-  #obj<-ts_t2_unadj_M
-  obj<-t(as.matrix(rnd(obj[1:3],2)))
-  #rownames(obj)<-colnames(obj)<-NULL
-  out<-paste(obj[1],"(",obj[2],",",obj[3],")", sep="")
-  return(out)
-}
 
 tab3<-data.frame(rbind(ts_t2_N_subgroup_M,ts_t3_N_subgroup_M,delta_ts_N_subgroup_M))
 tab3[,4]<-rnd(tab3[,4],2)
 tab3[,5]<-matrix("",12,1)
-tab3[2,5]<-glm_print(ts_t2_subgroup_M[1,-c(1,3)])
-tab3[4,5]<-glm_print(ts_t2_subgroup_M[2,-c(1,3)])
-tab3[6,5]<-glm_print(ts_t3_subgroup_M[1,-c(1,3)])
-tab3[8,5]<-glm_print(ts_t3_subgroup_M[2,-c(1,3)])
-tab3[10,5]<-glm_print(delta_ts_subgroup_M[1,-c(1,3)])
-tab3[12,5]<-glm_print(delta_ts_subgroup_M[2,-c(1,3)])
+tab3[2,5]<-glm_print(ts_t2_subgroup_M[1,-c(1)])
+tab3[4,5]<-glm_print(ts_t2_subgroup_M[2,-c(1)])
+tab3[6,5]<-glm_print(ts_t3_subgroup_M[1,-c(1)])
+tab3[8,5]<-glm_print(ts_t3_subgroup_M[2,-c(1)])
+tab3[10,5]<-glm_print(delta_ts_subgroup_M[1,-c(1)])
+tab3[12,5]<-glm_print(delta_ts_subgroup_M[2,-c(1)])
 colnames(tab3)<-NULL
 
 tab3[,1]<-as.character(tab3[,1])
 tab3[,2]<-as.character(tab3[,2])
 tab3[c(2,4,6,8,10,12),2]<-rep("N + WSH",3)
+#tab3[c(1,3,5,7,8,11),1]<-rep("~~~Control",3)
+
 
 tab3[tab3[,1]=="female",1]<-"Female, "
 tab3[tab3[,1]=="male",1]<-"Male, "
@@ -361,11 +377,11 @@ tab3[,1]<-""
 
 blank=rep("",4)
 tab3<-as.matrix(tab3)
-tab3<-rbind(t(c("\\textbf{After 1 year of intervention (age x months)}",blank)),
+tab3<-rbind(t(c("\\textbf{After 1 year of intervention (age \\textasciitilde 14 months)}",blank)),
             tab3[1:4,],
-            t(c("\\textbf{After 2 years of intervention (age x months)}",blank)),
+            t(c("\\textbf{After 2 years of intervention (age \\textasciitilde 28 months)}",blank)),
             tab3[5:8,],
-            t(c("\\textbf{Change in telomere length between 1 to 2-Year follow-up}",blank)),
+            t(c("\\textbf{Change in telomere length}",blank)),
             tab3[9:12,])
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Tables/")
@@ -464,7 +480,7 @@ main.control<-c("1382",
                 "1038(75\\%)",
                 "666(48\\%)",
                 "4(0\\%)",
-                "X.X(XX)",
+                "1(1)",
                 "97(7\\%)",
                 "62(4\\%)",
                 "53(10\\%)",
@@ -481,7 +497,7 @@ main.control<-c("1382",
                 "88(7\\%)",
                 "118(9\\%)",
                 "33(3\\%)",
-                "932(67\\%)"
+                "450(33\\%)"
                 ) 
 
 main.WSHN<-c("686",
@@ -496,7 +512,7 @@ main.WSHN<-c("686",
                 "504(73\\%)",
                 "331(48\\%)",
                 "2(0\\%)",
-                "X.X(XX)",
+                "1(2)",
                 "50(7\\%)",
                 "24(4\\%)",
                 "28(10\\%)",
@@ -513,7 +529,7 @@ main.WSHN<-c("686",
                 "36(6\\%)",
                 "60(9\\%)",
                 "18(3\\%)",
-                "485(71\\%)"
+                "213(31\\%)"
                 ) 
 
 dim(tab)
@@ -615,24 +631,29 @@ tab2[6,4]<-glm_print(delta_ts_unadj_M)
 tab2[2,5]<-glm_print(ts_t2_adj_M)
 tab2[4,5]<-glm_print(ts_t3_adj_M)
 tab2[6,5]<-glm_print(delta_ts_adj_M)
-tab2[2,6]<-glm_print((ts_t2_adj_ipcw_M))
-tab2[4,6]<-glm_print((ts_t3_adj_ipcw_M))
-tab2[6,6]<-glm_print((delta_ts_adj_ipcw_M))
+tab2[2,6]<-glm_print((c(ts_t2_adj_ipcw_M[1:3],NA,NA,ts_t2_adj_ipcw_M[4])), t=T)
+tab2[4,6]<-glm_print((c(ts_t3_adj_ipcw_M[1:3],NA,NA,ts_t3_adj_ipcw_M[4])), t=T)
+tab2[6,6]<-glm_print((c(delta_ts_adj_ipcw_M[1:3],NA,NA,delta_ts_adj_ipcw_M[4])), t=T)
 colnames(tab2)<-NULL
 
 tab2[,1]<-as.character(tab2[,1])
-tab2[c(2,4,6),1]<-rep("Nutrition + Water + Sanitation + Handwashing",3)
+tab2[c(1,3,5),1]<-rep("~~~Control",3)
+tab2[c(2,4,6),1]<-rep("~~~N+WSH",3)
 
 blank=rep("",5)
 tab2<-as.matrix(tab2)
-tab2<-rbind(t(c("\\textbf{After 1 year of intervention (age x months)}",blank)),
+tab2<-rbind(t(c("\\textbf{After 1 year of intervention}",blank)),
+            t(c("\\textbf{(age \\textasciitilde 14 months)}",blank)),
             tab2[1:2,],
-            t(c("\\textbf{After 2 years of intervention (age x months)}",blank)),
+            t(c("\\textbf{After 2 years of intervention}",blank)),
+            t(c("\\textbf{(age \\textasciitilde 28 months)}",blank)),
             tab2[3:4,],
-            t(c("\\textbf{$\\Delta$ Telomere length between 1 to 2-Year follow-up}",blank)),
+            t(c("\\textbf{Change in Telomere length}",blank)),
+            t(c("\\textbf{between year 1 and 2}",blank)),
             tab2[5:6,])
-
+s.tab2<-tab2
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Tables/")
-save(tab2, file="table2.RData")
+save(s.tab2, file="s.table2.RData")
 
-cleantable(tab2, 2)
+cleantable(s.tab2, 2)
+
