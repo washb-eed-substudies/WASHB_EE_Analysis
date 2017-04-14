@@ -724,8 +724,7 @@ lm_t3_adj_M=res_adj[[9]]
 
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
-save(age_t1_urine_M,age_t2_urine_M,age_t3_urine_M,
-     lac_t1_N_M, man_t1_N_M, lm_t1_N_M,
+save(lac_t1_N_M, man_t1_N_M, lm_t1_N_M,
      lac_t2_N_M, man_t2_N_M, lm_t2_N_M,
      lac_t3_N_M, man_t3_N_M,lm_t3_N_M,
      file="urine_res_N_M.Rdata")

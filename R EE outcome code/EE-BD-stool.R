@@ -611,8 +611,7 @@ aat_t3_adj_M=res_adj[[10]]
 
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
-save(age_t1_stool_M, age_t2_stool_M, age_t3_stool_M,
-     neo_t1_N_M, mpo_t1_N_M, aat_t1_N_M,
+save(neo_t1_N_M, mpo_t1_N_M, aat_t1_N_M,
      neo_t2_N_M, mpo_t2_N_M, aat_t2_N_M, reg1b_t2_N_M,
      neo_t3_N_M, mpo_t3_N_M, aat_t3_N_M, 
      file="stool_res_N_M.Rdata")
