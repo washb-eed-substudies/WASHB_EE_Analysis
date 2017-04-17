@@ -78,7 +78,7 @@ stool_outcomes<-subset(stool, select=c(dataid,childNo,
                                        mpo1,mpo2,mpo3,
                                        neo1,neo2,neo3,reg1b2))
 dim(stool_outcomes)
-d<-merge(ipcw, stool_outcomes, by=c("dataid", "childNo"), all.x=T, all.y=T)
+d<-merge(ipcw, stool_outcomes, by=c("dataid", "childNo"), all.x=T, all.y=F)
 dim(d)
 
 

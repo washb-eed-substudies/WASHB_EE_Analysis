@@ -49,9 +49,13 @@ urine <- urine %>%
 
 
 #merge datasets
-outcomes<-merge(outcomes.stool, outcomes.urine, by=c("childid"))
+dim(outcomes.stool)
+dim(outcomes.urine)
+outcomes<-merge(outcomes.stool, outcomes.urine, by=c("childid"), all.x =T, all.y =T)
+dim(outcomes)
 
-surveys<-merge(stool, urine, by=c("childid"))
+
+surveys<-merge(stool, urine, by=c("childid"), all.x =T, all.y =T)
 
 #Merge L/M outcomes
 dim(surveys)
@@ -86,6 +90,17 @@ table(d$tr)
 table(is.na(d$tr))
 
 
+
+table(!(is.na(d$Lact3)))
+table(!(is.na(d$Mann3)))
+table(!(is.na(d$t3_aat)))
+table(!(is.na(d$t3_mpo)))
+table(!(is.na(d$t3_neo)))
+
+
+test<-d%>% subset(!is.na(d$Lact1)|!is.na(d$Mann1)|!is.na(d$t1_aat)|!is.na(d$t1_mpo)|!is.na(d$t1_neo)) 
+dim(test)
+
 #Calculate average age across arms at followup time 1, 2, and 3
 #Survey 1
 #Tabulate overall N, gender, and age 
@@ -118,14 +133,14 @@ t2<-d%>%
 #Survey 3
 #Tabulate overall N, gender, and age 
 overallN3<-d%>% 
-  subset(!is.na(d$Lact3)|is.na(d$Mann3)|!is.na(d$t3_aat)|!is.na(d$t3_mpo)|!is.na(d$t3_neo)) %>% 
+  subset(!is.na(d$Lact3)|!is.na(d$Mann3)|!is.na(d$t3_aat)|!is.na(d$t3_mpo)|!is.na(d$t3_neo)) %>% 
   summarize(N=n(),Median_agem=median(agem3, na.rm=T), Mean_agem=mean(agem3, na.rm=T), Sd_agem=sd(agem3, na.rm=T), nummales=sum(sex, na.rm=T), numfemales=n()-sum(sex, na.rm=T)) 
 overallN3<-cbind("Overall", overallN3)
 colnames(overallN3)[1]<-"tr"
 
 #Tabulate N, gender, and age across survey rounds
 t3<-d %>% 
-  subset(!is.na(d$Lact3)|is.na(d$Mann3)|!is.na(d$t3_aat)|!is.na(d$t3_mpo)|!is.na(d$t3_neo)) %>% 
+  subset(!is.na(d$Lact3)|!is.na(d$Mann3)|!is.na(d$t3_aat)|!is.na(d$t3_mpo)|!is.na(d$t3_neo)) %>% 
   group_by(tr) %>%summarize(N=n(), Median_agem=median(agem3, na.rm=T), Mean_agem=mean(agem3, na.rm=T), Sd_agem=sd(agem3, na.rm=T), nummales=sum(sex, na.rm=T), numfemales=n()-sum(sex, na.rm=T)) 
 
 

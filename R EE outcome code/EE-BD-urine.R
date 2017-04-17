@@ -335,9 +335,18 @@ man_t3_N_M<-d %>% group_by(tr) %>% subset(!is.na(Mann3)) %>% summarize(N=n(), me
 lm_t3_N_M<-d %>% group_by(tr) %>% subset(!is.na(LM3)) %>% summarize(N=n(), mean= mean(log(LM3), na.rm=T))   
 
 
+#Means and 95% CI's for mean by arm plots
+lac_t1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Lact1, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+lac_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Lact2, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+lac_t3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Lact3, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+man_t1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Mann1, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+man_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Mann2, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+man_t3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Mann3, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+lm_t1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$LM1, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+lm_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$LM2, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+lm_t3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$LM3, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
 
-#test<-d %>% subset(tr=="Control") %>% subset(!is.na(LM1)) %>% summarize(N=n(), mean= mean(LM1, na.rm=T))  
-#test$LM1
+
 
 #------------------
 #Unadjusted GLM
@@ -729,6 +738,10 @@ save(lac_t1_N_M, man_t1_N_M, lm_t1_N_M,
      lac_t3_N_M, man_t3_N_M,lm_t3_N_M,
      file="urine_res_N_M.Rdata")
 
+save(lm_t1_mn, lm_t2_mn, lm_t3_mn,
+     lac_t1_mn, lac_t2_mn, lac_t3_mn, 
+     man_t1_mn, man_t2_mn, man_t3_mn, 
+     file="urine_res_means.Rdata")
 
 save(lac_t1_unadj_M, man_t1_unadj_M, lm_t1_unadj_M,
      lac_t2_unadj_M, man_t2_unadj_M, lm_t2_unadj_M, 

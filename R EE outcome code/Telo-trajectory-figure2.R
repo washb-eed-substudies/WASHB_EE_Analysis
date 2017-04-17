@@ -41,6 +41,7 @@ load("telo_figure_data.Rdata")
 d<-subset(d, !is.na(TS_delta))
 table(is.na(d$TS2))
 table(is.na(d$TS3))
+dim(d)
 
 #Calculate means and 95%CI's at each time point
 meansT2<- d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$TS2 , id=.$block.x, print=F)))
@@ -65,6 +66,7 @@ orange = "#EEA722"
 yellow = "#FFEE33"
 grey = "#777777"
 pink = "#f442d4"
+greenblue="#009e73"
 # cols=c(black,teal,green,chartr,orange,red,magent,blue,yellow)
 #cols=c(black,chartr,blue,teal,green,orange,red,magent)
 
@@ -74,7 +76,7 @@ pink = "#f442d4"
 # the composite figure
 #-------------------------------
 
-SLAb.plotLong <- function(Ab1,Ab2,mu1,mu2,diff,labels=c("Control","N+WSH"),letter="",ylabel=FALSE, ysize=c(1,2), point_col=1, linecols=c(green,pink)) {
+SLAb.plotLong <- function(Ab1,Ab2,mu1,mu2,diff,labels=c("Control","N+WSH"),letter="",ylabel=FALSE, ysize=c(1,2), point_col=1, linecols=c(greenblue,black)) {
   # plot individual level trajectories between measurements
   
   # Ab1 : log10 antibody level for each individual at measurement 1
@@ -87,9 +89,11 @@ SLAb.plotLong <- function(Ab1,Ab2,mu1,mu2,diff,labels=c("Control","N+WSH"),lette
   # ylabel: logical. print a label for the Y-axis
   
   op <- par(mar=c(3,6,4,0)+0.1)
-  cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+  cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#3feac2")
   cols <- cbPalette[c(7,6,2,3)]
-  mus <- cbind(mu1,mu2)
+  #cols <- cbPalette[c(7,6,9,3)]
+
+    mus <- cbind(mu1,mu2)
   
   plot(1,1,type="n",xaxt="n",yaxt="n",xlab="",ylab="",bty="n",xlim=c(0,2),ylim=c(ysize[1],ysize[2]))
   xs <- c(0.5,1.5)
@@ -136,8 +140,8 @@ SLAb.plotLong <- function(Ab1,Ab2,mu1,mu2,diff,labels=c("Control","N+WSH"),lette
   points(((xs[which(Ab2<Ab1),2])),Ab2[Ab2<Ab1],col=alpha(cols[point_col],.3),pch=16)
     
   # plot geometric means
-  arrows(x0=c(0.25,1.75),y0=unlist(mus[2,]),y1=unlist(mus[3,]),col=cols[point_col],lwd=1,length=0.05,angle=90,code=3)
-  points(c(0.25,1.75),mus[1,],col=cols[point_col],cex=1,pch=21,bg=c(cols[point_col],cols[point_col]))
+  # arrows(x0=c(0.25,1.75),y0=unlist(mus[2,]),y1=unlist(mus[3,]),col=cols[point_col],lwd=1,length=0.05,angle=90,code=3)
+  # points(c(0.25,1.75),mus[1,],col=cols[point_col],cex=1,pch=21,bg=c(cols[point_col],cols[point_col]))
   # plot P-values
 #   if(diff[5]*3<0.0001) {
 #     ptext <- "p < 0.0001"
@@ -197,7 +201,86 @@ dev.off()
 
 
 
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Figures/")
+pdf("Telo-trajectories-subsample.pdf",width=10,height=4)
+#Subset data to 1:20 rank ordered lines
+i<-10
 
+nrow(d)
+dsub1<-d %>%
+      subset(tr=="Control") %>%
+      arrange(TS2) %>%
+      slice(rep(1:floor(n()/i))*i)
+      #filter(row_number())
+dsub2<-d %>%
+      subset(tr=="Nutrition + WSH") %>%
+      arrange(TS2) %>%
+      slice(rep(1:floor(n()/i))*i)
+dsub<-rbind(dsub1,dsub2)
+
+
+#-------------------------------
+# make the plot
+#-------------------------------
+
+
+lo <- layout(mat=matrix(1:2,nrow=1,ncol=2,byrow=TRUE))
+
+SLAb.plotLong(Ab1=(dsub$TS2[dsub$tr=="Control"]),Ab2=(dsub$TS3[dsub$tr=="Control"]),mu1=t(T2.mu.ci[2,]),mu2=t(T3.mu.ci[2,]),diff=diff[2],labels=c("",""),letter="Control",ylabel=TRUE, ysize=c(.5,3))
+SLAb.plotLong(Ab1=(dsub$TS2[dsub$tr=="Nutrition + WSH"]),Ab2=(dsub$TS3[dsub$tr=="Nutrition + WSH"]),mu1=t(T2.mu.ci[3,]),mu2=t(T3.mu.ci[3,]),diff=diff[3],labels=c("",""),letter="N+WSH",ylabel=TRUE, ysize=c(.5,3), point_col = 2)
+
+i<-5
+
+nrow(d)
+dsub1<-d %>%
+      subset(tr=="Control") %>%
+      arrange(TS2) %>%
+      slice(rep(1:floor(n()/i))*i)
+      #filter(row_number())
+dsub2<-d %>%
+      subset(tr=="Nutrition + WSH") %>%
+      arrange(TS2) %>%
+      slice(rep(1:floor(n()/i))*i)
+dsub<-rbind(dsub1,dsub2)
+
+
+#-------------------------------
+# make the plot
+#-------------------------------
+
+
+lo <- layout(mat=matrix(1:2,nrow=1,ncol=2,byrow=TRUE))
+
+SLAb.plotLong(Ab1=(dsub$TS2[dsub$tr=="Control"]),Ab2=(dsub$TS3[dsub$tr=="Control"]),mu1=t(T2.mu.ci[2,]),mu2=t(T3.mu.ci[2,]),diff=diff[2],labels=c("",""),letter="Control",ylabel=TRUE, ysize=c(.5,3))
+SLAb.plotLong(Ab1=(dsub$TS2[dsub$tr=="Nutrition + WSH"]),Ab2=(dsub$TS3[dsub$tr=="Nutrition + WSH"]),mu1=t(T2.mu.ci[3,]),mu2=t(T3.mu.ci[3,]),diff=diff[3],labels=c("",""),letter="N+WSH",ylabel=TRUE, ysize=c(.5,3), point_col = 2)
+
+
+i<-4
+
+nrow(d)
+dsub1<-d %>%
+      subset(tr=="Control") %>%
+      arrange(TS2) %>%
+      slice(rep(1:floor(n()/i))*i)
+      #filter(row_number())
+dsub2<-d %>%
+      subset(tr=="Nutrition + WSH") %>%
+      arrange(TS2) %>%
+      slice(rep(1:floor(n()/i))*i)
+dsub<-rbind(dsub1,dsub2)
+
+
+#-------------------------------
+# make the plot
+#-------------------------------
+
+
+lo <- layout(mat=matrix(1:2,nrow=1,ncol=2,byrow=TRUE))
+
+SLAb.plotLong(Ab1=(dsub$TS2[dsub$tr=="Control"]),Ab2=(dsub$TS3[dsub$tr=="Control"]),mu1=t(T2.mu.ci[2,]),mu2=t(T3.mu.ci[2,]),diff=diff[2],labels=c("",""),letter="Control",ylabel=TRUE, ysize=c(.5,3))
+SLAb.plotLong(Ab1=(dsub$TS2[dsub$tr=="Nutrition + WSH"]),Ab2=(dsub$TS3[dsub$tr=="Nutrition + WSH"]),mu1=t(T2.mu.ci[3,]),mu2=t(T3.mu.ci[3,]),diff=diff[3],labels=c("",""),letter="N+WSH",ylabel=TRUE, ysize=c(.5,3), point_col = 2)
+
+dev.off()
 
 
 

@@ -229,6 +229,19 @@ mpo_t3_N_M<-d %>% group_by(tr) %>% subset(!is.na(mpo3)) %>% summarize(N=n(), mea
 neo_t3_N_M<-d %>% group_by(tr) %>% subset(!is.na(neo3)) %>% summarize(N=n(), mean= mean(log(neo3), na.rm=T))   
 
 
+#Means and 95% CI's for mean by arm plots
+aat_t1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$aat1, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+aat_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$aat2, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+aat_t3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$aat3, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+mpo_t1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$mpo1, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+mpo_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$mpo2, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+mpo_t3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$mpo3, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+neo_t1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$neo1, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+neo_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$neo2, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+neo_t3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$neo3, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+reg1b2_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$reg1b2, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+
+
 
 
 #Create empty matrix to hold the glm results:
@@ -616,6 +629,10 @@ save(neo_t1_N_M, mpo_t1_N_M, aat_t1_N_M,
      neo_t3_N_M, mpo_t3_N_M, aat_t3_N_M, 
      file="stool_res_N_M.Rdata")
 
+save(aat_t1_mn, aat_t2_mn, aat_t3_mn,
+     mpo_t1_mn, mpo_t2_mn, mpo_t3_mn, reg1b2_t2_mn,
+     neo_t1_mn, neo_t2_mn, neo_t3_mn, 
+     file="stool_res_means.Rdata")
 
 save(neo_t1_unadj_M, mpo_t1_unadj_M, aat_t1_unadj_M,
      neo_t2_unadj_M, mpo_t2_unadj_M, aat_t2_unadj_M, reg1b_t2_unadj_M,
@@ -631,3 +648,4 @@ save(neo_t1_adj_M, mpo_t1_adj_M, aat_t1_adj_M,
      neo_t2_adj_M, mpo_t2_adj_M, aat_t2_adj_M, reg1b_t2_adj_M,
      neo_t3_adj_M, mpo_t3_adj_M, aat_t3_adj_M, 
      file="stool_res_adj_M.Rdata")
+

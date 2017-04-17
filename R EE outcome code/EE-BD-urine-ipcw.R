@@ -57,9 +57,11 @@ urine_outcomes<-subset(urine, select=c(dataid,childNo,
                                        Lact1, Lact2, Lact3, 
                                        Mann1, Mann2, Mann3))
 dim(urine_outcomes)
-d<-merge(ipcw, urine_outcomes, by=c("dataid", "childNo"), all.x=T, all.y=T)
+d<-merge(ipcw, urine_outcomes, by=c("dataid", "childNo"), all.x=T, all.y=F)
 dim(d)
 
+#Single urine outcome not matched to main trial data
+anti_join(urine_outcomes, ipcw, by=c("dataid", "childNo")) %>% subset(select=c(dataid, childNo))
 
 #Merge treatment information 
 dim(d)
@@ -201,9 +203,12 @@ d$asset_mobile<-factor(d$asset_mobile)
     d$asset_mobile<-addNA(d$asset_mobile)
     levels(d$asset_mobile)<-c("No mobile phone","Mobile phone","Missing")
     d$asset_mobile=relevel(d$asset_mobile,ref="No mobile phone")    
+d$walls<-factor(d$walls)
 
 #Re-subset W so new re-leveled factors are included
 W<- subset(d, select=Wvars)
+
+
 
 
 
@@ -212,22 +217,20 @@ W<- subset(d, select=Wvars)
 #Generate LM ratio
 #------------------
 
-#XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-#TEMPORARY
-#Add 1 so no 0's
-d$Lact1<-d$Lact1+1
-d$Lact2<-d$Lact2+1
-d$Lact3<-d$Lact3+1
-d$Mann1<-d$Mann1+1
-d$Mann2<-d$Mann2+1
-d$Mann3<-d$Mann3+1
-#XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+#Destring urine and LM volume
+d$urineVol_t1<-as.numeric(d$urineVol_t1)
+d$urineVol_t2<-as.numeric(d$urineVol_t2)
+d$urineVol_t3<-as.numeric(d$urineVol_t3)
+d$LMvol_t1<-as.numeric(d$LMvol_t1)
+d$LMvol_t2<-as.numeric(d$LMvol_t2)
+d$LMvol_t3<-as.numeric(d$LMvol_t3)
 
 #To calculate total lactulose dosed (mg) or total mannitol dosed (mg):
  #The children ingest a solution of 250 mg/ml lactulose and 50 mg/ml of mannitol in a dose of 2 ml/kg of weight up to 20 ml maximum.
- #Q9 of the EE urine form is the total volume of LM solution ingested (in ml). For example, a child who ingested 20 ml of LM solution
-#(the maximum dose), would have ingested 1000 mg of mannitol and 5000 mg of lactulose. The 1000 mg and 5000 mg would then be used in the 
-#above formula as the "total mannitol dosed (mg) or total lactulose dosed (mg)".
+ #Q9 of the EE urine form is the total volume of LM solution ingested (in ml). For example, a child who ingested 20 ml of LM solution (the maximum dose), would have ingested 1000 mg of mannitol and 5000 mg of lactulose. The 1000 mg and 5000 mg would then be used in the above formula as the "total mannitol dosed (mg) or total lactulose dosed (mg)".
+ mean(d$LMvol_t1, na.rm=T)
+ mean(d$urineVol_t1, na.rm=T)/1000
+
 d$lact.dose_t1<-d$LMvol_t1*250
 d$lact.dose_t2<-d$LMvol_t2*250
 d$lact.dose_t3<-d$LMvol_t3*250
@@ -235,11 +238,15 @@ d$mann.dose_t1<-d$LMvol_t1*50
 d$mann.dose_t2<-d$LMvol_t2*50
 d$mann.dose_t3<-d$LMvol_t3*50
 
+mean(d$lact.dose_t1, na.rm=T)
+mean(d$mann.dose_t1, na.rm=T)
+
 
 #% lactulose recovery = (urine concentration lactulose (mg/L) * urine volume (L) * 100 / total lactulose dosed (mg))
 d$per.lact.rec_t1<-d$Lact1*(d$urineVol_t1/1000)*100/d$lact.dose_t1
 d$per.lact.rec_t2<-d$Lact2*(d$urineVol_t2/1000)*100/d$lact.dose_t2
 d$per.lact.rec_t3<-d$Lact3*(d$urineVol_t3/1000)*100/d$lact.dose_t3
+mean(d$per.lact.rec_t1, na.rm=T)
 
 #% mannitol recovery = (urine concentration mannitol (mg/L) * urine volume (L) * 100 / total mannitol dosed (mg))
 d$per.mann.rec_t1<-d$Mann1*(d$urineVol_t1/1000)*100/d$mann.dose_t1
@@ -251,19 +258,28 @@ d$per.mann.rec_t3<-d$Mann3*(d$urineVol_t3/1000)*100/d$mann.dose_t3
 d$LM1<-d$per.lact.rec_t1/d$per.mann.rec_t1
 d$LM2<-d$per.lact.rec_t2/d$per.mann.rec_t2
 d$LM3<-d$per.lact.rec_t3/d$per.mann.rec_t3
+mean(d$LM1, na.rm=T)
 
 #We also need to report Lactulose recovery and Mannitol recovery in mmol/L (as indicated on our table shells).
     #mmol/L of Lactulose = ??g/ml * 1000 ml/L * 1 mg/1000??g * 1g/1000mg * 1mol/342.296g * 1000mmol/1 mol
 #The above simplifies to (??g/ml) * (1 / 342.296) = mmol/L
     #mmol/L of Mannitol = ??g/ml * 1000 ml/L * 1 mg/1000??g * 1g/1000mg * 1mol/182.172g * 1000mmol/1 mol
 #The above simplifies to (??g/ml) * (1 / 182.172) = mmol/L
-d$lact.rec.MMOL_t1<-(d$Lact1)*(1/342.296)
+mean(d$Lact1, na.rm=T)
+mean(d$LMvol_t1, na.rm=T)
+mean(d$Mann1, na.rm=T)
+
+d$lact.rec.MMOL_t1<-(d$Lact1/1000)*(1/342.296)
 d$lact.rec.MMOL_t2<-(d$Lact2/1000)*(1/342.296)
 d$lact.rec.MMOL_t3<-(d$Lact3/1000)*(1/342.296)
 d$mann.rec.MMOL_t1<-(d$Mann1/1000)*(1/182.172)
 d$mann.rec.MMOL_t2<-(d$Mann2/1000)*(1/182.172)
 d$mann.rec.MMOL_t3<-(d$Mann3/1000)*(1/182.172)
+mean(d$lact.rec.MMOL_t1, na.rm=T)
 
+############################
+#Calculate outcomes:
+############################
 
 d$Lact1<-d$Lact1*(1/342.296)
 d$Lact2<-d$Lact2*(1/342.296)
@@ -275,6 +291,13 @@ d$Mann3<-d$Mann3*(1/182.172)
 
 
 
+mean(log(d$Lact1), na.rm=T)
+mean(log(d$Lact2), na.rm=T)
+mean(log(d$Lact3), na.rm=T)
+
+mean(log(d$Mann1), na.rm=T)
+mean(log(d$Mann2), na.rm=T)
+mean(log(d$Mann3), na.rm=T)
 
 
 
@@ -313,36 +336,39 @@ table(d$LM2.miss)
 table(d$LM3.miss)
 
 
-
+mean(d$Lact1.miss, na.rm=T)
 
 
 # set missing outcomes to an arbitrary, non-missing value. In this case use 9
 d$Lact1Delta <- d$Lact1
-d$Lact1Delta[d$Lact1.miss==0] <- 9
+d$Lact1Delta[d$Lact1.miss==0] <- exp(9)
 
 d$Lact2Delta <- d$Lact2
-d$Lact2Delta[d$Lact2.miss==0] <- 9
+d$Lact2Delta[d$Lact2.miss==0] <- exp(9)
 
 d$Lact3Delta <- d$Lact3
-d$Lact3Delta[d$Lact3.miss==0] <- 9
+d$Lact3Delta[d$Lact3.miss==0] <- exp(9)
 
 d$Mann1Delta <- d$Mann1
-d$Mann1Delta[d$Mann1.miss==0] <- 9
+d$Mann1Delta[d$Mann1.miss==0] <- exp(9)
 
 d$Mann2Delta <- d$Mann2
-d$Mann2Delta[d$Mann2.miss==0] <- 9
+d$Mann2Delta[d$Mann2.miss==0] <- exp(9)
 
 d$Mann3Delta <- d$Mann3
-d$Mann3Delta[d$Mann3.miss==0] <- 9
+d$Mann3Delta[d$Mann3.miss==0] <- exp(9)
 
 d$LM1Delta <- d$LM1
-d$LM1Delta[d$LM1.miss==0] <- 9
+d$LM1Delta[d$LM1.miss==0] <- exp(9)
 
 d$LM2Delta <- d$LM2
-d$LM2Delta[d$LM2.miss==0] <- 9
+d$LM2Delta[d$LM2.miss==0] <- exp(9)
 
 d$LM3Delta <- d$LM3
-d$LM3Delta[d$LM3.miss==0] <- 9
+d$LM3Delta[d$LM3.miss==0] <- exp(9)
+
+mean(log(d$Lact1Delta), na.rm=T)
+
 
 
 #Order for replication:
@@ -419,6 +445,9 @@ for(i in 1:ncol(Y)){
   }
 }
 
+mean(Y$Lact1Delta)
+dim(Y)
+table(is.na(Y$Lact1Delta))
 
 #Extract estimates
 l1_adj_ipcw_M<-res_adj[[1]]
@@ -433,12 +462,32 @@ lmr1_adj_ipcw_M<-res_adj[[3]]
 lmr2_adj_ipcw_M<-res_adj[[6]]
 lmr3_adj_ipcw_M<-res_adj[[9]]
 
+mean(miss$Lact2.miss)
+mean(log(Y$Lact2Delta))
+
+temp<-washb_tmle(Y=log(Y$Lact2Delta), Delta=miss$Lact2.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[1]], Q.SL.library = c("SL.glm"), seed=12345, print=T)
+
+mean(log(Y$Lact2Delta))
+mean(miss$Lact2.miss)
+mean(d$block)
 
 
+dim(W)
+table(is.na(W))
 
+#Where is walls?
 
+for(i in 1:ncol(W)){
+  cat(colnames(W)[i],":\n")
+  print(mean(W[,i],na.rm=T))
+}
 
-
+for(i in 1:ncol(W)){
+  if(class(W[,i])=="factor"){
+  cat(colnames(W)[i],":\n")
+  print(table(W[,i]))
+  }
+}
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
 save(l1_unadj_ipcw_M,
