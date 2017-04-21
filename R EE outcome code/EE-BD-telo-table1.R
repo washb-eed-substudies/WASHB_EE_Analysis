@@ -19,7 +19,6 @@ library(reshape2)
 
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/")
-#load("washb-BD-telo-blind-tr.Rdata")
 load("washb-bangladesh-tr.Rdata")
 d$clusterid<-as.numeric(d$clusterid)
 treatment<-d
@@ -60,12 +59,10 @@ table(is.na(d$svydate))
 
 colnames(d)
 
-#vlist <- c("momage","momedu_prim","patedu","agwork","Nlt18","electricity","cementfloor","ironroof","improvedwater","dminwat","treatwat","odmen","odwom","odch38","odchu3","latown","impr_lat","humfeces","wat_avail" , "soap_avail","HHSmod_sev")
 
 vlist <- c("momage","momeduy","dadeduy","dadagri","Nhh","elec","cement","landacre","tubewell","storewat","treatwat","watmin","odmen","odwom","odch815","odch38","odchu3",
            "latown","latslab","latseal","latfeces","potty","humfeces","humfecesch", "hwlatwat","hwlatsoap","hwkitwat","hwkitsoap","hfiacat")
 
-#[1] "n.1"   
 
 table(vlist %in% colnames(d))
 

@@ -341,6 +341,13 @@ for(i in 1:ncol(W2)){
     ts_t3_subgroup_M<-washb_glm(Y=d$TS3, tr=d$tr, W=subset(d, select=sex), V="sex", id=d$block.x, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), print=T)$lincom
     delta_ts_subgroup_M<-washb_glm(Y=d$TS_delta, tr=d$tr, W=subset(d, select=sex), V="sex", id=d$block.x, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), print=T)$lincom
 
+    ts_t2_subgroup_fit<-washb_glm(Y=d$TS2, tr=d$tr, W=subset(d, select=sex), V="sex", id=d$block.x, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), print=T)$fit
+    ts_t3_subgroup_fit<-washb_glm(Y=d$TS3, tr=d$tr, W=subset(d, select=sex), V="sex", id=d$block.x, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), print=T)$fit
+    delta_ts_subgroup_fit<-washb_glm(Y=d$TS_delta, tr=d$tr, W=subset(d, select=sex), V="sex", id=d$block.x, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), print=T)$fit
+
+    ts_t2_subgroup_fit
+    ts_t3_subgroup_fit
+    delta_ts_subgroup_fit
 
     #Strip out "missing" row
     ts_t2_subgroup_M<-ts_t2_subgroup_M[1:2,]
