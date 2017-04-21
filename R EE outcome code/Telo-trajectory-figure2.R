@@ -204,30 +204,30 @@ dev.off()
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Figures/")
 pdf("Telo-trajectories-subsample.pdf",width=10,height=4)
 #Subset data to 1:20 rank ordered lines
-i<-10
-
-nrow(d)
-dsub1<-d %>%
-      subset(tr=="Control") %>%
-      arrange(TS2) %>%
-      slice(rep(1:floor(n()/i))*i)
-      #filter(row_number())
-dsub2<-d %>%
-      subset(tr=="Nutrition + WSH") %>%
-      arrange(TS2) %>%
-      slice(rep(1:floor(n()/i))*i)
-dsub<-rbind(dsub1,dsub2)
+# i<-10
+# 
+# nrow(d)
+# dsub1<-d %>%
+#       subset(tr=="Control") %>%
+#       arrange(TS2) %>%
+#       slice(rep(1:floor(n()/i))*i)
+#       #filter(row_number())
+# dsub2<-d %>%
+#       subset(tr=="Nutrition + WSH") %>%
+#       arrange(TS2) %>%
+#       slice(rep(1:floor(n()/i))*i)
+# dsub<-rbind(dsub1,dsub2)
 
 
 #-------------------------------
 # make the plot
 #-------------------------------
 
-
-lo <- layout(mat=matrix(1:2,nrow=1,ncol=2,byrow=TRUE))
-
-SLAb.plotLong(Ab1=(dsub$TS2[dsub$tr=="Control"]),Ab2=(dsub$TS3[dsub$tr=="Control"]),mu1=t(T2.mu.ci[2,]),mu2=t(T3.mu.ci[2,]),diff=diff[2],labels=c("",""),letter="Control",ylabel=TRUE, ysize=c(.5,3))
-SLAb.plotLong(Ab1=(dsub$TS2[dsub$tr=="Nutrition + WSH"]),Ab2=(dsub$TS3[dsub$tr=="Nutrition + WSH"]),mu1=t(T2.mu.ci[3,]),mu2=t(T3.mu.ci[3,]),diff=diff[3],labels=c("",""),letter="N+WSH",ylabel=TRUE, ysize=c(.5,3), point_col = 2)
+# 
+# lo <- layout(mat=matrix(1:2,nrow=1,ncol=2,byrow=TRUE))
+# 
+# SLAb.plotLong(Ab1=(dsub$TS2[dsub$tr=="Control"]),Ab2=(dsub$TS3[dsub$tr=="Control"]),mu1=t(T2.mu.ci[2,]),mu2=t(T3.mu.ci[2,]),diff=diff[2],labels=c("",""),letter="Control",ylabel=TRUE, ysize=c(.5,3))
+# SLAb.plotLong(Ab1=(dsub$TS2[dsub$tr=="Nutrition + WSH"]),Ab2=(dsub$TS3[dsub$tr=="Nutrition + WSH"]),mu1=t(T2.mu.ci[3,]),mu2=t(T3.mu.ci[3,]),diff=diff[3],labels=c("",""),letter="N+WSH",ylabel=TRUE, ysize=c(.5,3), point_col = 2)
 
 i<-5
 
@@ -254,31 +254,31 @@ lo <- layout(mat=matrix(1:2,nrow=1,ncol=2,byrow=TRUE))
 SLAb.plotLong(Ab1=(dsub$TS2[dsub$tr=="Control"]),Ab2=(dsub$TS3[dsub$tr=="Control"]),mu1=t(T2.mu.ci[2,]),mu2=t(T3.mu.ci[2,]),diff=diff[2],labels=c("",""),letter="Control",ylabel=TRUE, ysize=c(.5,3))
 SLAb.plotLong(Ab1=(dsub$TS2[dsub$tr=="Nutrition + WSH"]),Ab2=(dsub$TS3[dsub$tr=="Nutrition + WSH"]),mu1=t(T2.mu.ci[3,]),mu2=t(T3.mu.ci[3,]),diff=diff[3],labels=c("",""),letter="N+WSH",ylabel=TRUE, ysize=c(.5,3), point_col = 2)
 
-
-i<-4
-
-nrow(d)
-dsub1<-d %>%
-      subset(tr=="Control") %>%
-      arrange(TS2) %>%
-      slice(rep(1:floor(n()/i))*i)
-      #filter(row_number())
-dsub2<-d %>%
-      subset(tr=="Nutrition + WSH") %>%
-      arrange(TS2) %>%
-      slice(rep(1:floor(n()/i))*i)
-dsub<-rbind(dsub1,dsub2)
-
-
-#-------------------------------
-# make the plot
-#-------------------------------
-
-
-lo <- layout(mat=matrix(1:2,nrow=1,ncol=2,byrow=TRUE))
-
-SLAb.plotLong(Ab1=(dsub$TS2[dsub$tr=="Control"]),Ab2=(dsub$TS3[dsub$tr=="Control"]),mu1=t(T2.mu.ci[2,]),mu2=t(T3.mu.ci[2,]),diff=diff[2],labels=c("",""),letter="Control",ylabel=TRUE, ysize=c(.5,3))
-SLAb.plotLong(Ab1=(dsub$TS2[dsub$tr=="Nutrition + WSH"]),Ab2=(dsub$TS3[dsub$tr=="Nutrition + WSH"]),mu1=t(T2.mu.ci[3,]),mu2=t(T3.mu.ci[3,]),diff=diff[3],labels=c("",""),letter="N+WSH",ylabel=TRUE, ysize=c(.5,3), point_col = 2)
+# 
+# i<-4
+# 
+# nrow(d)
+# dsub1<-d %>%
+#       subset(tr=="Control") %>%
+#       arrange(TS2) %>%
+#       slice(rep(1:floor(n()/i))*i)
+#       #filter(row_number())
+# dsub2<-d %>%
+#       subset(tr=="Nutrition + WSH") %>%
+#       arrange(TS2) %>%
+#       slice(rep(1:floor(n()/i))*i)
+# dsub<-rbind(dsub1,dsub2)
+# 
+# 
+# #-------------------------------
+# # make the plot
+# #-------------------------------
+# 
+# 
+# lo <- layout(mat=matrix(1:2,nrow=1,ncol=2,byrow=TRUE))
+# 
+# SLAb.plotLong(Ab1=(dsub$TS2[dsub$tr=="Control"]),Ab2=(dsub$TS3[dsub$tr=="Control"]),mu1=t(T2.mu.ci[2,]),mu2=t(T3.mu.ci[2,]),diff=diff[2],labels=c("",""),letter="Control",ylabel=TRUE, ysize=c(.5,3))
+# SLAb.plotLong(Ab1=(dsub$TS2[dsub$tr=="Nutrition + WSH"]),Ab2=(dsub$TS3[dsub$tr=="Nutrition + WSH"]),mu1=t(T2.mu.ci[3,]),mu2=t(T3.mu.ci[3,]),diff=diff[3],labels=c("",""),letter="N+WSH",ylabel=TRUE, ysize=c(.5,3), point_col = 2)
 
 dev.off()
 
