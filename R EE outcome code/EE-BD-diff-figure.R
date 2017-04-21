@@ -451,7 +451,7 @@ MidPts <- barplot(1:n, names.arg=NA,col=NA,
 
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Figures")
-pdf("EE Difference Plot_draft.pdf",width=10,height=8.5, paper="USr")
+pdf("EE-Difference-Plot.pdf",width=10,height=8.5, paper="USr")
 lo <- layout(mat=matrix(1:24,ncol=8,nrow=3,byrow=T),widths=c(1,1,1,1,1,1,1,1))
 op <- par(mar=c(4,0,3,0)+0.1)
 
@@ -464,8 +464,13 @@ for(j in 1:3){
     }
 }
 
+dev.off()
+
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Figures")
+pdf("EE-Mean-Plot.pdf",width=10,height=8.5, paper="USr")
 lo <- layout(mat=matrix(1:24,ncol=8,nrow=3,byrow=T),widths=c(1,1,1,1,1,1,1,1))
-op <- par(mar=c(4,1,3,0.5)+0.1)
+op <- par(mar=c(4,0,3,0)+0.1)
+
 i<-1
 for(j in 1:3){
   for(k in 1:8){
