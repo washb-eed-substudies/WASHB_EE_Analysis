@@ -10,14 +10,17 @@
 
 ###Load in data
 rm(list=ls())
-try(detach(package:plyr))
 library(foreign)
 library(dplyr)
 library(washb)
 library(tidyr)
+library(reshape2)
 
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/")
+# load("washb-bangladesh-tr.Rdata")
+# d$clusterid<-as.numeric(d$clusterid)
+# treatment<-d
 load("washb-BD-EE-blind-tr.Rdata")
 levels(treatment$tr)
 treatment$tr <- factor(treatment$tr,levels=c("Control","WSH","Nutrition","Nutrition + WSH"))
@@ -41,24 +44,20 @@ urine<-urine %>%
   mutate(urine_data3=!is.na(h2aliqout1_t3) & h2aliqout1_t3>1 | !is.na(h5aliqout7_t3) & h5aliqout7_t3>1 | !is.na(preLMaliqout13_t3) & preLMaliqout13_t3>1) %>%
   mutate(urine_data= urine_data1 | urine_data2 | urine_data3) %>%
   subset(urine_data==T) %>%
-  select(dataid, clusterid) %>%
-  distinct(dataid, clusterid)
+  select(dataid, clusterid, childNo) %>%
+  distinct(dataid, clusterid, childNo)
 
 stool<-stool %>% 
   mutate(stool_data=!is.na(aliqout1_t1) & aliqout1_t1>1 | !is.na(aliqout1_t2) & aliqout1_t2>1 | !is.na(aliqout1_t3) & aliqout1_t3>1) %>%
   subset(stool_data==T) %>%
-  select(dataid, clusterid) %>%
-  distinct(dataid, clusterid)
+  select(dataid, clusterid, childNo) %>%
+  distinct(dataid, clusterid, childNo)
 
 medhistory<-medhistory %>%
   #subset(!is.na(consent1) | !is.na(consent2) | !is.na(consent3)) %>%
   subset((consent1==1) | (consent2==1) | (consent3==1)) %>%
-  select(dataid, clusterid) %>%
-  distinct(dataid, clusterid)
-
-
-#urineform
-#stoolform
+  select(dataid, clusterid, childNo) %>%
+  distinct(dataid, clusterid, childNo)
 
 childid<-union(urine, stool)
 childid<-union(childid, medhistory)
@@ -82,95 +81,126 @@ dim(d)
 table(is.na(d$svydate)) 
 
 #Generate table 1
-
 colnames(d)
-vlist <- c("momage","momedu_prim","patedu","agwork","Nlt18","electricity","cementfloor","ironroof","improvedwater","dminwat","treatwat","odmen","odwom","odch38","odchu3","latown","impr_lat","humfeces","wat_avail" , "soap_avail","HHSmod_sev")
 
+#Drop twins so HH characteristics aren't duplicates
+d<-subset(d, childNo!=2)
+
+#test that all rows are matched to enrollment data
+table(is.na(d$svydate)) 
+
+#Generate table 1
+colnames(d)
+
+vlist <- c("momage","momeduy","dadeduy","dadagri","Nhh","elec","cement","landacre","tubewell","storewat","treatwat","watmin","odmen","odwom","odch815","odch38","odchu3",
+           "latown","latslab","latseal","latfeces","potty","humfeces","humfecesch", "hwlatwat","hwlatsoap","hwkitwat","hwkitsoap","hfiacat")
+
+
+table(vlist %in% colnames(d))
+
+table.dat<-subset(d, select=c("tr", vlist)) %>% subset(tr=="Control" | tr=="WSH" | tr=="Nutrition" | tr=="Nutrition + WSH")
+
+
+#Change factors to indicators
+for(i in 1:ncol(table.dat)){
+  cat(colnames(table.dat)[i]," : ",class((table.dat[,i])),"\n")
+}
+
+table.dat$hfiacat<-ifelse(table.dat$hfiacat=="Severely Food Insecure" | table.dat$hfiacat=="Moderately Food Insecure", 1,0)
 
 #Calculate number of compounds
 
-#summarize means (continious vars) or Ns (categorical vars)
-colnames(d)
-table1<-d %>%
+table1_mu<-table.dat%>%
         group_by(tr) %>%
-        summarize(
-          momage=mean(momage, na.rm=T), 
-          momedu=mean(momeduy, na.rm=T),
-          dadeduy=mean(dadeduy, na.rm=T),
-          dadagri=sum(dadagri, na.rm=T),  #cat
-          Nhh=mean(Nhh, na.rm=T),
-          elec=sum(elec, na.rm=T),
-          cement=sum(cement, na.rm=T),
-          landacre=mean(landacre, na.rm=T),
-          tubewell=sum(tubewell, na.rm=T),
-          storewat=sum(storewat, na.rm=T),
-          treatwat=sum(treatwat, na.rm=T),
-          watmin=mean(watmin, na.rm=T),
-          odmen=sum(odmen, na.rm=T),
-          odwom=sum(odwom, na.rm=T),
-          odch815=sum(odch815, na.rm=T),
-          odch38=sum(odch38, na.rm=T),
-          odchu3=sum(odchu3, na.rm=T),
-          latown=sum(latown, na.rm=T),
-          latslab=sum(latslab, na.rm=T),
-          latseal=sum(latseal, na.rm=T),
-          latfeces=sum(latfeces, na.rm=T),
-          potty=sum(potty, na.rm=T),
-          humfeces=sum(humfeces, na.rm=T),
-          humfecesch=sum(humfecesch, na.rm=T),
-          hwlatwat=sum(hwlatwat, na.rm=T),
-          hwlatsoap=sum(hwlatsoap, na.rm=T),
-          hwkitwat=sum(hwkitwat, na.rm=T),
-          hwkitsoap=sum(hwkitsoap, na.rm=T),
-          hfiacat=sum(hfiacat>1, na.rm=T) #Tabulate food insecure==2, 3, or 4
-          )
+        summarise_each(funs(mean(., na.rm = TRUE))) %>%
+        ungroup %>% as.data.frame
 
-table1_sd<-d %>%
+table1_N<-table.dat%>%
         group_by(tr) %>%
-        summarize(
-          momage=sd(momage, na.rm=T), 
-          momedu=sd(momeduy, na.rm=T),
-          dadeduy=sd(dadeduy, na.rm=T),
-          dadagri=mean(dadagri, na.rm=T)*100,  #cat
-          Nhh=sd(Nhh, na.rm=T),
-          elec=mean(elec, na.rm=T)*100,
-          cement=mean(cement, na.rm=T)*100,
-          landacre=sd(landacre, na.rm=T),
-          tubewell=mean(tubewell, na.rm=T)*100,
-          storewat=mean(storewat, na.rm=T)*100,
-          treatwat=mean(treatwat, na.rm=T)*100,
-          watmin=sd(watmin, na.rm=T),
-          odmen=mean(odmen, na.rm=T)*100,
-          odwom=mean(odwom, na.rm=T)*100,
-          odch815=mean(odch815, na.rm=T)*100,
-          odch38=mean(odch38, na.rm=T)*100,
-          odchu3=mean(odchu3, na.rm=T)*100,
-          latown=mean(latown, na.rm=T)*100,
-          latslab=mean(latslab, na.rm=T)*100,
-          latseal=mean(latseal, na.rm=T)*100,
-          latfeces=mean(latfeces, na.rm=T)*100,
-          potty=mean(potty, na.rm=T)*100,
-          humfeces=mean(humfeces, na.rm=T)*100,
-          humfecesch=mean(humfecesch, na.rm=T)*100,
-          hwlatwat=mean(hwlatwat, na.rm=T)*100,
-          hwlatsoap=mean(hwlatsoap, na.rm=T)*100,
-          hwkitwat=mean(hwkitwat, na.rm=T)*100,
-          hwkitsoap=mean(hwkitsoap, na.rm=T)*100,
-          hfiacat=mean(hfiacat>1, na.rm=T)*100 #Tabulate food insecure==2, 3, or 4
-          )
+        summarise_each(funs(sum(., na.rm = TRUE))) %>%
+        ungroup %>% as.data.frame
+
+table1_sd<-table.dat%>%
+        group_by(tr) %>%
+        summarise_each(funs(sd(., na.rm = TRUE))) %>%
+        ungroup %>% as.data.frame
+
+Ns<-table(table.dat$tr)
+balance.tab.mu_M<-rbind(Ns,t((table1_mu[,2:ncol(table1_mu)])))
+balance.tab.n_M<-rbind(Ns,t((table1_N[,2:ncol(table1_N)])))
+balance.tab.sd_M<-rbind(Ns,t((table1_sd[,2:ncol(table1_sd)])))
+
+
+#save objects
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
+save(balance.tab.mu_M, balance.tab.n_M, balance.tab.sd_M, 
+     file="EE-BD-table1.Rdata")
 
 
 
-#Transpose
-table1<-table1 %>%
-  gather(var, val, 2:ncol(table1)) %>%
-  spread(tr, val)
-print(table1, n=nrow(table1))
 
-table1_sd<-table1_sd %>%
-  gather(var, val, 2:ncol(table1_sd)) %>%
-  spread(tr, val)
-print(table1_sd, n=nrow(table1_sd))
+#Create supplimentary table 1
+#Merge in outcomes
+# 
+# suppd1<-subset(d, !is.na(TS2))
+# suppd2<-subset(d, !is.na(TS2) & is.na(TS3))
+# dim(suppd1)
+# dim(suppd2)
+# 
+# suppd1$col<-1
+# suppd2$col<-2
+# 
+# 
+# 
+# #Telomere substudy enrolled at Year 1
+# s1.table.dat<-subset(suppd1, select=c("tr","col", vlist)) %>% subset(tr=="Control" | tr=="Nutrition + WSH") #%>% subset(., select= -tr)
+# #Telomere substudy lost to follow-up at Year 2
+# s2.table.dat<-subset(suppd2, select=c("tr","col", vlist)) %>% subset(tr=="Control" | tr=="Nutrition + WSH") #%>% subset(., select= -tr)
+# 
+# #combine:
+# s.table.dat<-rbind(s1.table.dat,s2.table.dat)
+# head(s.table.dat)
+# 
+# #Change factors to indicators
+# for(i in 1:ncol(s.table.dat)){
+#   cat(colnames(s.table.dat)[i]," : ",class((s.table.dat[,i])),"\n")
+# }
+# 
+# s.table.dat$hfiacat<-ifelse(s.table.dat$hfiacat=="Severely Food Insecure" | s.table.dat$hfiacat=="Moderately Food Insecure", 1,0)
+# 
+# #Supplimentary table 1 column 2
+# s.table1_mu<-s.table.dat%>%
+#         group_by(col, tr) %>%
+#         summarise_each(funs(mean(., na.rm = TRUE))) %>%
+#         ungroup %>% 
+#         as.data.frame
+# 
+# s.table1_N<-s.table.dat%>%
+#         group_by(col, tr) %>%
+#         summarise_each(funs(sum(., na.rm = TRUE))) %>%
+#         ungroup %>% 
+#         as.data.frame
+# 
+# s.table1_sd<-s.table.dat%>%
+#         group_by(col, tr) %>%
+#         summarise_each(funs(sd(., na.rm = TRUE))) %>%
+#         ungroup %>% 
+#         as.data.frame
+# 
+# 
+# s.Ns<-table(s.table.dat$tr, s.table.dat$col)
+# s.Ns<-c(s.Ns[1,1],s.Ns[2,1],s.Ns[1,2],s.Ns[2,2])
+# 
+# 
+# s.balance.tab.mu_M<-s.table1_mu
+# s.balance.tab.n_M<-s.table1_N
+# s.balance.tab.sd_M<-s.table1_sd
+# s.balance.tab.mu_M[,1]<-s.Ns
+# s.balance.tab.n_M[,1]<-s.Ns
+# s.balance.tab.sd_M[,1]<-s.Ns
+# save(s.balance.tab.mu_M, s.balance.tab.n_M, s.balance.tab.sd_M, 
+#      file="EE-BD-s.table1.Rdata")
+
 
 
 

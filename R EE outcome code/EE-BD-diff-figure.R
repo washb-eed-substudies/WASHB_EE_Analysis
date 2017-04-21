@@ -53,15 +53,15 @@ neo_N2<-cbind("NEO","T2", rownames(neo_t2_mn), as.data.frame(neo_t2_mn)) %>% `ro
 mpo_N2<-cbind("MPO","T2", rownames(mpo_t2_mn), as.data.frame(mpo_t2_mn)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
 lm_N2<-cbind("LM","T2", rownames(lm_t2_mn), as.data.frame(lm_t2_mn)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
 reg_N2<-cbind("REG","T2", rownames(reg1b2_t2_mn), as.data.frame(reg1b2_t2_mn)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
-l_N2<-cbind("Lact","T1", rownames(lac_t2_mn), as.data.frame(lac_t2_mn)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
-m_N2<-cbind("Mann","T1", rownames(man_t2_mn), as.data.frame(man_t2_mn)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
+l_N2<-cbind("Lact","T2", rownames(lac_t2_mn), as.data.frame(lac_t2_mn)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
+m_N2<-cbind("Mann","T2", rownames(man_t2_mn), as.data.frame(man_t2_mn)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
 
 aat_N3<-cbind("AAT","T3", rownames(aat_t3_mn), as.data.frame(aat_t3_mn)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
 neo_N3<-cbind("NEO","T3", rownames(neo_t3_mn), as.data.frame(neo_t3_mn)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
 mpo_N3<-cbind("MPO","T3", rownames(mpo_t3_mn), as.data.frame(mpo_t3_mn)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
 lm_N3<-cbind("LM","T3", rownames(lm_t3_mn), as.data.frame(lm_t3_mn)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
-l_N3<-cbind("Lact","T1", rownames(lac_t3_mn), as.data.frame(lac_t3_mn)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
-m_N3<-cbind("Mann","T1", rownames(man_t3_mn), as.data.frame(man_t3_mn)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
+l_N3<-cbind("Lact","T3", rownames(lac_t3_mn), as.data.frame(lac_t3_mn)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
+m_N3<-cbind("Mann","T3", rownames(man_t3_mn), as.data.frame(man_t3_mn)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
 
 
 
@@ -191,7 +191,14 @@ N_df[,5]<-as.numeric(sprintf("%1.2f",N_df[,5]))
 N_df[,6]<-as.numeric(sprintf("%1.2f",N_df[,6]))
 N_df[,7]<-as.numeric(sprintf("%1.2f",N_df[,7]))
 
-
+#Add formatted treatment for x-acis label
+#N_df$TR.format<-N_df$TR  
+N_df$TR.format<-ifelse(N_df$TR=="N+WSH",
+  paste0("N+\nWSH"),
+    paste0(N_df$TR,"\n"))
+N_df$TR.format<-ifelse(N_df$TR=="WSH",
+  paste0("\nWSH"),
+    N_df$TR.format)
 
 #-------------------------------------------
 # Customize plot layout
@@ -212,8 +219,8 @@ corange <- "#EEA722"
 cyellow <- "#FFEE33"
 cgrey <- "#777777"
 
-tr.cols=c(C=cblack,W=cblue,S=cteal,H=cgreen,WSH=corange,N=cred,"WSH+N"=cmagent)
-# cols=c(C=cblack,W=cblue,S=cteal,H=cgreen,WSH=corange)
+#tr.cols=c(C=cblack,W=cblue,S=cteal,H=cgreen,WSH=corange,N=cred,"WSH+N"=cmagent)
+tr.cols=c(C=cblack,WSH=cblue,N=cred,"WSH+N"=cgreen)
 
 #cols=c("C v WSH"=corange,"C v N"=cred,"C v N+WSH"=cmagent)
 cols=c("C v WSH"=cblue,"C v N"=cred,"C v N+WSH"=cgreen)
@@ -242,18 +249,18 @@ ulabplot <- function(title) {
 # prev.dat$Location<-factor(prev.dat$Location, c("Tubewell", "Stored water", "Hands", "Toys", "Food", "Ponds", "Soil", "Flies"))
 # table(prev.dat$Location)
 # prev.dat$TR
-j<-2
-k<-3
-d=N_df[N_df$Location==levels(N_df$Location)[k] & N_df$round==levels(N_df$round)[j],]
-i=3 
-yrange="auto"
-cols=tr.cols
-n=4
-lo <- layout(mat=matrix(1:24,ncol=8,nrow=3,byrow=T),widths=c(1,1,1,1,1,1,1,1))
-op <- par(mar=c(4,1,3,0.5)+0.1)
+# j<-2
+# k<-3
+# d=N_df[N_df$Location==levels(N_df$Location)[k] & N_df$round==levels(N_df$round)[j],]
+# i=3 
+# yrange="auto"
+# cols=tr.cols
+# n=4
+# lo <- layout(mat=matrix(1:24,ncol=8,nrow=3,byrow=T),widths=c(1,1,1,1,1,1,1,1))
+# op <- par(mar=c(4,1,3,0.5)+0.1)
 
 #for(i in 1:24){
-prevplot<-function(d, i, cols=cols, yrange="auto", n=3){
+diffplot<-function(d, i, cols=cols, yrange="auto", n=3){
   
   if(nrow(d)==0){
        op <- par(mar=c(3,1,2,0)+0.1)
@@ -266,9 +273,11 @@ prevplot<-function(d, i, cols=cols, yrange="auto", n=3){
 
   }else{
   
-  ytics <- if(yrange[1]=="auto")
-    seq(min(d$lower.ci),max(d$upper.ci),by=(max(d$upper.ci)-min(d$lower.ci))/10) else
-    seq(yrange[1],yrange[2],by=.1)  #<----------Set the Y-axis range here
+  ytics <- if(yrange[1]=="auto"){
+    seq(min(d$lower.ci),max(d$upper.ci),by=(max(d$upper.ci)-min(d$lower.ci))/10)
+    }else{
+    seq(yrange[1],yrange[2],by=.1) #<----------Set the Y-axis range here
+      }  
 
 
 if(i==1 | i==9 | i==17){
@@ -292,6 +301,8 @@ MidPts <- barplot(1:n, names.arg=NA,col=NA,
       las=1,bty="n"
 	)
 	segments(x0=0,x1=max(MidPts+0.5),y0=ytics,lty=2,lwd=1,col="gray80")
+	segments(x0=0,x1=max(MidPts+0.5),y0=0,lty=1,lwd=1,col="black")
+
 	
 	if(i==2 | i==10 | i==18){
 	    axis(2,at=ytics,las=1)
@@ -322,18 +333,133 @@ MidPts <- barplot(1:n, names.arg=NA,col=NA,
 	# }
 }
 
+#------------------------------------------
+# Outcome means function
+#------------------------------------------
+
+#Figure out Y-axis range for different sample types
+AAT<-N_df[N_df$Location=="AAT",]
+NEO<-N_df[N_df$Location=="NEO",]
+MPO<-N_df[N_df$Location=="MPO",]
+Lact<-N_df[N_df$Location=="Lact",]
+Mann<-N_df[N_df$Location=="Mann",]
+LM<-N_df[N_df$Location=="LM",]
+REG<-N_df[N_df$Location=="REG",]
+
+seq(min(AAT$lower.ci),max(AAT$upper.ci),by=diff(range(min(AAT$lower.ci),max(AAT$upper.ci)))/10)
+c(min(AAT$lower.ci),max(AAT$upper.ci))
+c(min(NEO$lower.ci),max(NEO$upper.ci))
+c(min(MPO$lower.ci),max(MPO$upper.ci))
+c(min(Lact$lower.ci),max(Lact$upper.ci))
+c(min(Mann$lower.ci),max(Mann$upper.ci))
+c(min(LM$lower.ci),max(LM$upper.ci))
+c(min(REG$lower.ci),max(REG$upper.ci))
+
+
+
+meanplot<-function(d, i, cols=cols, yrange, n=3){
+#   l<-2
+#   j<-2
+#   i<-3
+# d=N_df[N_df$Location==levels(N_df$Location)[l] & N_df$round==levels(N_df$round)[j],]
+# i=i
+# yrange=c(0,1.5)
+# cols=tr.cols
+# n=4
+
+  if(nrow(d)==0){
+       op <- par(mar=c(3,3,2,0.5)+0.1)
+    	ulabplot("")
+    	
+         mtext(ifelse(i<9,
+                      c("AAT", "NEO", "MPO","Lactulose","Mannitol", "LM Ratio", "REG1b")[i-1],
+                        ""),
+                        side=3,line=0.25,col="gray20",cex=1)
+  }else{
+  
+  if(d$Location=="AAT"){yrange<-c(0.4,1.1)
+    ytics <- seq(0.4,1.1,by=0.05)}
+  if(d$Location=="NEO"){yrange<-c(700,2200)
+    ytics <- seq(800,2200,by=200)}
+  if(d$Location=="MPO"){yrange<-c(3200,20200)
+    ytics <- seq(4000,20000,by=2000)}
+  if(d$Location=="Lact"){yrange<-c(0.3,1.9)
+    ytics <- seq(0.4,1.8,by=0.2)}
+  if(d$Location=="Mann"){yrange<-c(2,10.5)
+    ytics <- seq(3,10,by=1)}
+  if(d$Location=="LM"){yrange<-c(0.005,0.21)
+    ytics <- seq(0.02,0.2,by=0.02)}
+  if(d$Location=="REG"){yrange<-c(170,240)
+    ytics <- seq(180,240,by=10)}
+
+  
+  #seq(min(d$lower.ci),max(d$upper.ci),by=(max(d$upper.ci)-min(d$lower.ci))/10)
+  # ytics <- if(yrange[1]=="auto"){
+  #   seq(min(d$lower.ci),max(d$upper.ci),by=(max(d$upper.ci)-min(d$lower.ci))/10)
+  #   }else{
+  #   seq(yrange[1],yrange[2],by=.1) #<----------Set the Y-axis range here
+  #     }  
+  # ytics <- seq(min(d$lower.ci),max(d$upper.ci),by=diff(range(d$Dif))/10)
+  # ytics <- round(ytics,2)
+
+if(i==1 | i==9 | i==17){
+   op <- par(mar=c(3,0,2,1)+0.1)
+
+	if(i==1){ulabplot("3 Month\nMean")}
+	if(i==9){ulabplot("Year 1\nMean")}
+	if(i==17){ulabplot("Year 2\nMean")}
+
+   	#,side=2,line=3,las=1)
+
+	}else{
+   #op <- par(mar=c(4,1,3,0.5)+0.1)
+   op <- par(mar=c(3,3,2,0.5)+0.1)
+
+   # set up an empty plot
+MidPts <- barplot(1:n, names.arg=NA,col=NA,
+                  border=NA, 
+	  	#ylim= if(yrange[1]=="auto"){c(min(d$lower.ci),max(d$upper.ci))}else{c(range(yrange)[1],range(yrange)[2])},
+	  	ylim= yrange,
+	  	ylab="",yaxt="n",
+      las=1,bty="n"
+	)
+	segments(x0=0,x1=max(MidPts+0.5),y0=ytics,lty=2,lwd=1,col="gray80")
+	
+	#if(i==2 | i==10 | i==18){
+	    axis(2,at=ytics,las=1)
+	#}
+
+	
+	# plot estimates
+	arrows(x0=MidPts, y0=d$lower.ci, y1=d$upper.ci, col=cols,lwd=2,length=0.05,angle=90,code=3)
+	points(MidPts,d$Dif,pch=21,cex=1.5,lwd=1,col=cols,bg="white")
+	points(MidPts,d$Dif,pch=21,cex=1.5,lwd=0,col=cols,bg=alpha(cols,alpha=0.5))
+	text(x=MidPts,y=d$upper.ci, labels=d$Pval,pos=3,cex=1,col=cols,font=1)
+	  # X-axis labels
+  mtext(d$TR.format,side=1,line=2,at=MidPts,col=cols,cex=0.8,las=1)
+  #mtext(d$Location,side=3,line=0.25,col="gray20",cex=1)
+           mtext(ifelse(i<9,
+                      c("AAT", "NEO", "MPO","Lactulose","Mannitol", "LM Ratio", "REG1b")[i-1],
+                        ""),
+                        side=3,line=0.25,col="gray20",cex=1)
+             box()
+  }
+}
+  
+
+}
 
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Figures")
 pdf("EE Difference Plot_draft.pdf",width=10,height=8.5, paper="USr")
 lo <- layout(mat=matrix(1:24,ncol=8,nrow=3,byrow=T),widths=c(1,1,1,1,1,1,1,1))
-op <- par(mar=c(4,1,3,0.5)+0.1)
+op <- par(mar=c(4,0,3,0)+0.1)
 
 i<-1
 for(j in 1:3){
   for(k in 1:8){
-    ifelse(k==1,k<-1,k<-k-1)
-    prevplot(d=dif_df[dif_df$Location==levels(dif_df$Location)[k] & dif_df$round==levels(dif_df$round)[j],], i, yrange=c(-0.5,0.5))
+    ifelse(k==1,l<-1,l<-k-1)
+    diffplot(d=dif_df[dif_df$Location==levels(dif_df$Location)[l] & dif_df$round==levels(dif_df$round)[j],], i, yrange=c(-0.5,0.5), cols=cols, n=3)
     i<-i+1
     }
 }
@@ -343,8 +469,8 @@ op <- par(mar=c(4,1,3,0.5)+0.1)
 i<-1
 for(j in 1:3){
   for(k in 1:8){
-    ifelse(k==1,k<-1,k<-k-1)
-    prevplot(d=N_df[N_df$Location==levels(N_df$Location)[k] & N_df$round==levels(N_df$round)[j],], i=i, yrange="auto", cols=tr.cols, n=4)
+    ifelse(k==1,l<-1,l<-k-1)
+    meanplot(d=N_df[N_df$Location==levels(N_df$Location)[l] & N_df$round==levels(N_df$round)[j],], i=i, yrange=c(0,1.5), cols=tr.cols, n=4)
     i<-i+1
     }
   }
@@ -352,8 +478,7 @@ for(j in 1:3){
  
 dev.off()
 
- 
-
+  
 
 
 

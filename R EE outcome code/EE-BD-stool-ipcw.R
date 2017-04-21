@@ -132,6 +132,10 @@ for(i in 1:ncol(W)){
 d$sex<-as.factor(d$sex)
 #d$birthord[is.na(d$birthord)]<-"99"
 d$birthord<-factor(d$birthord)
+table(d$birthord)
+table(W$birthord)
+
+d %>% group_by(birthord) %>% summarise(mean=mean(log(aat3), na.rm=T))
 
 d$asset_clock[is.na(d$asset_clock)]<-"99"
 d$asset_clock<-factor(d$asset_clock)
@@ -266,37 +270,40 @@ table(d$reg1b2.miss)
 
 
 
+d$aat3Delta.test <- log(d$aat3)
+d$aat3Delta.test[d$aat3.miss==0] <- 99
+
 
 # set missing outcomes to an arbitrary, non-missing value. In this case use 9
 d$aat1Delta <- d$aat1
-d$aat1Delta[d$aat1.miss==0] <- 9
+d$aat1Delta[d$aat1.miss==0] <- exp(9)
 
 d$aat2Delta <- d$aat2
-d$aat2Delta[d$aat2.miss==0] <- 9
+d$aat2Delta[d$aat2.miss==0] <- exp(9)
 
 d$aat3Delta <- d$aat3
-d$aat3Delta[d$aat3.miss==0] <- 9
+d$aat3Delta[d$aat3.miss==0] <- exp(9)
 
 d$mpo1Delta <- d$mpo1
-d$mpo1Delta[d$mpo1.miss==0] <- 9
+d$mpo1Delta[d$mpo1.miss==0] <- exp(9)
 
 d$mpo2Delta <- d$mpo2
-d$mpo2Delta[d$mpo2.miss==0] <- 9
+d$mpo2Delta[d$mpo2.miss==0] <- exp(9)
 
 d$mpo3Delta <- d$mpo3
-d$mpo3Delta[d$mpo3.miss==0] <- 9
+d$mpo3Delta[d$mpo3.miss==0] <- exp(9)
 
 d$neo1Delta <- d$neo1
-d$neo1Delta[d$neo1.miss==0] <- 9
+d$neo1Delta[d$neo1.miss==0] <- exp(9)
 
 d$neo2Delta <- d$neo2
-d$neo2Delta[d$neo2.miss==0] <- 9
+d$neo2Delta[d$neo2.miss==0] <- exp(9)
 
 d$neo3Delta <- d$neo3
-d$neo3Delta[d$neo3.miss==0] <- 9
+d$neo3Delta[d$neo3.miss==0] <- exp(9)
 
 d$reg1b2Delta <- d$reg1b2
-d$reg1b2Delta[d$reg1b2.miss==0] <- 9
+d$reg1b2Delta[d$reg1b2.miss==0] <- exp(9)
 
 
 
@@ -332,8 +339,8 @@ miss<-d %>% select(neo1.miss,mpo1.miss,aat1.miss,neo2.miss,mpo2.miss,aat2.miss,r
 contrasts <- list(c("Control","WSH"), c("Control","Nutrition"), c("Control","Nutrition + WSH"), c("WSH","Nutrition + WSH"), c("Nutrition","Nutrition + WSH"))
 
 
-
-temp<-washb_tmle(Y=log(d$aat1Delta), Delta=d$aat1.miss, tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
+Ytest=log(d$aat3Delta)
+temp<-washb_tmle(Y=d$aat3Delta.test, Delta=d$aat3.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","WSH"), Q.SL.library = c("SL.glm"), seed=12345, print=T)
 
 
 for(i in 1:10){
