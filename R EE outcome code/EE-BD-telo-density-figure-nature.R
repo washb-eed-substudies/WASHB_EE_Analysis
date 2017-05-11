@@ -1,4 +1,6 @@
 
+
+
 ##########################################
 #Plot telomere length densities
 ##########################################
@@ -85,10 +87,9 @@ lazdenplot <- function(x,y,namex,namey,dstats,main,letter,cols,ylab=TRUE,mulab=T
 	# format the difference and 95% CI
 	diff <- paste(sprintf("%1.2f",dstats[1])," (",sprintf("%1.2f",dstats[2]),", ",sprintf("%1.2f",dstats[3]),")",sep="")
 
-	par()
 
 	# make the empty plot
-	op <- par(xpd=FALSE,mar=c(5,5,6,2)+0.1)
+	op <- par(xpd=FALSE,mar=c(4,5,3,2)+0.1, ps = 7, cex = 1, cex.main = 1)
 	ytics <- seq(0,3,by=0.5)
 	xtics <- seq(0,3,by=0.5)
 	plot(density(x),type="n",
@@ -97,14 +98,15 @@ lazdenplot <- function(x,y,namex,namey,dstats,main,letter,cols,ylab=TRUE,mulab=T
 		xlim=c(0,2),xaxt="n",xlab="",
 		las=1,bty="n"
 		)
-		axis(1,at=xtics,las=1,cex.axis=1.5)
-		mtext("T/S Ratio",side=1,line=3)
+		axis(1,at=xtics,las=1,cex.axis=1)
+		mtext("T/S Ratio",side=1,line=2.5)
 		if(ylab==TRUE) {
-		  axis(2,at=ytics,las=1,cex.axis=1.5,lwd=0,lwd.ticks=1)
+		  axis(2,at=ytics,las=1,cex.axis=1,lwd=1.5,lwd.ticks=1)
 		  mtext("Kernel Density",side=2,line=3.5)
 		}
-		mtext(main,side=3,line=2,cex=1.5,adj=0)
-		mtext(letter,side=3,line=2,cex=2,adj=0,at=-6,font=2)
+		
+		mtext(main,side=3,line=1,cex=1,adj=0)
+		#mtext(letter,side=3,line=2,cex=1,adj=0,at=-6)
 
 		# draw shaded regions for stunted and severely stunted (not used)
 		minx <- min(xtics)
@@ -120,19 +122,19 @@ lazdenplot <- function(x,y,namex,namey,dstats,main,letter,cols,ylab=TRUE,mulab=T
 		# draw kernal density distributions
 		dx <- density(x)
 		dy <- density(y)
-		lines(dx,col=cols[1],lwd=3,lty=2)
-		lines(dy,col=cols[2],lwd=3)
+		lines(dx,col=cols[1],lwd=1.5,lty=2)
+		lines(dy,col=cols[2],lwd=1.5)
 
 		# label group means
 		if(mulab==TRUE) {
 			segments(x0=mean(x),y0=miny-0.015,y1=0.05,col="gray40",lty=2)
 			segments(x0=mean(y),y0=miny-0.015,y1=0.05,col="gray40",lty=2)
-			text(x=mean(c(x,y)),y=0.2,"Group Means",col="gray40",cex=1)
+			text(x=mean(c(x,y)),y=0.4,"Group Means",col="gray40",cex=1)
 
 		}
 		# segments(x0=mean(x),y0=miny-0.015,y1=max(dx$y)+0.05,col="gray40",lty=2)
 		# segments(x0=mean(x),x1=mean(x)+0.2,y0=max(dx$y)+0.05,col="gray40",lty=2)
-		op <- par(xpd=TRUE)
+		op <- par(xpd=TRUE, ps = 7, cex = 1, cex.main = 1)
 		points(mean(x),miny-0.015,pch=21,cex=1.75,col=cols[1],bg=alpha(cols[1],alpha=0.5))
 
 		# segments(x0=mean(y),y0=miny-0.015,y1=max(dy$y)+0.02,col="gray40",lty=2)
@@ -148,18 +150,19 @@ lazdenplot <- function(x,y,namex,namey,dstats,main,letter,cols,ylab=TRUE,mulab=T
 		# draw a small table in the upper right
 		#txs <- c(-1,0,1.1,2)
 		txs <- c(1,1.25,1.5,1.75)
+		#		txs <- c(1.3,1.4,1.5,1.6)
 		txs2 <- c(2.2)
 		# mtext("LAZ",side=3,line=0,at=txs[1],adj=1)
 			mtext(c("","N","Mean","SD"),side=3,line=0,at=txs,cex=1,adj=1)
 		mtext(namex,side=3,line=-1.2,at=txs[1],adj=1,col=cols[1])
-			mtext(format(length(x),big.mark=","),side=3,line=-1.2,at=txs[2],adj=1,cex=0.9,col=cols[1])
-			mtext(sprintf("%1.2f",mean(x)),side=3,line=-1.2,at=txs[3],adj=1,cex=0.9,col=cols[1])
-			mtext(sprintf("%1.2f",sd(x))  ,side=3,line=-1.2,at=txs[4],adj=1,cex=0.9,col=cols[1])
-		mtext(namey,side=3,line=-2.5,at=txs[1],adj=1,col=cols[2])
-		mtext("Intervention",side=3,line=-3.3,at=txs[1]+0.0525,adj=1,col=cols[2])
-			mtext(format(length(y),big.mark=","),side=3,line=-2.4,at=txs[2],adj=1,cex=0.9,col=cols[2])
-			mtext(sprintf("%1.2f",mean(y)),side=3,line=-2.4,at=txs[3],adj=1,cex=0.9,col=cols[2])
-			mtext(sprintf("%1.2f",sd(y))  ,side=3,line=-2.4,at=txs[4],adj=1,cex=0.9,col=cols[2])
+			mtext(format(length(x),big.mark=","),side=3,line=-1.2,at=txs[2],adj=1,cex=1,col=cols[1])
+			mtext(sprintf("%1.2f",mean(x)),side=3,line=-1.2,at=txs[3],adj=1,cex=1,col=cols[1])
+			mtext(sprintf("%1.2f",sd(x))  ,side=3,line=-1.2,at=txs[4],adj=1,cex=1,col=cols[1])
+		mtext(namey,side=3,line=-2.2,at=txs[1],adj=1,col=cols[2])
+		mtext("Intervention",side=3,line=-2.9,at=txs[1],adj=1,col=cols[2])
+			mtext(format(length(y),big.mark=","),side=3,line=-2.4,at=txs[2],adj=1,cex=1,col=cols[2])
+			mtext(sprintf("%1.2f",mean(y)),side=3,line=-2.4,at=txs[3],adj=1,cex=1,col=cols[2])
+			mtext(sprintf("%1.2f",sd(y))  ,side=3,line=-2.4,at=txs[4],adj=1,cex=1,col=cols[2])
 
 		#mtext("Diff. (95% CI)",side=3,line=0,at=txs2,adj=1)
 		#	mtext(diff,side=3,line=-2.4,at=txs2,adj=1,col="gray20",cex=0.9)
@@ -193,15 +196,22 @@ cols=c(orange,blue)
 
 
 
-#lo <- layout(mat=matrix(1:2,nrow=1,ncol=2,byrow=T))
-#lazdenplot(x=ad2$bp[ad2$tr=="Control"],y=ad2$bp[ad2$tr=="Nutrition + WSH"],namex="Control",namey="Nutrition + WSH", dstats=NULL, main="TS ratio, Year 1",letter="a",cols=cols[c(1,2)],mulab=TRUE)
-#lazdenplot(x=ad3$bp[ad2$tr=="Control"],y=ad3$bp[ad3$tr=="Nutrition + WSH"],namex="Control",namey="Nutrition + WSH", dstats=NULL, main="TS ratio, Year 2",letter="b",cols=cols[c(1,2)],mulab=TRUE)
+#PDF parameters for Nature
+# mm to inch
+setWidth = 183*0.039370 
+setWidth = 89*0.039370 
+
+# font size in pt
+setFontSize = 7
+
+# 1 in R = 0.75pt, so 0.25pt is specified as 
+setLwd <- 0.25/0.75    
 
 
 
 # set up a layout
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Figures/")
-pdf("telo-density.pdf",width=8,height=10)
+pdf("telo-density.pdf",width=setWidth,height=3.5,pointsize=setFontSize)
 lo <- layout(mat=matrix(1:2,nrow=2,ncol=1,byrow=F))
 lazdenplot(x=ad2$TS2[ad2$tr=="Control"],y=ad2$TS2[ad2$tr=="N+WSH"],namex="Control",namey="N + WSH", dstats=NULL, main="Telomere length (T/S ratio), Year 1",letter="a",cols=cols[c(1,2)],mulab=TRUE)
 lazdenplot(x=ad3$TS3[ad3$tr=="Control"],y=ad3$TS3[ad3$tr=="N+WSH"],namex="Control",namey="N + WSH", dstats=NULL, main="Telomere length (T/S ratio), Year 2",letter="b",cols=cols[c(1,2)],mulab=TRUE)

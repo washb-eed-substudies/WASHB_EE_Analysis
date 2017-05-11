@@ -18,19 +18,25 @@ library(washb)
 
 #Load in blinded treatment information
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/")
-load("washb-BD-EE-blind-tr.Rdata")
-levels(treatment$tr)
-treatment$tr <- factor(treatment$tr,levels=c("Control","WSH","Nutrition","Nutrition + WSH"))
-levels(treatment$tr)
+load("washb-bangladesh-tr.Rdata")
+d$clusterid<-as.numeric(d$clusterid)
+treatment<-d
+# levels(treatment$tr)
+# treatment$tr <- factor(treatment$tr,levels=c("Control","WSH","Nutrition","Nutrition + WSH"))
+# levels(treatment$tr)
 
 #Load in L/M outcomes
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew")
 outcomes<-read.dta("washb-BD-EE-urine-outcomes-stata12.dta")
-
+load("urine_volume.Rdata")
 
 #Load in urine survey data
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew/")
 urine<-read.csv("BD-EE-urine.csv")
+
+#Drop and merge fixed urine volumes
+urine<-urine %>% subset(select=-c(urineVol_t1,urineVol_t2,urineVol_t3))
+urine<-merge(urine, urineVol, by=c("dataid", "childNo"))
 
 
 #Load in enrollment data for adjusted analysis
@@ -71,6 +77,7 @@ dim(d)
 
 #test that all rows are matched to enrollment data
 table(is.na(d$svydate)) 
+
 
 
 
@@ -272,10 +279,19 @@ d$per.lact.rec_t2<-d$Lact2*(d$urineVol_t2/1000)*100/d$lact.dose_t2
 d$per.lact.rec_t3<-d$Lact3*(d$urineVol_t3/1000)*100/d$lact.dose_t3
 mean(d$per.lact.rec_t1, na.rm=T)
 
+table(d$lact.dose_t1==0)
+table(d$lact.dose_t2==0)
+table(d$lact.dose_t3==0)
+
 #% mannitol recovery = (urine concentration mannitol (mg/L) * urine volume (L) * 100 / total mannitol dosed (mg))
 d$per.mann.rec_t1<-d$Mann1*(d$urineVol_t1/1000)*100/d$mann.dose_t1
 d$per.mann.rec_t2<-d$Mann2*(d$urineVol_t2/1000)*100/d$mann.dose_t2
 d$per.mann.rec_t3<-d$Mann3*(d$urineVol_t3/1000)*100/d$mann.dose_t3
+
+
+table(d$lact.dose_t1==0)
+table(d$lact.dose_t2==0)
+table(d$lact.dose_t3==0)
 
 
 #LM ratio
@@ -283,6 +299,20 @@ d$LM1<-d$per.lact.rec_t1/d$per.mann.rec_t1
 d$LM2<-d$per.lact.rec_t2/d$per.mann.rec_t2
 d$LM3<-d$per.lact.rec_t3/d$per.mann.rec_t3
 mean(d$LM1, na.rm=T)
+
+
+#Data check. Why are there less LM than lact or mann?
+table(d$per.mann.rec_t1==0)
+table(d$per.mann.rec_t2==0)
+table(d$per.mann.rec_t3==0)
+
+table(d$urineVol_t1==0)
+table(d$urineVol_t2==0)
+table(d$urineVol_t3==0)
+
+table(is.na(d$per.mann.rec_t1))
+table(is.na(d$Lact1))
+
 
 #We also need to report Lactulose recovery and Mannitol recovery in mmol/L (as indicated on our table shells).
     #mmol/L of Lactulose = ??g/ml * 1000 ml/L * 1 mg/1000??g * 1g/1000mg * 1mol/342.296g * 1000mmol/1 mol
@@ -336,15 +366,25 @@ lm_t3_N_M<-d %>% group_by(tr) %>% subset(!is.na(LM3)) %>% summarize(N=n(), mean=
 
 
 #Means and 95% CI's for mean by arm plots
-lac_t1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Lact1, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-lac_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Lact2, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-lac_t3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Lact3, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-man_t1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Mann1, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-man_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Mann2, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-man_t3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Mann3, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-lm_t1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$LM1, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-lm_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$LM2, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-lm_t3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$LM3, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+lac_t1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$Lact1), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+lac_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$Lact2), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+lac_t3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$Lact3), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+man_t1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$Mann1), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+man_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$Mann2), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+man_t3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$Mann3), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+lm_t1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$LM1), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+lm_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$LM2), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+lm_t3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$LM3), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+
+lac_t1_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Lact1, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+lac_t2_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Lact2, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+lac_t3_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Lact3, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+man_t1_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Mann1, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+man_t2_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Mann2, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+man_t3_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Mann3, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+lm_t1_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$LM1, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+lm_t2_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$LM2, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+lm_t3_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$LM3, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
 
 
 
@@ -667,10 +707,35 @@ for(i in 1:ncol(W3)){
 #Run GLMs for the adjusted parameter estimates
 ##############################################
 
+
+#dataframe of urine biomarkers:
+Y<-d %>% select(Lact1,Mann1,LM1,Lact2,Mann2,LM2,Lact3,Mann3,LM3)
+
 #Create empty matrix to hold the tmle results:
 res_adj<-list(lact_t1_adj=matrix(0,5,6), mann_t1_adj=matrix(0,5,6), lm_t1_adj=matrix(0,5,6), 
                 lact_t2_adj=matrix(0,5,6), mann_t2_adj=matrix(0,5,6), lm_t2_adj=matrix(0,5,6),  
                 lact_t3_adj=matrix(0,5,6), mann_t3_adj=matrix(0,5,6), lm_t3_adj=matrix(0,5,6))
+
+d %>% group_by(tr) %>%
+  summarize(Lac=mean(log(Lact1) ,na.rm=T), N=n())
+mean(log(d$Lact1), na.rm=T)
+mean(log(Y[,1]), na.rm=T)
+
+table(is.na(d$Lact1))
+table(is.na(Y[,1]))
+
+
+  temp<-washb_glm(Y=log(d$Lact1), tr=d$tr, W=NULL, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=T)
+  temp<-washb_glm(Y=log(Y[,1]), tr=d$tr, W=NULL, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=T)
+
+
+  temp<-washb_glm(Y=log(d$Lact1), tr=d$tr, W=W1$momedu, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=T)
+
+
+  j<-i<-1
+  temp<-washb_glm(Y=log(Y[,1]), tr=d$tr, W=W1, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=T)
+
+
 
 for(i in 1:3){
   for(j in 1:5){
@@ -741,6 +806,9 @@ save(lac_t1_N_M, man_t1_N_M, lm_t1_N_M,
 save(lm_t1_mn, lm_t2_mn, lm_t3_mn,
      lac_t1_mn, lac_t2_mn, lac_t3_mn, 
      man_t1_mn, man_t2_mn, man_t3_mn, 
+     lm_t1_absmn, lm_t2_absmn, lm_t3_absmn,
+     lac_t1_absmn, lac_t2_absmn, lac_t3_absmn, 
+     man_t1_absmn, man_t2_absmn, man_t3_absmn, 
      file="urine_res_means.Rdata")
 
 save(lac_t1_unadj_M, man_t1_unadj_M, lm_t1_unadj_M,

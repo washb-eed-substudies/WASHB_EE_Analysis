@@ -18,10 +18,12 @@ library(washb)
 
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/")
-load("washb-BD-EE-blind-tr.Rdata")
-levels(treatment$tr)
-treatment$tr <- factor(treatment$tr,levels=c("Control","WSH","Nutrition","Nutrition + WSH"))
-levels(treatment$tr)
+load("washb-bangladesh-tr.Rdata")
+d$clusterid<-as.numeric(d$clusterid)
+treatment<-d
+# levels(treatment$tr)
+# treatment$tr <- factor(treatment$tr,levels=c("Control","WSH","Nutrition","Nutrition + WSH"))
+# levels(treatment$tr)
 #Load in enrollment data for adjusted analysis
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
 enrol<-read.csv("washb-bangladesh-enrol+animals.csv",stringsAsFactors = TRUE)
@@ -216,6 +218,8 @@ contrasts <- list(c("Control","WSH"), c("Control","Nutrition"), c("Control","Nut
 neo_t1_N_M<-mpo_t1_N_M<-aat_t1_N_M<-neo_t2_N_M<-mpo_t2_N_M<-aat_t2_N_M<-reg1b_t2_N_M<-neo_t3_N_M<-mpo_t3_N_M<-aat_t3_N<-matrix(0,4,2)
 
 
+mean(d$aat1, na.rm=T)
+
   #N's and geometric means
 aat_t1_N_M<-d %>% group_by(tr) %>% subset(!is.na(aat1)) %>% summarize(N=n(), mean= mean(log(aat1), na.rm=T))   
 mpo_t1_N_M<-d %>% group_by(tr) %>% subset(!is.na(mpo1)) %>% summarize(N=n(), mean= mean(log(mpo1), na.rm=T))   
@@ -230,16 +234,28 @@ neo_t3_N_M<-d %>% group_by(tr) %>% subset(!is.na(neo3)) %>% summarize(N=n(), mea
 
 
 #Means and 95% CI's for mean by arm plots
-aat_t1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$aat1, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-aat_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$aat2, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-aat_t3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$aat3, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-mpo_t1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$mpo1, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-mpo_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$mpo2, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-mpo_t3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$mpo3, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-neo_t1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$neo1, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-neo_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$neo2, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-neo_t3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$neo3, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-reg1b2_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$reg1b2, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+aat_t1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$aat1), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+aat_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$aat2), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+aat_t3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$aat3), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+mpo_t1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$mpo1), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+mpo_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$mpo2), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+mpo_t3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$mpo3), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+neo_t1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$neo1), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+neo_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$neo2), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+neo_t3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$neo3), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+reg1b2_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$reg1b2), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+
+
+aat_t1_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=(.$aat1), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+aat_t2_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=(.$aat2), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+aat_t3_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=(.$aat3), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+mpo_t1_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=(.$mpo1), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+mpo_t2_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=(.$mpo2), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+mpo_t3_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=(.$mpo3), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+neo_t1_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=(.$neo1), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+neo_t2_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=(.$neo2), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+neo_t3_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=(.$neo3), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+reg1b2_t2_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=(.$reg1b2), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
 
 
 
@@ -632,6 +648,9 @@ save(neo_t1_N_M, mpo_t1_N_M, aat_t1_N_M,
 save(aat_t1_mn, aat_t2_mn, aat_t3_mn,
      mpo_t1_mn, mpo_t2_mn, mpo_t3_mn, reg1b2_t2_mn,
      neo_t1_mn, neo_t2_mn, neo_t3_mn, 
+     aat_t1_absmn, aat_t2_absmn, aat_t3_absmn,
+     mpo_t1_absmn, mpo_t2_absmn, mpo_t3_absmn, reg1b2_t2_absmn,
+     neo_t1_absmn, neo_t2_absmn, neo_t3_absmn, 
      file="stool_res_means.Rdata")
 
 save(neo_t1_unadj_M, mpo_t1_unadj_M, aat_t1_unadj_M,

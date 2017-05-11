@@ -31,7 +31,6 @@ log using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Logs/Andrew/
 *--------------------------------------------
 * format the treatment assignment information
 *--------------------------------------------
-*use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/washb-BD-EE-blind-tr.dta", clear
 use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/washb-bangladesh-tr.dta", clear
 
 
@@ -390,7 +389,7 @@ codebook miss1reason_ee miss1reason
 tab miss1reason_ee tr if svy==2 
 sort miss1reason_ee dataid
 *br if svy==3 & tr=="WSH"
-tab miss1reason_ee if svy==2 & tr=="WSH" 
+*tab miss1reason_ee if svy==2 & tr=="WSH" 
 
 
 tab miss1reason_ee tr if svy==3
@@ -408,6 +407,12 @@ replace clusterid=temp_clusterid if clusterid==.
 
 keep dataid childno clusterid block svy tr miss1_ee miss1reason_ee maintrial_origin baseline_origin midline_origin endline_origin
 
+
+help reshape
+
+
+
+br if dataid=="44106" | dataid=="44107"
 
 
 

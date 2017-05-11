@@ -88,7 +88,7 @@ SLAb.plotLong <- function(Ab1,Ab2,mu1,mu2,diff,labels=c("Control","N+WSH Interve
   # letter: letter for multi-panel plots (e.g., "a")
   # ylabel: logical. print a label for the Y-axis
   
-  op <- par(mar=c(3,6,4,0)+0.1)
+  op <- par(mar=c(3,6,4,0)+0.1, ps = 7, cex = 1, cex.main = 1)
   cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#3feac2")
   cols <- cbPalette[c(7,6,2,3)]
   #cols <- cbPalette[c(7,6,9,3)]
@@ -101,7 +101,7 @@ SLAb.plotLong <- function(Ab1,Ab2,mu1,mu2,diff,labels=c("Control","N+WSH Interve
   mtext(labels,side=3,line=0.5,at=xs,col=cols[point_col])
   
   mtext(c("Year 1","Year 2"),side=1,line=0,at=xs,col=cols[point_col])
-  if (ylabel==TRUE) mtext(expression(paste(italic(''), "T/S Ratio")),side=2,line=3.5,cex=1.25)
+  if (ylabel==TRUE) mtext(expression(paste(italic(''), "T/S Ratio")),side=2,line=3.5,cex=1)
   axis(2,at=c(0,0.5,1,1.5,2,2.5,3),labels=c(
     # expression(10^-1),
     expression(0),
@@ -114,11 +114,11 @@ SLAb.plotLong <- function(Ab1,Ab2,mu1,mu2,diff,labels=c("Control","N+WSH Interve
     #expression(10^4),
     #expression(10^5),
     #expression(10^6)
-  ), las=1,cex.axis=1.5
+  ), las=1,cex.axis=1
   )
   
   # header
-  mtext(letter,side=3,line=1.75,font=2,at=ifelse(letter=="Control",-0.3,.2),cex=1.75)
+  mtext(letter,side=3,line=1.75,font=1,at=ifelse(letter=="Control",-0.3,.2),cex=1)
   
   set.seed(12345)
   xs<-cbind(rnorm(1000,mean=0.5, sd=.02),rnorm(1000,mean=1.5, sd=.02))
@@ -126,31 +126,12 @@ SLAb.plotLong <- function(Ab1,Ab2,mu1,mu2,diff,labels=c("Control","N+WSH Interve
   # plot individual trajectories
   segments(x0=xs[which(Ab2<Ab1),1],x1=xs[which(Ab2<Ab1),2],y0=Ab1[Ab2<Ab1],y1=Ab2[Ab2<Ab1],col=alpha(linecols[1],.2), lwd=2)
   segments(x0=xs[which(Ab2>=Ab1),1],x1=xs[which(Ab2>=Ab1),2],y0=Ab1[Ab2>=Ab1],y1=Ab2[Ab2>=Ab1],col=alpha(linecols[2],.2), lwd=2)
-  #points(rep(xs[1],length(Ab1)),Ab1,col=cols[1],pch=16)
-  #points(rep(xs[2],length(Ab2)),Ab2,col=cols[2],pch=16)
-
-  
-  #points(rep(jitter(xs[1],3),length(Ab1[Ab2>=Ab1])),Ab1[Ab2>=Ab1],col=alpha(cols[2],.5),pch=16)
-  #points(rep((xs[,1]), length(Ab1[Ab2>=Ab1])),Ab1[Ab2>=Ab1],col=alpha(cols[2],.5),pch=16)
-  #points(rep((xs[,1]), length(Ab1[Ab2<Ab1])),Ab1[Ab2<Ab1],col=alpha(cols[1],.5),pch=16)
-  #points(rep((xs[,2]), length(Ab2[Ab2>=Ab1])),Ab2[Ab2>=Ab1],col=alpha(cols[2],.5),pch=16)
-  #points(rep((xs[,2]), length(Ab2[Ab2<Ab1])),Ab2[Ab2<Ab1],col=alpha(cols[1],.5),pch=16)
   points(((xs[which(Ab2>=Ab1),1])),Ab1[Ab2>=Ab1],col=alpha(cols[point_col],.3),pch=16)
   points(((xs[which(Ab2<Ab1),1])),Ab1[Ab2<Ab1],col=alpha(cols[point_col],.3),pch=16)
   points(((xs[which(Ab2>=Ab1),2])),Ab2[Ab2>=Ab1],col=alpha(cols[point_col],.3),pch=16)
   points(((xs[which(Ab2<Ab1),2])),Ab2[Ab2<Ab1],col=alpha(cols[point_col],.3),pch=16)
     
-  # plot geometric means
-  # arrows(x0=c(0.25,1.75),y0=unlist(mus[2,]),y1=unlist(mus[3,]),col=cols[point_col],lwd=1,length=0.05,angle=90,code=3)
-  # points(c(0.25,1.75),mus[1,],col=cols[point_col],cex=1,pch=21,bg=c(cols[point_col],cols[point_col]))
-  # plot P-values
-#   if(diff[5]*3<0.0001) {
-#     ptext <- "p < 0.0001"
-#   } else {
-#     ptext <- ifelse(diff[5]*3>1,"p = 1.000",paste("p =",sprintf("%1.3f",diff[5]*3)) )
-#   }
-#   mtext(ptext,side=1,line=-1)
-  par(op)
+  par(op, ps = 7, cex = 1, cex.main = 1)
 }
 
 
@@ -201,9 +182,22 @@ dev.off()
 
 
 
+#PDF parameters for Nature
+# mm to inch
+#setWidth = 183*0.039370 
+setWidth = 89*0.039370 
+
+# font size in pt
+setFontSize = 7
+
+# 1 in R = 0.75pt, so 0.25pt is specified as 
+setLwd <- 0.25/0.75    
+
+
+
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Figures/")
-pdf("Telo-trajectories-subsample.pdf",width=10,height=8)
+pdf("Telo-trajectories-subsample.pdf",width=setWidth,height=2.5,pointsize=setFontSize)
 #Subset data to 1:20 rank ordered lines
 # i<-10
 # 

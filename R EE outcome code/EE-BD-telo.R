@@ -112,6 +112,17 @@ d$TS_delta<-d$TS3-d$TS2
     ts_t3_unadj_M<-washb_glm(Y=d$TS3, tr=d$tr, W=NULL, id=d$block.x, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), print=F)$TR
     delta_ts_unadj_M<-washb_glm(Y=d$TS_delta, tr=d$tr, W=NULL, id=d$block.x, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), print=F)$TR
 
+#Mean basepairs
+    d %>% group_by(tr) %>% subset(!is.na(TS2)) %>% summarize(N=n(), mean= mean(3274 + 2413*TS2, na.rm=T))   
+    d %>% group_by(tr) %>% subset(!is.na(TS3)) %>% summarize(N=n(), mean= mean(3274 + 2413*TS3, na.rm=T))   
+    d %>% group_by(tr) %>% subset(!is.na(TS_delta)) %>% summarize(N=n(), mean= mean(3274 + 2413*TS_delta, na.rm=T))   
+
+    d %>% group_by(tr) %>% subset(!is.na(TS2)&!is.na(TS3)) %>% summarize(N=n(), mean= mean((3274 + 2413*TS3)-(3274 + 2413*TS2), na.rm=T))   
+
+    mean(3274 + 2413*d$TS2[d$tr=="Nutrition + WSH"], na.rm=T)-mean(3274 + 2413*d$TS2[d$tr=="Control"], na.rm=T)
+    mean(3274 + 2413*d$TS3[d$tr=="Nutrition + WSH"], na.rm=T)-mean(3274 + 2413*d$TS3[d$tr=="Control"], na.rm=T)
+    mean(3274 + 2413*d$TS_delta[d$tr=="Nutrition + WSH"], na.rm=T)-mean(3274 + 2413*d$TS_delta[d$tr=="Control"], na.rm=T)
+
     
 
 ############################

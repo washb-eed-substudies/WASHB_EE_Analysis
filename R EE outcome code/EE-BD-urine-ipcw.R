@@ -19,10 +19,12 @@ library(washb)
 
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/")
-load("washb-BD-EE-blind-tr.Rdata")
-levels(treatment$tr)
-treatment$tr <- factor(treatment$tr,levels=c("Control","WSH","Nutrition","Nutrition + WSH"))
-levels(treatment$tr)
+load("washb-bangladesh-tr.Rdata")
+d$clusterid<-as.numeric(d$clusterid)
+treatment<-d
+# levels(treatment$tr)
+# treatment$tr <- factor(treatment$tr,levels=c("Control","WSH","Nutrition","Nutrition + WSH"))
+# levels(treatment$tr)
 #Load in enrollment data for adjusted analysis
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
 enrol<-read.csv("washb-bangladesh-enrol+animals.csv",stringsAsFactors = TRUE)
@@ -36,6 +38,16 @@ ipcw<-read.csv("BD-EE-ipcw.csv", stringsAsFactors = T) %>% select(-c(tr,block))
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew")
 outcomes<-read.dta("washb-BD-EE-urine-outcomes-stata12.dta")
 outcomes$childid<-as.numeric(outcomes$childid)
+load("urine_volume.Rdata")
+
+#Load in urine survey data
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew/")
+urine<-read.csv("BD-EE-urine.csv")
+
+#Drop and merge fixed urine volumes
+urine<-urine %>% subset(select=-c(urineVol_t1,urineVol_t2,urineVol_t3))
+urine<-merge(urine, urineVol, by=c("dataid", "childNo"))
+
 
 
 dim(urine)
@@ -334,6 +346,10 @@ table(d$Mann3.miss)
 table(d$LM1.miss)
 table(d$LM2.miss)
 table(d$LM3.miss)
+
+table(d$Lact1.miss)
+table(d$Lact2.miss)
+table(d$Lact3.miss)
 
 
 mean(d$Lact1.miss, na.rm=T)

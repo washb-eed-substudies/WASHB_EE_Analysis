@@ -126,10 +126,4 @@ NotLost %>% group_by(svy, tr) %>% distinct(dataid, childno) %>%summarize(N=n())
 
 
 
-
-
-
-
-
-
   

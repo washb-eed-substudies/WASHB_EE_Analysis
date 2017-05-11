@@ -48,6 +48,11 @@ dlong3 <- d %>% subset(!is.na(TS3)) %>%
 dlong3$year<-"Year 2"
 
 dlong <- rbind(dlong2, dlong3)
+dlong %>% group_by(year) %>%
+  summarize(meanAge=mean(agey*12, na.rm=T), SD_Age=sd(agey*12, na.rm=T),
+             meanTS=mean(TS, na.rm=T), SD_TS=sd(TS, na.rm=T),
+            meanTSbp=mean(3274 + 2413*TS, na.rm=T), SD_TSbp=sd(3274 + 2413*TS, na.rm=T))
+
 
 #Make new blank category to control axis in facet_wrap
 head(dlong)
