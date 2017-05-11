@@ -73,7 +73,7 @@ table1_create<-function(mu, n, sd, mean.ind, vargroup, vargroup.row, Rownames, r
       temp<-rnd(temp, 0)
       dat<-rbind(dat, temp)
       }else{
-      temp<-cbind(n[j,1],n[j,1]/(n[1,1])*100,n[j,2],n[j,2]/(n[1,2])*100)
+      temp<-cbind(n[j,1],(mu[j,1])*100,n[j,2],(mu[j,2])*100)
       temp<-rnd(temp, 0)
       dat<-rbind(dat, temp)
       }
@@ -85,8 +85,8 @@ table1_create<-function(mu, n, sd, mean.ind, vargroup, vargroup.row, Rownames, r
   col2<-NULL
   for(j in 1:nrow(n)){
       if(mean.ind[j]==1){
-      temp1<-cbind(paste(dat[j,1],"(",dat[j,2],")",sep=""))
-      temp2<-cbind(paste(dat[j,3],"(",dat[j,4],")",sep=""))
+      temp1<-cbind(paste(dat[j,1]," (",dat[j,2],")",sep=""))
+      temp2<-cbind(paste(dat[j,3]," (",dat[j,4],")",sep=""))
       col1<-rbind(col1, temp1)
       col2<-rbind(col2, temp2)
       }else{
@@ -96,8 +96,8 @@ table1_create<-function(mu, n, sd, mean.ind, vargroup, vargroup.row, Rownames, r
       col1<-rbind(col1, temp1)
       col2<-rbind(col2, temp2)           
         }else{
-      temp1<-cbind(paste(dat[j,1],"(",dat[j,2],"\\%)",sep=""))
-      temp2<-cbind(paste(dat[j,3],"(",dat[j,4],"\\%)",sep=""))
+      temp1<-cbind(paste(dat[j,1]," (",dat[j,2],"\\%)",sep=""))
+      temp2<-cbind(paste(dat[j,3]," (",dat[j,4],"\\%)",sep=""))
       col1<-rbind(col1, temp1)
       col2<-rbind(col2, temp2) 
         }
@@ -139,7 +139,7 @@ setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/"
 load("telo_table1.Rdata")
 
 
-balance.tab.mu_M 
+balance.tab.mu_M*100 
 balance.tab.n_M 
 balance.tab.sd_M
 
@@ -179,7 +179,7 @@ Rownames<-c("No. of compounds",
         "Has soap",
         "Has water",
         "Has soap",
-    "Food insecure"
+    "Household is food secure"
   )
 
 tab<-table1_create(mu=balance.tab.mu_M, 
@@ -227,8 +227,8 @@ rownames(table1_f)=NULL
 table1_f
 n.comp.f
 
-n.comp.f[2]=paste("(N=",n.comp.f[2],")",sep="")
-n.comp.f[3]=paste("(N=",n.comp.f[3],")",sep="")
+n.comp.f[2]=paste(" (N=",n.comp.f[2],")",sep="")
+n.comp.f[3]=paste(" (N=",n.comp.f[3],")",sep="")
 n.comp.f<-n.comp.f[2:3]
 colnames(n.comp.f)<-NULL
 
@@ -237,7 +237,7 @@ colnames(n.comp.f)<-NULL
 for(i in c(2:3,5:6,8:11,13:16,18,24,29:30,34,37,41)){
   table1_f[i,1]=paste("~~~",table1_f[i,1],sep="")
 }
-for(i in c(19:23,25:28,26:27,31,32,35:36,38:39)){
+for(i in c(19:23,25:28,31,32,35:36,38:39)){
   table1_f[i,1]=paste("~~~~~",table1_f[i,1],sep="")
 }
 
@@ -444,7 +444,7 @@ Rownames<-c("No. of compounds",
         "Has soap",
         "Has water",
         "Has soap",
-    "Food insecure"
+    "Household is food secure"
   )
 
 
@@ -469,68 +469,69 @@ tab2<-table1_create(mu=s.balance.tab.mu_M[,3:4],
 
 
 main.control<-c("1382",
-                "24(5)",
-                "6(3)",
-                "5(4)",
-                "414(30\\%)",
-                "5(2)",
-                "784(57\\%)",
-                "145(10\\%)",
-                "0.15(0.21)",
-                "1038(75\\%)",
-                "666(48\\%)",
-                "4(0\\%)",
-                "1(1)",
-                "97(7\\%)",
-                "62(4\\%)",
-                "53(10\\%)",
-                "267(38\\%)",
-                "245(82\\%)",
-                "750(54\\%)",
-                "1251(95\\%)",
-                "358(31\\%)",
-                "625(48\\%)",
-                "61(4\\%)",
-                "114(8\\%)",
-                "21(2\\%)",
-                "178(14\\%)",
-                "88(7\\%)",
-                "118(9\\%)",
-                "33(3\\%)",
-                "450(33\\%)"
+                "24 (5)",
+                "6 (3)",
+                "5 (4)",
+                "414 (30\\%)",
+                "5 (2)",
+                "784 (57\\%)",
+                "145 (10\\%)",
+                "0.15 (0.21)",
+                "1038 (75\\%)",
+                "666 (48\\%)",
+                "4 (0\\%)",
+                "1 (1)",
+                "97 (7\\%)",
+                "62 (4\\%)",
+                "53 (10\\%)",
+                "267 (38\\%)",
+                "245 (82\\%)",
+                "750 (54\\%)",
+                "1251 (95\\%)",
+                "358 (31\\%)",
+                "625 (48\\%)",
+                "61 (4\\%)",
+                "114 (8\\%)",
+                "21 (2\\%)",
+                "178 (14\\%)",
+                "88 (7\\%)",
+                "118 (9\\%)",
+                "33 (3\\%)",
+                "932 (67\\%)"
                 ) 
 
 main.WSHN<-c("686",
-                "24(6)",
-                "6(3)",
-                "5(4)",
-                "207(30\\%)",
-                "5(2)",
-                "412(60\\%)",
-                "72(10\\%)",
-                "0.14(0.38)",
-                "504(73\\%)",
-                "331(48\\%)",
-                "2(0\\%)",
-                "1(2)",
-                "50(7\\%)",
-                "24(4\\%)",
-                "28(10\\%)",
-                "134(37\\%)",
-                "123(88\\%)",
-                "367(53\\%)",
-                "621(94\\%)",
-                "155(27\\%)",
-                "298(46\\%)",
-                "30(4\\%)",
-                "49(7\\%)",
-                "7(1\\%)",
-                "72(11\\%)",
-                "36(6\\%)",
-                "60(9\\%)",
-                "18(3\\%)",
-                "213(31\\%)"
+                "24 (6)",
+                "6 (3)",
+                "5 (4)",
+                "207 (30\\%)",
+                "5 (2)",
+                "412 (60\\%)",
+                "72 (10\\%)",
+                "0.14 (0.38)",
+                "504 (73\\%)",
+                "331 (48\\%)",
+                "2 (0\\%)",
+                "1 (2)",
+                "50 (7\\%)",
+                "24 (4\\%)",
+                "28 (10\\%)",
+                "134 (37\\%)",
+                "123 (88\\%)",
+                "367 (53\\%)",
+                "621 (94\\%)",
+                "155 (27\\%)",
+                "298 (46\\%)",
+                "30 (4\\%)",
+                "49 (7\\%)",
+                "7 (1\\%)",
+                "72 (11\\%)",
+                "36 (6\\%)",
+                "60 (9\\%)",
+                "18 (3\\%)",
+                "485 (71\\%)"
                 ) 
+
 
 dim(tab)
 dim(tab2)
@@ -585,7 +586,7 @@ colnames(n.comp.f)<-NULL
 for(i in c(2:3,5:6,8:11,13:16,18,24,29:30,34,37,41)){
   s.table1_f[i,1]=paste("~~~",table1_f[i,1],sep="")
 }
-for(i in c(19:23,25:28,26:27,31,32,35:36,38:39)){
+for(i in c(19:23,25:28,31,32,35:36,38:39)){
   s.table1_f[i,1]=paste("~~~~~",table1_f[i,1],sep="")
 }
 

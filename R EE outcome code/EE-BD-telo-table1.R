@@ -58,10 +58,11 @@ table(is.na(d$svydate))
 #Generate table 1
 
 colnames(d)
+d$foodsecure<-ifelse(d$hfiacat=="Food Secure", 1,0)
 
 
 vlist <- c("momage","momeduy","dadeduy","dadagri","Nhh","elec","cement","landacre","tubewell","storewat","treatwat","watmin","odmen","odwom","odch815","odch38","odchu3",
-           "latown","latslab","latseal","latfeces","potty","humfeces","humfecesch", "hwlatwat","hwlatsoap","hwkitwat","hwkitsoap","hfiacat")
+           "latown","latslab","latseal","latfeces","potty","humfeces","humfecesch", "hwlatwat","hwlatsoap","hwkitwat","hwkitsoap","foodsecure")
 
 
 table(vlist %in% colnames(d))
@@ -74,7 +75,6 @@ for(i in 1:ncol(table.dat)){
   cat(colnames(table.dat)[i]," : ",class((table.dat[,i])),"\n")
 }
 
-table.dat$hfiacat<-ifelse(table.dat$hfiacat=="Severely Food Insecure" | table.dat$hfiacat=="Moderately Food Insecure", 1,0)
 
 #Calculate number of compounds
 
@@ -134,7 +134,6 @@ for(i in 1:ncol(s.table.dat)){
   cat(colnames(s.table.dat)[i]," : ",class((s.table.dat[,i])),"\n")
 }
 
-s.table.dat$hfiacat<-ifelse(s.table.dat$hfiacat=="Severely Food Insecure" | s.table.dat$hfiacat=="Moderately Food Insecure", 1,0)
 
 #Supplimentary table 1 column 2
 s.table1_mu<-s.table.dat%>%
