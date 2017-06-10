@@ -356,13 +356,10 @@ tab _merge
 
 *MISS1REASON_EE has coded “no live birth” in some cases, where there are other correct reasons that the child was not there.
 drop if _merge==2
-*keep if svy==1
 codebook miss1reason_ee miss1reason
 tab miss1reason svy
 
 
-
-codebook miss1reason_ee
 *MISS1REASON “not lost” children are alive, so in cases where miss1reason_ee==“no live birth”, they need to recode miss1reason_ee as “absent”
 replace miss1reason_ee = 5 if miss1reason_ee==1 & miss1reason== 0
 
@@ -384,36 +381,16 @@ replace miss1reason_ee = miss1reason if miss1reason==2 & miss1reason_ee==4
 
 
 codebook miss1reason_ee miss1reason
-
-
-tab miss1reason_ee tr if svy==2 
 sort miss1reason_ee dataid
-*br if svy==3 & tr=="WSH"
-*tab miss1reason_ee if svy==2 & tr=="WSH" 
-
-
-tab miss1reason_ee tr if svy==3
-
-*br if dataid=="20107"
 
 
 *Fix missing clusterid's
-*br if clusterid==.
-
 gen temp_clusterid=substr(dataid,1,3)
 destring temp_clusterid, replace
 replace clusterid=temp_clusterid if clusterid==.
 
 
 keep dataid childno clusterid block svy tr miss1_ee miss1reason_ee maintrial_origin baseline_origin midline_origin endline_origin
-
-
-help reshape
-
-
-
-br if dataid=="44106" | dataid=="44107"
-
 
 
 
@@ -440,14 +417,6 @@ clear
 use `ee_tracking2'
 merge dataid childno using `ee_tracking3'
 tab _merge
-
-
-
-
-
-
-
-
 
 
 

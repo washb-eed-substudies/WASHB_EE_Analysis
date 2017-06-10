@@ -18,17 +18,6 @@ log using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Logs/Andrew/
 
 
 
-
-*--------------------------------------------
-* input files:
-*
-*  Treatment assignments 
-*    washb-bangladesh-blind-tr.dta
-* 
-*
-*
-*--------------------------------------------
-
 *--------------------------------------------
 * format the treatment assignment information
 *--------------------------------------------

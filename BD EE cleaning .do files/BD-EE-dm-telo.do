@@ -430,28 +430,6 @@ tab _merge
 keep if _merge==3
 drop _merge
 
-/*
-x
-*Merge DOBs into blood and centrifugation datasets
-sort dataid childNo
-merge 1:m dataid childNo using `centri'
-tab _merge
-x
-drop if _merge==1
-list dataid childNo svy if _merge==2
-list dataid childNo svy if DOBfromEE==1
-drop _merge 
-
-
-sort dataid childNo svy
-merge dataid childNo svy using `blood'
-tab _merge
-br if dataid=="04006" | RandomID=="3549259"
-
-list dataid clusterid childNo svy _merge if _merge==1 //List of lab samples missing field data
-*drop if _merge!=3 //Dropping many rows I need to figure out about
-drop _merge 
-*/
 
 ************************************
 *Clean variables
@@ -603,10 +581,6 @@ mean TS3
 *Only keep rows with outcome data
 keep if TS2!=. | TS3!=.
 
-*keep if TS2!=.
-*list dataid childNo if agem2==.
-
-
 
 *Generate clusterid for rows missing clusterid
 
@@ -615,20 +589,6 @@ drop clusterid
 gen clusterid=substr(dataid,1,3)
 destring clusterid, replace
 sort clusterid
-*br if clusterid==801
-
-/*
-tempfile telo
-save `telo'
-
-cd "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/" 
-use "washb-BD-telo-blind-tr.dta"
-
-sort clusterid
-merge clusterid using `telo'
-tab _merge
-list clusterid if _merge==2
-*/
 
 drop _merge
 sort dataid
@@ -645,7 +605,6 @@ keep if _merge==3
 mean TS2
 mean watmin
 
-*gen childid= dataid+childNo
 
 
 *Save file 

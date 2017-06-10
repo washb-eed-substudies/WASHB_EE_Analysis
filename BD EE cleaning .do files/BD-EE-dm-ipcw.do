@@ -47,7 +47,6 @@ save `dob_change'
 import excel using washb-bd-ee-med-gender-changes-final.xlsx, sheet("Sheet2") firstrow clear
 gen byte sex= Correctanswer=="Male"
 keep dataid childNo sex
-*rename Correctanswer sex
 tostring childNo, replace
 sort dataid childNo 
 tempfile sex_change
@@ -57,7 +56,6 @@ save `sex_change'
 *--------------------------------------------
 * format the treatment assignment information
 *--------------------------------------------
-*use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/washb-BD-telo-blind-tr.dta", clear
 use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/washb-bangladesh-tr.dta", clear
 
 destring clusterid, replace
@@ -294,30 +292,6 @@ tab _merge
 drop _merge
 
 
-
-
-
-
-************************************
-*Generate child ages
-************************************
-/*
-gen aged = date-DOB
-	label var aged "Age in days (anthro meas)"
-gen double agem = aged/30.4375
-	label var agem "Age in months (anthro meas)"
-gen double agey = aged/365.25
-	label var agey "Age in years (anthro meas)"
-codebook agey
-
-* Month of measurement
-gen month = month(date)
-	label var month "Month of sample collection"
-*/
-
-
-
-
 sort dataid
 tempfile temp
 save `temp'
@@ -328,7 +302,6 @@ use "washb-bangladesh-enrol+animals.dta"
 sort dataid
 merge dataid using `temp'
 tab _merge
-*keep if _merge==3
 
 
 ************************************
