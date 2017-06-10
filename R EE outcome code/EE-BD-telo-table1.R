@@ -46,11 +46,6 @@ table(d$tr)
 d<-subset(d, childNo!=2)
 
 
-#Merge in enrollment information
-#dim(d)
-#dim(enrol)
-#d<-left_join(d,enrol, by="dataid")
-#dim(d)
 
 #test that all rows are matched to enrollment data
 table(is.na(d$svydate)) 

@@ -256,6 +256,8 @@ MidPts <- barplot(1:n, names.arg=NA,col=NA,
       las=1,bty="n"
 	)
 	segments(x0=0,x1=max(MidPts+0.5),y0=ytics,lty=2,lwd=1,col="gray80")
+		segments(x0=0,x1=max(MidPts+0.5),y0=0,lty=1,lwd=1,col="black")
+
 	#segments(x0=0,x1=max(MidPts+0.5),y0=0,lty=1,lwd=1,col="black")
 	axis(2,at=ytics,las=1)
 	mtext(title,side=3,line=0.25,col="gray20",cex=1)
@@ -272,9 +274,9 @@ MidPts <- barplot(1:n, names.arg=NA,col=NA,
 	#text(x=MidPts,y=d$upper.ci, labels=d$Pval,pos=3,cex=1,col=cols,font=1)
 
 	  # X-axis labels
-  mtext(c("3 Month\nDifference",
-          "Year 1\nDifference",
-          "Year 2\nDifference"),
+  mtext(c("3 month\ndifference",
+          "14 month\ndifference",
+          "28 month\ndifference"),
         side=1,line=2,at=MidPts,col="black",cex=0.8,las=1)
   box()
 }

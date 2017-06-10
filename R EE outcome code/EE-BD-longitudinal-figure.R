@@ -319,9 +319,9 @@ MidPts <- barplot(1:n, names.arg=NA,col=NA,
 	#text(x=MidPts,y=d$upper.ci, labels=d$Pval,pos=3,cex=1,col=cols,font=1)
 
 	  # X-axis labels
-  mtext(c("3 Month\nDifference",
-          "Year 1\nDifference",
-          "Year 2\nDifference"),
+  mtext(c("3 month\nmean",
+          "14 month\nmean",
+          "28 month\nmean"),
         side=1,line=2,at=MidPts,col="black",cex=0.8,las=1)
   box()
 }

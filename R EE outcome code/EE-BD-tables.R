@@ -937,6 +937,118 @@ ipcw.tab2<-rbind(
   s.glm_print(lm_t1_N_M, lm_t1_mn, lm_t1_unadj_M, lm_t1_adj_M, lmr1_adj_ipcw_M)
 )
 
+
+
+
+#--------------------------------
+# Supplementary Table 7: 
+#   Unadjusted and adjusted p-values 
+# across all time points
+#--------------------------------
+
+
+glm=mpo_t1_unadj_M
+age=mpo_t1_adj_sex_age_M
+adj=mpo_t1_adj_M
+ipcw=mpo_t1_adj_ipcw_M
+
+s.pval_print<-function(t, sample ,glm, age, adj,ipcw){
+ 
+contrasts<-c("C v W", "C v N", "C v N+WSH", "WSH v N+WSH", "N v N+WSH")
+  
+rownames(glm)<-NULL
+glmh1<-rbind(rep(NA, 3), glm[1:3,1:3])
+adjh1<-rbind(rep(NA, 3), adj[1:3,1:3])
+ageh1<-rbind(rep(NA, 3), age[1:3,1:3])
+ipcwh1<-rbind(rep(NA, 3), ipcw[1:3,c(1,3,4)])
+
+glm<-data.frame(glm[,c(1,6)])
+age<-data.frame(age[,c(1,6)])
+adj<-data.frame(adj[,c(1,6)])
+ipcw<-data.frame(ipcw[,c(1,5)])
+
+colnames(glm)<-colnames(age)<-colnames(adj)<-colnames(ipcw)<-c("diff","pval")
+
+glm$adjp<-glm[,2]*3
+age$adjp<-age[,2]*3
+adj$adjp<-adj[,2]*3
+ipcw$adjp<-ipcw[,2]*3
+
+glm$adjp<-ifelse(glm$adjp>0.99,0.99,glm$adjp)
+age$adjp<-ifelse(age$adjp>0.99,0.99,age$adjp)
+adj$adjp<-ifelse(adj$adjp>0.99,0.99,adj$adjp)
+ipcw$adjp<-ifelse(ipcw$adjp>0.99,0.99,ipcw$adjp)
+
+time<-ifelse(t>6,"Year 1", "3 month")
+time<-ifelse(t>13,"Year 2", time)
+
+obj<-data.frame((rep(paste0(sample[t]),5)), (rep(time,5)), contrasts, glm ,age, adj, ipcw)
+for(i in 4:ncol(obj)){
+  obj[,i]<-sprintf("%1.2f",obj[,i])
+}
+
+  return(obj)
+}
+
+sample<-c("Ln myeloperoxidase (ng/ml)",
+"Ln alpha 1-antitrypsin (mg/g)",
+"Ln neopterin (nmol/L)",
+"Ln lactulose (mmol/L)",
+"Ln mannitol (mmol/L)",
+"Ln L:M ratio",
+"Ln myeloperoxidase (ng/ml)",
+"Ln alpha 1-antitrypsin (mg/g)",
+"Ln neopterin (nmol/L)",
+"Ln lactulose (mmol/L)",
+"Ln regenerating gene 1$\\beta$ ($\\mu$g/ml)",
+"Ln mannitol (mmol/L)",
+"Ln L:M ratio",
+"Ln myeloperoxidase (ng/ml)",
+"Ln alpha 1-antitrypsin (mg/g)",
+"Ln neopterin (nmol/L)",
+"Ln lactulose (mmol/L)",
+"Ln mannitol (mmol/L)",
+"Ln L:M ratio"
+)
+
+s.tab7<-rbind(
+  s.pval_print(1, sample, mpo_t1_unadj_M, mpo_t1_adj_sex_age_M, mpo_t1_adj_M, mpo_t1_adj_ipcw_M),
+  s.pval_print(2, sample,aat_t1_unadj_M, aat_t1_adj_sex_age_M, aat_t1_adj_M, aat_t1_adj_ipcw_M),
+  s.pval_print(3, sample,neo_t1_unadj_M, neo_t1_adj_sex_age_M, neo_t1_adj_M, neo_t1_adj_ipcw_M),
+  s.pval_print(4, sample,lac_t1_unadj_M, lac_t1_adj_sex_age_M, lac_t1_adj_M, l1_adj_ipcw_M),
+  s.pval_print(5, sample,man_t1_unadj_M, man_t1_adj_sex_age_M, man_t1_adj_M, m1_adj_ipcw_M),
+  s.pval_print(6, sample,lm_t1_unadj_M, lm_t1_adj_sex_age_M, lm_t1_adj_M, lmr1_adj_ipcw_M),
+  s.pval_print(7, sample,mpo_t2_unadj_M, mpo_t2_adj_sex_age_M, mpo_t2_adj_M, mpo_t2_adj_ipcw_M),
+  s.pval_print(8, sample,aat_t2_unadj_M, aat_t2_adj_sex_age_M, aat_t2_adj_M, aat_t2_adj_ipcw_M),
+  s.pval_print(9, sample,neo_t2_unadj_M, neo_t2_adj_sex_age_M, neo_t2_adj_M, neo_t2_adj_ipcw_M),
+  s.pval_print(10, sample,reg1b_t2_unadj_M, reg1b_t2_adj_sex_age_M, reg1b_t2_adj_M, reg_t2_adj_ipcw_M),
+  s.pval_print(11, sample,lac_t2_unadj_M, lac_t2_adj_sex_age_M, lac_t2_adj_M, l2_adj_ipcw_M),
+  s.pval_print(12, sample,man_t2_unadj_M, man_t2_adj_sex_age_M, man_t2_adj_M, m2_adj_ipcw_M),
+  s.pval_print(13, sample,lm_t2_unadj_M, lm_t2_adj_sex_age_M, lm_t2_adj_M, lmr2_adj_ipcw_M),
+  s.pval_print(14, sample,mpo_t3_unadj_M, mpo_t3_adj_sex_age_M, mpo_t3_adj_M, mpo_t3_adj_ipcw_M),
+  s.pval_print(15, sample,aat_t3_unadj_M, aat_t3_adj_sex_age_M, aat_t3_adj_M, aat_t3_adj_ipcw_M),
+  s.pval_print(16, sample,neo_t3_unadj_M, neo_t3_adj_sex_age_M, neo_t3_adj_M, neo_t3_adj_ipcw_M),
+  s.pval_print(17, sample,lac_t3_unadj_M, lac_t3_adj_sex_age_M, lac_t3_adj_M, l3_adj_ipcw_M),
+  s.pval_print(18, sample,man_t3_unadj_M, man_t3_adj_sex_age_M, man_t3_adj_M, m3_adj_ipcw_M),
+  s.pval_print(19, sample,lm_t3_unadj_M, lm_t3_adj_sex_age_M, lm_t3_adj_M, lmr3_adj_ipcw_M)
+)
+
+#Drop out age_sex and ipcw
+
+s.tab7<-s.tab7[,c(1,2,3,4,5,6,10,11,12)]
+
+  cleantable(s.tab7,2)
+  
+  #Split by time
+  s.tab7.m3<-s.tab7[s.tab7[,2]=="3 month",c(1,3:9)]
+  s.tab7.1<-s.tab7[s.tab7[,2]=="Year 1",c(1,3:9)]
+  s.tab7.2<-s.tab7[s.tab7[,2]=="Year 2",c(1,3:9)]
+  
+      cleantable(s.tab7.m3,2)
+      cleantable(s.tab7.1,2)
+      cleantable(s.tab7.2,2)
+
+
 #--------------------------------
 # Supplementary Table 7: 
 #   Effect of intervention on environmental enteric dysfunction measurements 

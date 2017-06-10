@@ -15,6 +15,7 @@
 # --------------------------------------
 
 rm(list=ls())
+try(detach(package:plyr))
 library(RColorBrewer)
 library(scales)
 library(foreign)
@@ -65,6 +66,18 @@ dim(ad3)
 
 ad2$bp<-3274 + 2413*ad2$TS2
 ad3$bp<-3274 + 2413*ad3$TS3
+
+
+x=ad2$TS2[ad2$tr=="Control"]
+y=ad2$TS2[ad2$tr=="N+WSH"]
+namex="Control"
+namey="N + WSH"
+dstats=NULL
+main="Telomere length (T/S ratio), Year 1"
+letter="a"
+cols=cols[c(1,2)]
+mulab=TRUE
+
 
 # --------------------------------------
 # plotting and analysis function

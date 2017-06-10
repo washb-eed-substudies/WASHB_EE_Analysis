@@ -79,8 +79,7 @@ table1_create<-function(mu, n, sd, mean.ind, vargroup, vargroup.row, Rownames, r
       }
   }
   rownames(dat)<-rownames(mu)
-  #dat<-rnd(dat, round)
-  #dat<-cbind(Rownames,dat)
+
   col1<-NULL
   col2<-NULL
   for(j in 1:nrow(n)){
@@ -233,7 +232,6 @@ n.comp.f<-n.comp.f[2:3]
 colnames(n.comp.f)<-NULL
 
 
-#FIX:
 for(i in c(2:3,5:6,8:11,13:16,18,24,29:30,34,37,41)){
   table1_f[i,1]=paste("~~~",table1_f[i,1],sep="")
 }
@@ -243,7 +241,6 @@ for(i in c(19:23,25:28,31,32,35:36,38:39)){
 
 
 
-#n.comp.f<-c("No. of compounds:")
 
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Tables/")
@@ -255,7 +252,7 @@ cleantable(table1_f,digits=0)
 
 
 #--------------------------------
-#Table 2
+#Table 2 (eLife table 3)
 #--------------------------------
 
 #load objects
@@ -278,9 +275,6 @@ age_t2_blood_M
 age_t3_blood_M
  
 glm_print<-function(obj, t=F){
-  #obj<-ts_t2_unadj_M
-  #obj<-t(as.matrix(rnd(obj[c(1:3,6)],2)))
-  #obj<-ts_t2_unadj_M
   if(t==F){
         obj<-as.data.frame((obj))
   }else{
@@ -340,6 +334,7 @@ cleantable(tab2, 2)
 
 #--------------------------------
 #Table 3 -Effect modification by gender
+# (eLife table 4)
 #--------------------------------
 
 ts_t2_N_subgroup_M
@@ -391,7 +386,7 @@ cleantable(tab3, 2)
 
 
 #--------------------------------
-#Table S1
+#Table S1 (eLife table 2)
 #--------------------------------
 
 #load objects
@@ -402,9 +397,6 @@ load("telo_s.table1.Rdata")
 s.balance.tab.mu_M 
 s.balance.tab.n_M 
 s.balance.tab.sd_M
-#s.balance.tab.mu_M[,2]<-0 
-#s.balance.tab.n_M[,2]<-0  
-#s.balance.tab.sd_M[,2]<-0 
 s.balance.tab.mu_M<-t(s.balance.tab.mu_M[,-2])
 s.balance.tab.n_M <-t(s.balance.tab.n_M[,-2])
 s.balance.tab.sd_M<-t(s.balance.tab.sd_M[,-2]) 
@@ -413,8 +405,7 @@ s.balance.tab.n_M
 s.balance.tab.sd_M
 
 mean.ind<-c(0,1,1,1,0,1,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
-#vargroup<-c(0)
-#vargroup.row<-c(2,5,8,13,20,21,27,32,33,36,37,40,43)
+
 Rownames<-c("No. of compounds",
             "Age (years)",
   "Years of education",
@@ -608,7 +599,7 @@ cleantable(s.table1_f,digits=0)
 
 
 #--------------------------------
-#Table S2
+#Table S2 (eLife table 5)
 #--------------------------------
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
 load("telo_ipcw_res.Rdata")

@@ -18,58 +18,6 @@ library(washb)
 
 
 
-#setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/")
-#load("washb-BD-telo-blind-tr.Rdata")
-#setwd("C:/Users/andre/Dropbox/HBGDki/WASH Benefits Analysis/0. Data/WBB-primary-outcome-datasets/")
-#load("washb-bangladesh-tr.Rdata")
-#d$clusterid<-as.numeric(d$clusterid)
-#treatment<-d
-#levels(treatment$tr)
-#treatment$tr <- factor(treatment$tr,levels=c("Control","Nutrition + WSH"))
-#levels(treatment$tr)
-
-#Load in birthorder
-#setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/")
-#anthro<-read.csv("washb-bangladesh-anthro.csv", stringsAsFactors = T) %>%  
-#       subset(select=c(dataid, childid, sex, birthord)) %>%
-#       mutate(childNo=substr(childid, 2,2)) %>%
-#       distinct(dataid, childid, .keep_all=T)
-#head(anthro) 
-
-#diar<-read.csv("washb-bangladesh-diar.csv", stringsAsFactors = T) %>%  
-#       subset(select=c(dataid, childid, sex)) %>%
-#       mutate(childNo=substr(childid, 2,2)) %>%
-#       distinct(dataid, childid, .keep_all=T)
-#head(diar)  
-
-
-#Load in enrollment data for adjusted analysis
-#setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
-#enrol<-read.csv("washb-bangladesh-enrol+animals.csv",stringsAsFactors = TRUE)
-
-
-#d<-merge(telo, ipcw, by=c("dataid","childNo"), all.x=T, all.y=T)
-
-#Load in HH tracking data 
-#setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/")
-#tracking<-read.csv("washb-bangladesh-track-compound.csv", stringsAsFactors = T)
-#tracking<-subset(tracking, select=c(dataid, miss1reason))
-
-
-#Merge anthro and enrollment data
-#dim(enrol)
-#dim(anthro)
-#mainstudy<-merge(anthro, enrol, by=c("dataid"), all.x=T, all.y=T)
-
-#Merge tracking and enrollment
-#d<-merge(tracking, mainstudy, by=c("dataid"), all.x=T, all.y=T)
-
-
-
-#Merge in treatment
-#d<-left_join(d,treatment, by="clusterid")
-#table(d$tr)
-# table(is.na(d$tr))
  
 
 

@@ -18,23 +18,13 @@ library(washb)
 
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/")
-#load("washb-BD-telo-blind-tr.Rdata")
 load("washb-bangladesh-tr.Rdata")
 d$clusterid<-as.numeric(d$clusterid)
 treatment<-d
-#setwd("C:/Users/andre/Dropbox/HBGDki/WASH Benefits Analysis/0. Data/WBB-primary-outcome-datasets/")
-#load("washb-bangladesh-tr.Rdata")
-#d$clusterid<-as.numeric(d$clusterid)
-#treatment<-d
+table(treatment$tr)
 
-levels(treatment$tr)
-#treatment$tr <- factor(treatment$tr,levels=c("Control","Nutrition + WSH"))
-#levels(treatment$tr)
-#Load in enrollment data for adjusted analysis
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
-enrol<-read.csv("washb-bangladesh-enrol+animals.csv",stringsAsFactors = TRUE)
-#enrol<-read.csv("washb-bangladesh-enrol.csv",stringsAsFactors = TRUE)
 
+#Load in telomere dataset
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew")
 telo<-read.csv("BD-EE-telo.csv")
 
@@ -326,14 +316,6 @@ for(i in 1:ncol(W2)){
   print(table(is.na(W2[,i])))
 }
 
-    
-#Save combined telomere dataset for comparison with Audrie
-#library(stringr)
-#d$childid<-str_pad(d$childid, 6, pad = "0")
-#head(d)    
-
-#setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
-#write.dta(d, "washb-BD-EE-telo_Andrew.dta")
 
     
 
@@ -365,37 +347,7 @@ for(i in 1:ncol(W2)){
     ts_t3_subgroup_M<-ts_t3_subgroup_M[1:2,]
     delta_ts_subgroup_M<-delta_ts_subgroup_M[1:2,]
 
-############################
-#SL analysis of Telomere Quartiles
-############################
-#Each specific association that we measure between an exposure (e.g., telomere length at 12 months after 
-#intervention) and an outcome (e.g., length-for-age Z-scores (LAZ) measured at 24 months after intervention) 
-#will require its own, unique analysis, which could be complicated by non-linear or other complex relationships 
-#between the exposure and outcome. We will adopt the following general approach in each case, recognizing that 
-#it will be tailored to each specific analysis. First, we will conduct exploratory data analyses that plot the 
-#relationship between telomere exposures and length outcomes and summarize the patterns between them using 
-#non-parametric smoothed fits with an ensemble approach called Ssuper learner18 that uses cross-validation 
-#to optimally combine different models in a library, and we will include the following library in the ensemble: 
-#the simple mean, linear models, locally weighted regression (lowess), and natural smoothing splines (generalized 
-#additive models). In concert with this visual examination of each exposure/outcome relationship, we will test for 
-#the bivariate association between the exposure and outcome using a non-parametric Spearman's rank correlation test 
-#with a permutation-based test to determine if it differs from zero. Since the relationship between telomere length 
-#and subsequent growth could be nonlinear, we will summarize unadjusted and adjusted mean LAZ by quartiles of telomere 
-#length.  We will estimated adjusted means in each quartile and their difference using targeted maximum likelihood 
-#estimation (TMLE), which will allow us to flexibly adjust for potential confounding covariates in section 9.2 using 
-#the super learner ensemble, described above19. We will first stratify this analysis by intervention arm, and then 
-#combine the data across arms if the relationships are similar. 
-
-#Merge in anthro data
-
-#Plot using Ben's antibody package
-
-#Divide TS into quartiles
-
-#By arm, permutation test of each quartile to lowest
-
-
- 
+    
 ##########################################
 #Save objects for replication
 ##########################################
