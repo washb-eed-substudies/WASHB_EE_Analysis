@@ -12,7 +12,7 @@
 
 rm(list=ls())
 library(foreign)
-library(dplyr)
+library(tidyverse)
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/")
 
@@ -22,6 +22,9 @@ ml2hr.long<-read.dta("Midline/Urine_2hr_Midline_Cleaned_MatchedwEnrollment_27Jan
 ml5hr.long<-read.dta("Midline/Urine_5hr_Midline_Cleaned_MatchedwEnrollment_27Jan16_stata12.dta")
 el2hr.long<-read.dta("Endline/EE_Endline_Urine_2hr_CLEANED_data_28July2016_stata12.dta")
 el5hr.long<-read.dta("Endline/EE_Endline_Urine_5hr_CLEANED_data_28July2016_stata12.dta")
+
+pre_ml2hr.long<-read.dta("Midline/Pre-LM2Hr_Urine_Main_Midline_Cleaned_8Jan2017_stata12.dta")
+pre_ml5hr.long<-read.dta("Midline/Pre-LM_Urine_Main_Midline_Cleaned_8Jan2017_stata12.dta")
 
 head(bl2hr.long)
 bl2hr<-bl2hr.long %>%
@@ -58,6 +61,18 @@ el5hr<-el5hr.long %>%
       rename(h5.urinevol=q16_hour5) %>%
       select(dataid, childNo, EpisodeNo, h5.urinevol) %>%
       spread(EpisodeNo, h5.urinevol, fill=NA, sep="_h5_")  
+
+head(pre_ml2hr.long)
+pre_ml2hr<-pre_ml2hr.long %>%
+      rename(preh2.urinevol=q44_hour2) %>%
+      select(dataid, childNo, EpisodeNo, preh2.urinevol) %>%
+      spread(EpisodeNo, preh2.urinevol, fill=NA, sep="_preh2_")  
+
+head(pre_ml5hr.long)
+pre_ml5hr<-pre_ml5hr.long %>%
+      rename(h5.urinevol=q16_hour5) %>%
+      select(dataid, childNo, EpisodeNo, h5.urinevol) %>%
+      spread(EpisodeNo, h5.urinevol, fill=NA, sep="_preh5_")  
 
 #Merge urine volume datasets
 #baseline

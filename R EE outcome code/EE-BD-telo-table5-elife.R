@@ -1,11 +1,11 @@
 
 #---------------------------------------
-# EE-BD-telo-table4-elife.R
+# EE-BD-telo-table5-elife.R
 #
 # andrew mertens (amertens@berkeley.edu)
 #
 # The tabulate enrollment variables for 
-# telomere manuscript table 4 - elife format
+# telomere manuscript table 5 - elife format
 #---------------------------------------
 
 
@@ -21,6 +21,11 @@ library(xtable)
 #load objects
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
 load("telo_res.Rdata")
+load("telo_ipcw_res.Rdata")
+
+ts_t2_adj_ipcw_M
+ts_t3_adj_ipcw_M
+delta_ts_adj_ipcw_M
 
 ts_t2_N_subgroup_M
 ts_t3_N_subgroup_M
@@ -127,18 +132,18 @@ glm_print<-function(obj, t=F){
         obj<-as.data.frame(t(obj))
   }
   flag=F
-  if(as.numeric(obj[4])<0.05){obj[4]<-paste0(sprintf("%1.3f",obj[c(4)]),"*")
+  if(as.numeric(obj[6])<0.05){obj[6]<-paste0(sprintf("%1.3f",obj[c(6)]),"*")
                               flag=T}
   if(flag==F){
   obj<-t(as.matrix(c(sprintf("%1.2f",obj[c(1:3)]),
-                     sprintf("%1.3f",obj[c(4)]))))    
+                     sprintf("%1.3f",obj[c(6)]))))    
   }else{
    obj<-t(as.matrix(c(sprintf("%1.2f",obj[c(1:3)]),
-                     obj[c(4)])))       
+                     obj[c(6)])))       
   }
 
   #rownames(obj)<-colnames(obj)<-NULL
-  out<-paste(obj[1]," (",obj[2],",",obj[3],") P=",obj[4], sep="")
+  out<-paste(obj[1],"(",obj[2],",",obj[3],") P=",obj[4], sep="")
   return(out)
 }
 
@@ -163,52 +168,49 @@ rnd<- function(x, n=2) {
 }
 
 
+#--------------------------------
+#Table S2 (eLife table 5)
+#--------------------------------
 
 
+#Drop out var.psi from ipcw objects so that glm_print() works 
+ts_t2_adj_ipcw_M<-ts_t2_adj_ipcw_M[-2,]
+ts_t3_adj_ipcw_M<-ts_t3_adj_ipcw_M[-2,]
+delta_ts_adj_ipcw_M<-delta_ts_adj_ipcw_M[-2,]
 
 
-tab3_long<-data.frame(rbind(ts_t2_N_subgroup_M,ts_t3_N_subgroup_M,delta_ts_N_subgroup_M))
-tab3 <-cbind(tab3_long[c(1,2,5,6,9,10),], tab3_long[c(3,4,7,8,11,12),])
-tab3 <- tab3[,c(2,3,4,7,8)]
-tab3[,c(3,5)]<-rnd(tab3[,c(3,5)],2)
-tab3[,6:8]<-matrix("",6,3)
+tab2<-data.frame(rbind(ts_t2_N_M,ts_t3_N_M,delta_ts_N_M))
+tab2[,3]<-rnd(tab2[,3],2)
+tab2[,4:6]<-matrix("",6,3)
+tab2[2,4]<-glm_print(ts_t2_unadj_M)
+tab2[4,4]<-glm_print(ts_t3_unadj_M)
+tab2[6,4]<-glm_print(delta_ts_unadj_M)
+tab2[2,5]<-glm_print(ts_t2_adj_M)
+tab2[4,5]<-glm_print(ts_t3_adj_M)
+tab2[6,5]<-glm_print(delta_ts_adj_M)
+tab2[2,6]<-glm_print((c(ts_t2_adj_ipcw_M[1:3],NA,NA,ts_t2_adj_ipcw_M[4])), t=T)
+tab2[4,6]<-glm_print((c(ts_t3_adj_ipcw_M[1:3],NA,NA,ts_t3_adj_ipcw_M[4])), t=T)
+tab2[6,6]<-glm_print((c(delta_ts_adj_ipcw_M[1:3],NA,NA,delta_ts_adj_ipcw_M[4])), t=T)
+colnames(tab2)<-NULL
 
+tab2[,1]<-as.character(tab2[,1])
+tab2[c(1,3,5),1]<-rep("~~~Control",3)
+tab2[c(2,4,6),1]<-rep("~~~N+WSH",3)
 
-tab3[2,6]<-glm_print(ts_t2_subgroup_M[1,-c(1,3,6)])
-tab3[4,6]<-glm_print(ts_t3_subgroup_M[1,-c(1,3,6)])
-tab3[6,6]<-glm_print(delta_ts_subgroup_M[1,-c(1,3,6)])
-
-tab3[2,7]<-glm_print(ts_t2_subgroup_M[2,-c(1,3,6)])
-tab3[4,7]<-glm_print(ts_t3_subgroup_M[2,-c(1,3,6)])
-tab3[6,7]<-glm_print(delta_ts_subgroup_M[2,-c(1,3,6)])
-
-tab3[2,8]<-glm_print(ts_t2_subgroup_fit[4,-c(4:5)])
-tab3[4,8]<-glm_print(ts_t3_subgroup_fit[4,-c(4:5)])
-tab3[6,8]<-glm_print(delta_ts_subgroup_fit[4,-c(4:5)])
-
-colnames(tab3)<-NULL
-
-tab3[,1]<-as.character(tab3[,1])
-tab3[c(2,4,6),1]<-rep("N + WSH",3)
-
-# tab3[tab3[,1]=="female",1]<-"Female, "
-# tab3[tab3[,1]=="male",1]<-"Male, "
-# tab3[,2]<-paste0(tab3[,1],tab3[,2])
-# tab3[,1]<-""
-
-blank=rep("",7)
-tab3<-as.matrix(tab3)
-tab3<-rbind(t(c("\\textbf{After 1 year of intervention (age \\textasciitilde 14 months)}",blank)),
-            tab3[1:2,],
-            t(c("\\textbf{After 2 years of intervention (age \\textasciitilde 28 months)}",blank)),
-            tab3[3:4,],
-            t(c("\\textbf{Change in telomere length}",blank)),
-            tab3[5:6,])
-
+blank=rep("",5)
+tab2<-as.matrix(tab2)
+tab2<-rbind(t(c("\\textbf{After 1 year of intervention}",blank)),
+            t(c("\\textbf{(age \\textasciitilde 14 months)}",blank)),
+            tab2[1:2,],
+            t(c("\\textbf{After 2 years of intervention}",blank)),
+            t(c("\\textbf{(age \\textasciitilde 28 months)}",blank)),
+            tab2[3:4,],
+            t(c("\\textbf{Change in Telomere length}",blank)),
+            t(c("\\textbf{between year 1 and 2}",blank)),
+            tab2[5:6,])
+s.tab2<-tab2
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Tables/")
-save(tab3, file="table3.RData")
+save(s.tab2, file="s.table2.RData")
 
-cleantable(tab3, 2)
-
-
+cleantable(s.tab2, 2)
 

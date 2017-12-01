@@ -34,7 +34,9 @@ delta_ts_subgroup_M
 ts_t2_subgroup_M
 ts_t3_subgroup_M
 
-
+ts_t2_subgroup_fit
+ts_t3_subgroup_fit
+delta_ts_subgroup_fit
 
 # Table functions
 cleantable <- function(x,digits) {

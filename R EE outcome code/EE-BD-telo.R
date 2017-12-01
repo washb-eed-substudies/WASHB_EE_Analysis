@@ -310,6 +310,15 @@ cbind(d$TS2,W2) %>% subset(!is.na(d$TS2)) %>% apply(., 2, function(x) print(tabl
     delta_ts_adj_M<-washb_glm(Y=d$TS_delta, tr=d$tr, W=W_delta, id=d$block.x, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), print=T)$TR
 
 
+#Run GLMs for the fully adjusted parameter estimates (no prescreening)
+    ts_t2_adj_noscreen_M<-washb_glm(Y=d$TS2, tr=d$tr, W=W2, forcedW=colnames(W2), id=d$block.x, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), print=T)$TR
+    ts_t3_adj_noscreen_M<-washb_glm(Y=d$TS3, tr=d$tr, W=W3, forcedW=colnames(W3), id=d$block.x, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), print=T)$TR
+    delta_ts_adj_noscreen_M<-washb_glm(Y=d$TS_delta, tr=d$tr, W=W_delta,  forcedW=colnames(W_delta), id=d$block.x, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), print=T)$TR
+
+
+
+
+    
 
 for(i in 1:ncol(W2)){
   print(colnames(W2)[i])
@@ -356,7 +365,9 @@ for(i in 1:ncol(W2)){
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
 save(age_t2_blood_M, age_t3_blood_M, ts_t2_N_M, ts_t3_N_M,ts_t2_unadj_M, ts_t3_unadj_M, ts_t2_adj_sex_age_M, ts_t3_adj_sex_age_M, ts_t2_adj_M, ts_t3_adj_M,
      ts_t2_subgroup_M, ts_t3_subgroup_M, delta_ts_N_M, delta_ts_unadj_M, delta_ts_adj_M, delta_ts_adj_sex_age_M, delta_ts_subgroup_M,
-     ts_t2_N_subgroup_M, ts_t3_N_subgroup_M, delta_ts_N_subgroup_M,
+     ts_t2_N_subgroup_M, ts_t3_N_subgroup_M, delta_ts_N_subgroup_M, ts_t2_subgroup_fit,
+    ts_t3_subgroup_fit,
+    delta_ts_subgroup_fit,
      file="telo_res.Rdata")
 
 
@@ -367,6 +378,36 @@ save(d, file="telo_figure_data.Rdata")
 
 
 
+
+
+#Numerical check for elife publication
+    library(stargazer)
+    stargazer(round(ts_t2_adj_M[c(1:3,6)], 3), type = "text", title="TS2 prescreen", summary=F)
+    stargazer(round(ts_t2_adj_noscreen_M[c(1:3,6)], 3), type = "text", title="TS2 no prescreen", summary=F)
+    stargazer(round(ts_t3_adj_M[c(1:3,6)], 3), type = "text", title="TS3 prescreen", summary=F)
+    stargazer(round(ts_t3_adj_noscreen_M[c(1:3,6)], 3), type = "text", title="TS3 no prescreen", summary=F)
+    stargazer(round(delta_ts_adj_M[c(1:3,6)], 3), type = "text", title="TS delta prescreen", summary=F)
+    stargazer(round(delta_ts_adj_noscreen_M[c(1:3,6)], 3), type = "text", title="TS delta no prescreen", summary=F)
+
+    
+    
+    # In the substudy, a quarter of the fathers were engaged in agriculture. 61% of 
+    # households reported having electricity available, and only 14% had a cement floor.
+    # At enrollment, 72%, 56%, and 9% of households were food secure, owned a latrine, 
+    # and had a handwashing station with soap near the latrine respectively. The primary
+    # water source for the majority of households (72%) was a shallow tubewell. Respondents
+    # reported the occurrence of daily open defecation in 80% of children less than 3 years 
+    # of age. The substudy household enrollment characteristics were similar to the overall 
+    # trial (Table 2)." 
+    
+    mean(d$dadagri, na.rm=T) *100
+    table(d$elec)[2]/sum( table(d$elec))*100
+    table(d$floor) [2]/sum( table(d$floor))*100
+    table(d$hfiacat)[1]/sum( table(d$hfiacat))*100 
+    mean(d$latown, na.rm=T) *100
+    mean(d$hwlatsoap, na.rm=T) *100
+    mean(d$tubewell, na.rm=T)
+    mean(d$odchu3, na.rm=T) *100
 
 
 

@@ -74,10 +74,10 @@ table1_create<-function(mu, n, sd, mean.ind, vargroup, vargroup.row, Rownames, r
       temp<-rnd(temp, 0)
       dat<-rbind(dat, temp)
       }else{
-      temp<-cbind(n[j,1],n[j,1]/(n[1,1])*100,
-                  n[j,2],n[j,2]/(n[1,2])*100,
-                  n[j,3],n[j,3]/(n[1,3])*100,
-                  n[j,4],n[j,4]/(n[1,4])*100)
+      temp<-cbind(n[j,1],mu[j,1]*100,
+                  n[j,2],mu[j,2]*100,
+                  n[j,3],mu[j,3]*100,
+                  n[j,4],mu[j,4]*100)
       temp<-rnd(temp, 0)
       dat<-rbind(dat, temp)
       }
@@ -124,7 +124,7 @@ table1_create<-function(mu, n, sd, mean.ind, vargroup, vargroup.row, Rownames, r
           }
       }
   } 
-  dat<-cbind(Rownames, col1, col2, col4, col4)
+  dat<-cbind(Rownames, col1, col2, col3, col4)
   colnames(dat)=c(" ","Control","WSH","Nutrition","Nutrition + WSH")
   return(dat)
 }
@@ -374,7 +374,7 @@ blank=rep("",6)
 tab2<-as.matrix(tab2)
 tab2<-rbind(t(c("\\textbf{Ln myeloperoxidase (ng/ml)}",blank)),
             tab2[1:4,],
-            t(c("\\textbf{Ln alpha 1-antitrypsin (mg/g)}",blank)),
+            t(c("\\textbf{Ln alpha-1 antitrypsin (mg/g)}",blank)),
             tab2[5:8,],
             t(c("\\textbf{Ln neopterin (nmol/L)}",blank)),
             tab2[9:12,],
@@ -416,7 +416,7 @@ blank=rep("",6)
 tab3<-as.matrix(tab3)
 tab3<-rbind(t(c("\\textbf{Ln myeloperoxidase (ng/ml)}",blank)),
             tab3[1:4,],
-            t(c("\\textbf{Ln alpha 1-antitrypsin (mg/g)}",blank)),
+            t(c("\\textbf{Ln alpha-1 antitrypsin (mg/g)}",blank)),
             tab3[5:8,],
             t(c("\\textbf{Ln neopterin (nmol/L)}",blank)),
             tab3[9:12,],
@@ -457,7 +457,7 @@ blank=rep("",6)
 tab4<-as.matrix(tab4)
 tab4<-rbind(t(c("\\textbf{Ln myeloperoxidase (ng/ml)}",blank)),
             tab4[1:4,],
-            t(c("\\textbf{Ln alpha 1-antitrypsin (mg/g)}",blank)),
+            t(c("\\textbf{Ln alpha-1 antitrypsin (mg/g)}",blank)),
             tab4[5:8,],
             t(c("\\textbf{Ln neopterin (nmol/L)}",blank)),
             tab4[9:12,],
@@ -489,9 +489,9 @@ s.table1_create<-function(mu, n, sd, mean.ind, vargroup, vargroup.row, Rownames,
       temp<-rnd(temp, 0)
       dat<-rbind(dat, temp)
       }else{
-      temp<-cbind(n[j,1],n[j,1]/(n[1,1])*100,
-                  n[j,2],n[j,2]/(n[1,2])*100,
-                  n[j,3],n[j,3]/(n[1,3])*100)
+      temp<-cbind(n[j,1],mu[j,1]*100,
+                  n[j,2],mu[j,2]*100,
+                  n[j,3],mu[j,3]*100)
       temp<-rnd(temp, 0)
       dat<-rbind(dat, temp)
       }
@@ -762,13 +762,13 @@ blank=rep("",7)
 s.tab2<-as.matrix(s.tab2)
 s.tab2<-rbind(t(c("\\textbf{Ln myeloperoxidase (ng/ml)}",blank)),
             s.tab2[1:4,],
-            t(c("\\textbf{Ln alpha 1-antitrypsin (mg/g)}",blank)),
+            t(c("\\textbf{Ln alpha-1 antitrypsin (mg/g)}",blank)),
             s.tab2[5:8,],
             t(c("\\textbf{Ln neopterin (nmol/L)}",blank)),
             s.tab2[9:12,],
             t(c("\\textbf{Ln lactulose (mmol/L)}",blank)),
             s.tab2[13:16,],
-            t(c("\\textbf{Ln mannitol (mmol/L)l}",blank)),
+            t(c("\\textbf{Ln mannitol (mmol/L)}",blank)),
             s.tab2[17:20,],
             t(c("\\textbf{Ln L:M ratio}",blank)),
             s.tab2[21:24,]
@@ -806,7 +806,7 @@ blank=rep("",7)
 s.tab3<-as.matrix(s.tab3)
 s.tab3<-rbind(t(c("\\textbf{Ln myeloperoxidase (ng/ml)}",blank)),
             s.tab3[1:4,],
-            t(c("\\textbf{Ln alpha 1-antitrypsin (mg/g)}",blank)),
+            t(c("\\textbf{Ln alpha-1 antitrypsin (mg/g)}",blank)),
             s.tab3[5:8,],
             t(c("\\textbf{Ln neopterin (nmol/L)}",blank)),
             s.tab3[9:12,],
@@ -814,7 +814,7 @@ s.tab3<-rbind(t(c("\\textbf{Ln myeloperoxidase (ng/ml)}",blank)),
             s.tab3[13:16,],
             t(c("\\textbf{Ln lactulose (mmol/L)}",blank)),
             s.tab3[17:20,],
-            t(c("\\textbf{Ln mannitol (mmol/L)l}",blank)),
+            t(c("\\textbf{Ln mannitol (mmol/L)}",blank)),
             s.tab3[21:24,],
             t(c("\\textbf{Ln L:M ratio}",blank)),
             s.tab3[25:28,]
@@ -844,13 +844,13 @@ blank=rep("",7)
 s.tab4<-as.matrix(s.tab4)
 s.tab4<-rbind(t(c("\\textbf{Ln myeloperoxidase (ng/ml)}",blank)),
             s.tab4[1:4,],
-            t(c("\\textbf{Ln alpha 1-antitrypsin (mg/g)}",blank)),
+            t(c("\\textbf{Ln alpha-1 antitrypsin (mg/g)}",blank)),
             s.tab4[5:8,],
             t(c("\\textbf{Ln neopterin (nmol/L)}",blank)),
             s.tab4[9:12,],
             t(c("\\textbf{Ln lactulose (mmol/L)}",blank)),
             s.tab4[13:16,],
-            t(c("\\textbf{Ln mannitol (mmol/L)l}",blank)),
+            t(c("\\textbf{Ln mannitol (mmol/L)}",blank)),
             s.tab4[17:20,],
             t(c("\\textbf{Ln L:M ratio}",blank)),
             s.tab4[21:24,]
@@ -954,7 +954,7 @@ ipcw=mpo_t1_adj_ipcw_M
 
 s.pval_print<-function(t, sample ,glm, age, adj,ipcw){
  
-contrasts<-c("C v W", "C v N", "C v N+WSH", "WSH v N+WSH", "N v N+WSH")
+contrasts<-c("C v WSH", "C v N", "C v N+WSH", "WSH v N+WSH", "N v N+WSH")
   
 rownames(glm)<-NULL
 glmh1<-rbind(rep(NA, 3), glm[1:3,1:3])
@@ -984,27 +984,36 @@ time<-ifelse(t>13,"Year 2", time)
 
 obj<-data.frame((rep(paste0(sample[t]),5)), (rep(time,5)), contrasts, glm ,age, adj, ipcw)
 for(i in 4:ncol(obj)){
+  sig<-rep("", nrow(obj))
   obj[,i]<-sprintf("%1.2f",obj[,i])
+    obj[,i]<-as.character(obj[,i])
+    
+  if(i==5|i==6|i==8|i==9|i==11|i==12|i==14|i==15){
+  sig<-ifelse(obj[,i]<0.05, paste0(sig, "*"), sig)
+  sig<-ifelse(obj[,i]<0.01, paste0(sig, "*"), sig)
+  sig<-ifelse(obj[,i]<0.001, paste0(sig, "*"), sig)
+  obj[,i]<-paste0(obj[,i],sig)
+    }
 }
 
   return(obj)
 }
 
 sample<-c("Ln myeloperoxidase (ng/ml)",
-"Ln alpha 1-antitrypsin (mg/g)",
+"Ln alpha-1 antitrypsin (mg/g)",
 "Ln neopterin (nmol/L)",
 "Ln lactulose (mmol/L)",
 "Ln mannitol (mmol/L)",
 "Ln L:M ratio",
 "Ln myeloperoxidase (ng/ml)",
-"Ln alpha 1-antitrypsin (mg/g)",
+"Ln alpha-1 antitrypsin (mg/g)",
 "Ln neopterin (nmol/L)",
 "Ln lactulose (mmol/L)",
 "Ln regenerating gene 1$\\beta$ ($\\mu$g/ml)",
 "Ln mannitol (mmol/L)",
 "Ln L:M ratio",
 "Ln myeloperoxidase (ng/ml)",
-"Ln alpha 1-antitrypsin (mg/g)",
+"Ln alpha-1 antitrypsin (mg/g)",
 "Ln neopterin (nmol/L)",
 "Ln lactulose (mmol/L)",
 "Ln mannitol (mmol/L)",
@@ -1050,21 +1059,648 @@ s.tab7<-s.tab7[,c(1,2,3,4,5,6,10,11,12)]
 
 
 #--------------------------------
-# Supplementary Table 7: 
+# Supplementary Table 8: 
+#   L and M %s
+#--------------------------------   
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
+load("pre_recovery_res_M.Rdata")
+load("pre_recovery_ipcw_res_M.Rdata")
+
+
+s.tab8<-rbind(
+  s.glm_print(perl1_N_M, perl1_mn, perl1_unadj_M, perl1_adj_sex_age_M, perl1_adj_M, perl1_adj_ipcw_M),
+  s.glm_print(perm1_N_M, perm1_mn, perm1_unadj_M, perm1_adj_sex_age_M, perm1_adj_M, perm1_adj_ipcw_M),
+  s.glm_print(perl2_N_M, perl2_mn, perl2_unadj_M, perl2_adj_sex_age_M, perl2_adj_M, perl2_adj_ipcw_M),
+  s.glm_print(perm2_N_M, perm2_mn, perm2_unadj_M, perm2_adj_sex_age_M, perm2_adj_M, perm2_adj_ipcw_M),
+  s.glm_print(perl3_N_M, perl3_mn, perl3_unadj_M, perl3_adj_sex_age_M, perl3_adj_M, perl3_adj_ipcw_M),
+  s.glm_print(perm3_N_M, perm3_mn, perm3_unadj_M, perm3_adj_sex_age_M, perm3_adj_M, perm3_adj_ipcw_M)
+)
+
+blank=rep("",7)
+s.tab8<-as.matrix(s.tab8)
+s.tab8<-rbind(t(c("\\textbf{Lactulose recovery (\\%) at child age 3 months}",blank)),
+            s.tab8[1:4,],
+            t(c("\\textbf{Mannitol recovery (\\%) at child age 3 months}",blank)),
+            s.tab8[5:8,],
+            t(c("\\textbf{Lactulose recovery (\\%) at child age 14 months}",blank)),
+            s.tab8[9:12,],
+            t(c("\\textbf{Mannitol recovery (\\%) at child age 14 months}",blank)),
+            s.tab8[13:16,],
+            t(c("\\textbf{Lactulose recovery (\\%) at child age 28 months}",blank)),
+            s.tab8[17:20,],
+            t(c("\\textbf{Mannitol recovery (\\%) at child age 28 months}",blank)),
+            s.tab8[21:24,]
+            )
+
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Tables/")
+save(s.tab8, file="EE-BD-s.table8.RData")
+
+cleantable(s.tab8, 2)
+
+      
+#--------------------------------
+# Supplementary Table 9: 
 #   Effect of intervention on environmental enteric dysfunction measurements 
 # after 2 years of intervention using inverse probability weighting
 #--------------------------------
 
 #--------------------------------
-# Supplementary Table 8: 
+# Supplementary Table 10: 
 #   Absolute concentrations of environmental enteric dysfunction measurements 
 #--------------------------------
 
 #--------------------------------
-# Supplementary Table 9 (Or should this be the first one?): 
+# Supplementary Table 11 (Or should this be the first one?): 
 #   Balance  of enrollment characteristics between EED subgroup 
 #   and the main trial population
 #--------------------------------
+
+
+
+
+#--------------------------------
+#Table S1 (eLife table 2)
+#--------------------------------
+
+#load objects
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
+load("telo_s.table1.Rdata")
+
+
+s.balance.tab.mu_M 
+s.balance.tab.n_M 
+s.balance.tab.sd_M
+s.balance.tab.mu_M<-t(s.balance.tab.mu_M[,-2])
+s.balance.tab.n_M <-t(s.balance.tab.n_M[,-2])
+s.balance.tab.sd_M<-t(s.balance.tab.sd_M[,-2]) 
+s.balance.tab.mu_M 
+s.balance.tab.n_M 
+s.balance.tab.sd_M
+
+mean.ind<-c(0,1,1,1,0,1,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+
+Rownames<-c("No. of compounds",
+            "Age (years)",
+  "Years of education",
+  "Years of education",
+  "Works in agriculture",
+  "Number of persons"
+  ,"Has electricity"
+  ,"Has a cement floor"
+  ,"Acres of agricultural land owned",
+      "Shallow tubewell primary water source",
+    "Stored water observed at home",
+    "Reported treating water yesterday",
+    "Distance (mins) to primary water source",
+        "Adult men",
+        "Adult women",
+        "Children: 8-\\textless 15 years",
+        "Children: 3-\\textless 8 years",
+        "Children: 0-\\textless 3 years",
+        "Owned",
+        "Concrete slab",
+        "Functional water seal",
+        "Visible stool on slab or floor",
+        "Owned a potty",
+        "House",
+        "Child's play area",
+        "Has water",
+        "Has soap",
+        "Has water",
+        "Has soap",
+    "Household is food secure"
+  )
+
+
+
+
+
+#--------------------------------
+#Table S9
+#--------------------------------
+tab<-table1_create(mu=balance.tab.mu_M, 
+                   n=balance.tab.n_M, 
+                   sd=balance.tab.sd_M, 
+                   mean.ind=mean.ind,
+                   Rownames=Rownames,
+                   round=1)
+tab
+
+main.control<-c("1382",
+                "24 (5)",
+                "6 (3)",
+                "5 (4)",
+                "414 (30\\%)",
+                "5 (2)",
+                "784 (57\\%)",
+                "145 (10\\%)",
+                "0.15 (0.21)",
+                "1038 (75\\%)",
+                "666 (48\\%)",
+                "4 (0\\%)",
+                "1 (3)",
+                "97 (7\\%)",
+                "62 (4\\%)",
+                "53 (10\\%)",
+                "267 (38\\%)",
+                "245 (82\\%)",
+                "750 (54\\%)",
+                "1251 (95\\%)",
+                "358 (31\\%)",
+                "625 (48\\%)",
+                "61 (4\\%)",
+                "114 (8\\%)",
+                "21 (2\\%)",
+                "178 (14\\%)",
+                "88 (7\\%)",
+                "118 (9\\%)",
+                "33 (3\\%)",
+                "932 (67\\%)"
+                ) 
+
+main.WSH<-c("702",
+"24 (5)",
+"6 (3)",
+"5 (4)",
+"216 (31\\%)",
+"5 (2)",
+"426 (61\\%)",
+"77 (11\\%)",
+"0.15 (0.23)",
+"546 (78\\%)",
+"304 (43\\%)",
+"0 (0\\%)",
+"1 (5)",
+"54 (8\\%)",
+"29 (4\\%)",
+"30 (10\\%)",
+"137 (38\\%)",
+"123 (79\\%)",
+"373 (53\\%)",
+"620 (993\\%)",
+"152 (26\\%)",
+"289 (44\\%)",
+"27 (4\\%)",
+"48 (7\\%)",
+"7 (1\\%)",
+"67 (10\\%)",
+"42 (7\\%)",
+"61 (9\\%)",
+"15 (2\\%)",
+"482 (69\\%)"
+)
+
+
+main.N<-c(
+"699",
+"24 (5)",
+"6 (3)",
+"5 (4)",
+"232 (33\\%)",
+"5 (2)",
+"409 (59\\%)",
+"67 (10\\%)",
+"0.16 (0.27\\%)",
+"519 (74\\%)",
+"301 (43\\%)",
+"0 (0\\%)",
+"1 (3)",
+"59 (9\\%)",
+"39 (6\\%)",
+"23 (8\\%)",
+"129 (39\\%)",
+"128 (85\\%)",
+"377 (54\\%)",
+"620 (94\\%)",
+"183 (31\\%)",
+"331 (51\\%)",
+"36 (5\\%)",
+"58 (8\\%)",
+"8 (1\\%)",
+"62 (10\\%)",
+"32 (5\\%)",
+"61 (9\\%)",
+"23 (4\\%)",
+"479 (69\\%)") 
+
+main.WSHN<-c("686",
+                "24 (6)",
+                "6 (3)",
+                "5 (4)",
+                "207 (30\\%)",
+                "5 (2)",
+                "412 (60\\%)",
+                "72 (10\\%)",
+                "0.14 (0.38)",
+                "504 (73\\%)",
+                "331 (48\\%)",
+                "2 (0\\%)",
+                "1 (2)",
+                "50 (7\\%)",
+                "24 (4\\%)",
+                "28 (10\\%)",
+                "134 (37\\%)",
+                "123 (88\\%)",
+                "367 (53\\%)",
+                "621 (94\\%)",
+                "155 (27\\%)",
+                "298 (46\\%)",
+                "30 (4\\%)",
+                "49 (7\\%)",
+                "7 (1\\%)",
+                "72 (11\\%)",
+                "36 (6\\%)",
+                "60 (9\\%)",
+                "18 (3\\%)",
+                "485 (71\\%)"
+                ) 
+
+
+dim(tab)
+length(main.control)
+length(main.N)
+length(main.WSH)
+length(main.WSHN)
+
+tab<-cbind(tab[,1],main.control,main.WSH,main.N,main.WSHN,tab[,2:5])
+
+
+#Add in variable group labels
+blank=rep("",4)
+
+s.n.comp.f<-tab[1,]
+tab<-tab[-1,]
+
+s.table9_f=   rbind(
+               c("\\textbf{Maternal}",blank,blank),
+               tab[c(1:2),],
+               c( "\\textbf{Paternal}",blank,blank),
+               tab[c(3:4),],
+               c("\\textbf{Household}",blank,blank),
+               tab[c(5:8),],
+               c("\\textbf{Drinking Water}",blank,blank),
+               tab[c(9:12),],
+               c("\\textbf{Sanitation}",blank,blank),
+               c("Reported daily open defecation",blank,blank),
+               tab[c(13:17),],
+               c("Latrine",blank,blank),
+               tab[c(18:22),],
+               c("Human feces observed in the",blank,blank),
+               tab[c(23:24),],
+               c("\\textbf{Handwashing}",blank,blank),
+               c("Within 6 steps of latrine",blank,blank),
+               tab[c(25:26),],
+               c("Within 6 steps of kitchen",blank,blank),
+               tab[c(27:28),],
+               c("\\textbf{Nutrition}",blank,blank),
+               tab[c(29),])
+
+rownames(s.table9_f)=NULL
+
+s.table9_f
+
+
+
+
+
+#FIX:
+for(i in c(2:3,5:6,8:11,13:16,18,24,29:30,34,37,41)){
+  s.table9_f[i,1]=paste("~~~",s.table9_f[i,1],sep="")
+}
+for(i in c(19:23,25:28,31,32,35:36,38:39)){
+  s.table9_f[i,1]=paste("~~~~~",s.table9_f[i,1],sep="")
+}
+
+
+
+#n.comp.f<-c("No. of compounds:")
+
+
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Tables/")
+save(s.n.comp.f, s.table9_f, file="s.table9_f.RData")
+
+
+#cleantable(n.comp.f,digits=0)
+cleantable(s.table9_f,digits=0)
+
+
+
+
+
+#--------------------------------
+#Table S10:
+# Can you create another supplementary table with geometric means and 95%CI of each biomarker at each age/time point?
+# biomarkers in the table: mpo, neo, reg, aat, lactulose concentration, mannitol concentration, %L recovery, %M recovery, LMR
+# And it'd be best to include an overall geo mean of each biomarker across all time points in the table, in addition to a means 
+# at each time point individually (other EED studies report these absolute concentrations). 
+#--------------------------------
+
+#load objects
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
+load("urine_overall_means.Rdata")
+load("stool_overall_means.Rdata")
+
+d<-rbind(stool_overall_mn[,-c(4:5)], urine_overall_mn[,-c(4:5)])
+tab_overall<-d[c(1:4,15:19),]
+
+tab<-data.frame(biomarker=tab_overall[,1],
+                N=rep(NA,9),
+                mean=rep(NA,9),
+                ci.lb=rep(NA,9),
+                ci.ub=rep(NA,9),
+                N1=rep(NA,9),
+                mean1=rep(NA,9),
+                ci.lb1=rep(NA,9),
+                ci.ub1=rep(NA,9),
+                N2=rep(NA,9),
+                mean2=rep(NA,9),
+                ci.lb2=rep(NA,9),
+                ci.ub2=rep(NA,9),
+                N3=rep(NA,9),
+                mean3=rep(NA,9),
+                ci.lb3=rep(NA,9),
+                ci.ub3=rep(NA,9))
+tab[,c(2:5)]<-d[c(1:4,15:19),2:5]                
+tab[c(1:3,5:9),c(6:9)]<-d[c(5,8,11,20,23,26,29,32),2:5]                
+tab[,c(10:13)]<-d[c(6,9,12,14,21,24,27,30,33),2:5]                
+tab[c(1:3,5:9),c(14:17)]<-d[c(7,10,12,20,25,28,31,34),2:5]                
+
+#convert back to raw scale from log scale
+for(i in c(3,4,5,7,8,9,11,12,13,15,16,17)){
+  tab[,i]<-exp(tab[,i])
+}
+
+
+tab[,3] <- paste(sprintf("%1.2f",tab[,3])," (",sprintf("%1.2f",tab[,4]),",",sprintf("%1.2f",tab[,5]),")", sep="")
+tab[,7] <- paste(sprintf("%1.2f",tab[,7])," (",sprintf("%1.2f",tab[,8]),",",sprintf("%1.2f",tab[,9]),")", sep="")
+tab[,11] <- paste(sprintf("%1.2f",tab[,11])," (",sprintf("%1.2f",tab[,12]),",",sprintf("%1.2f",tab[,13]),")", sep="")
+tab[,15] <- paste(sprintf("%1.2f",tab[,15])," (",sprintf("%1.2f",tab[,16]),",",sprintf("%1.2f",tab[,17]),")", sep="")
+
+tab<-tab[,-c(4,5,8,9,12,13,16,17)]
+tab[4,c(4,5,8,9)]<-"---"
+tab<-tab[c(2,1,3,4,5,7,8,9,6),]
+tab
+
+tab[,1]<-c(
+"Myeloperoxidase (ng/ml)",
+"Alpha-1 antitrypsin (mg/g)",
+"Neopterin (nmol/L)",
+"Regenerating gene 1$\\beta$ ($\\mu$g/ml)",
+"Lactulose (mmol/L)",
+"Mannitol (mmol/L)",
+"Lactulose (\\%)",
+"Mannitol (\\%)",
+"Ln L:M ratio"
+)
+
+
+
+cleantable(tab,digits=0)
+
+
+
+
+
+
+#--------------------------------
+#Supplementary Table 11: 
+#   Effect of intervention on environmental enteric dysfunction measurements 
+# at follow-up 1 
+#--------------------------------
+
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
+load("urine_sens_res_N_M.Rdata")
+load("urine_sens_res_means.Rdata")
+load("urine_sens_res_unadj_M.Rdata")
+load("urine_sens_res_adj_sex_age_M.Rdata")
+load("urine_sens_res_adj_M.Rdata")
+load("urine_ipcw_sens_res.Rdata")
+
+
+
+
+s.glm_print<-function(n, mean, glm, age, adj,ipcw, t=F){
+ # n<-aat_t1_N_M
+ # mean<-aat_t1_mn
+ # glm<-aat_t1_unadj_M
+ # adj<-aat_t1_adj_M
+ # ipcw<-aat_t1_adj_ipcw_M
+ 
+rownames(glm)<-NULL
+glmh1<-rbind(rep(NA, 3), glm[1:3,1:3])
+adjh1<-rbind(rep(NA, 3), adj[1:3,1:3])
+ageh1<-rbind(rep(NA, 3), age[1:3,1:3])
+ipcwh1<-rbind(rep(NA, 3), ipcw[1:3,c(1,3,4)])
+
+
+obj<-cbind(n[,1:2], mean[,2:3], glmh1 ,ageh1, adjh1, ipcwh1)
+
+  if(t==F){
+        obj<-as.data.frame((obj))
+  }else{
+        obj<-as.data.frame(t(obj))
+  }
+
+obj[,3]<-sprintf("%1.2f",obj[,3])
+obj[,4]<-sprintf("%1.2f",obj[,4])
+obj[2:4,5]<-sprintf("%1.2f",obj[2:4,5])
+obj[2:4,6]<-sprintf("%1.2f",obj[2:4,6])
+obj[2:4,7]<-sprintf("%1.2f",obj[2:4,7])
+obj[2:4,8]<-sprintf("%1.2f",obj[2:4,8])
+obj[2:4,9]<-sprintf("%1.2f",obj[2:4,9])
+obj[2:4,10]<-sprintf("%1.2f",obj[2:4,10])
+obj[2:4,11]<-sprintf("%1.2f",obj[2:4,11])
+obj[2:4,12]<-sprintf("%1.2f",obj[2:4,12])
+obj[2:4,13]<-sprintf("%1.2f",obj[2:4,13])
+obj[2:4,14]<-sprintf("%1.2f",obj[2:4,14])
+obj[2:4,15]<-sprintf("%1.2f",obj[2:4,15])
+obj[2:4,16]<-sprintf("%1.2f",obj[2:4,16])
+  #Add later if p-val is needed:
+  #if(as.numeric(obj[6])<0.05){obj[6]<-paste0(sprintf("%1.3f",obj[c(6)]),"*")
+  #                            flag=T}
+
+  rownames(obj)<-colnames(obj)<-NULL
+  
+  obj[,17]<-paste(obj[,5]," (",obj[,6],",",obj[,7],")", sep="")
+  obj[,18]<-paste(obj[,8]," (",obj[,9],",",obj[,10],")", sep="")
+  obj[,19]<-paste(obj[,11]," (",obj[,12],",",obj[,13],")", sep="")
+  obj[,20]<-paste(obj[,14]," (",obj[,15],",",obj[,16],")", sep="")
+
+  obj<-obj[,-c(5:16)]
+  obj[1,5]<-""
+  obj[1,6]<-""
+  obj[1,7]<-""
+  obj[1,8]<-""
+
+  return(obj)
+}
+
+sens.tab<-rbind(
+  s.glm_print(sens_lac_t1_N_M, sens_lac_t1_mn, sens_lac_t1_unadj_M, sens_lac_t1_adj_sex_age_M, sens_lac_t1_adj_M, sens_l1_adj_ipcw_M),
+  s.glm_print(sens_man_t1_N_M, sens_man_t1_mn, sens_man_t1_unadj_M, sens_man_t1_adj_sex_age_M, sens_man_t1_adj_M, sens_m1_adj_ipcw_M),
+  s.glm_print(sens_lm_t1_N_M, sens_lm_t1_mn, sens_lm_t1_unadj_M, sens_lm_t1_adj_sex_age_M, sens_lm_t1_adj_M, sens_lmr1_adj_ipcw_M),
+  
+  s.glm_print(sens_lac_t2_N_M, sens_lac_t2_mn, sens_lac_t2_unadj_M, sens_lac_t2_adj_sex_age_M, sens_lac_t2_adj_M, sens_l1_adj_ipcw_M),
+  s.glm_print(sens_man_t2_N_M, sens_man_t2_mn, sens_man_t2_unadj_M, sens_man_t2_adj_sex_age_M, sens_man_t2_adj_M, sens_m1_adj_ipcw_M),
+  s.glm_print(sens_lm_t2_N_M, sens_lm_t2_mn, sens_lm_t2_unadj_M, sens_lm_t2_adj_sex_age_M, sens_lm_t2_adj_M, sens_lmr1_adj_ipcw_M),
+
+  s.glm_print(sens_lac_t3_N_M, sens_lac_t3_mn, sens_lac_t3_unadj_M, sens_lac_t3_adj_sex_age_M, sens_lac_t3_adj_M, sens_l1_adj_ipcw_M),
+  s.glm_print(sens_man_t3_N_M, sens_man_t3_mn, sens_man_t3_unadj_M, sens_man_t3_adj_sex_age_M, sens_man_t3_adj_M, sens_m1_adj_ipcw_M),
+  s.glm_print(sens_lm_t3_N_M, sens_lm_t3_mn, sens_lm_t3_unadj_M, sens_lm_t3_adj_sex_age_M, sens_lm_t3_adj_M, sens_lmr1_adj_ipcw_M)
+  )
+
+
+
+
+blank=rep("",7)
+sens.tab<-as.matrix(sens.tab)
+sens.tab<-rbind(
+            t(c("\\textbf{Ln lactulose (mmol/L) at child age 3 months}",blank)),
+            sens.tab[1:4,],
+            t(c("\\textbf{Ln mannitol (mmol/L) at child age 3 months}",blank)),
+            sens.tab[5:8,],
+            t(c("\\textbf{Ln L:M ratio at child age 3 months}",blank)),
+            sens.tab[9:12,],
+            t(c("\\textbf{Ln lactulose (mmol/L) at child age 14 months}",blank)),
+            sens.tab[13:16,],
+            t(c("\\textbf{Ln mannitol (mmol/L) at child age 14 months}",blank)),
+            sens.tab[17:20,],
+            t(c("\\textbf{Ln L:M ratio at child age 14 months}",blank)),
+            sens.tab[21:24,],
+             t(c("\\textbf{Ln lactulose (mmol/L) at child age 28 months}",blank)),
+            sens.tab[25:28,],
+            t(c("\\textbf{Ln mannitol (mmol/L) at child age 28 months}",blank)),
+            sens.tab[29:32,],
+            t(c("\\textbf{Ln L:M ratio at child age 28 months}",blank)),
+            sens.tab[33:36,]
+            )
+
+
+# sens.tab<-rbind( 
+#             t(c("\\textbf{Ln lactulose}",blank)),
+#             t(c("\\textbf{(mmol/L) at child}",blank)),
+#             t(c("\\textbf{age 3 months}",blank)),
+#             sens.tab[1:4,],
+#             t(c("\\textbf{Ln mannitol}",blank)),
+#                         t(c("\\textbf{(mmol/L) at child}",blank)),
+#             t(c("\\textbf{age 3 months}",blank)),
+#             sens.tab[5:8,],
+#             t(c("\\textbf{Ln L:M ratio}",blank)),
+#                         t(c("\\textbf{(mmol/L) at child}",blank)),
+#             t(c("\\textbf{age 3 months}",blank)),
+#             sens.tab[9:12,],
+#             t(c("\\textbf{Ln lactulose}",blank)),
+#                         t(c("\\textbf{(mmol/L) at child}",blank)),
+#             t(c("\\textbf{age 14 months}",blank)),
+#             sens.tab[13:16,],
+#             t(c("\\textbf{Ln mannitol}",blank)),
+#                         t(c("\\textbf{(mmol/L) at child}",blank)),
+#             t(c("\\textbf{age 14 months}",blank)),
+#             sens.tab[17:20,],
+#             t(c("\\textbf{Ln L:M ratio}",blank)),
+#                         t(c("\\textbf{(mmol/L) at child}",blank)),
+#             t(c("\\textbf{age 14 months}",blank)),
+#             sens.tab[21:24,],
+#              t(c("\\textbf{Ln lactulose}",blank)),
+#                         t(c("\\textbf{(mmol/L) at child}",blank)),
+#             t(c("\\textbf{age 28 months}",blank)),
+#             sens.tab[25:27,],
+#             t(c("\\textbf{Ln mannitol}",blank)),
+#                         t(c("\\textbf{(mmol/L) at child}",blank)),
+#             t(c("\\textbf{age 28 months}",blank)),
+#             sens.tab[28:30,],
+#             t(c("\\textbf{Ln L:M ratio}",blank)),
+#                         t(c("\\textbf{(mmol/L) at child}",blank)),
+#             t(c("\\textbf{age 28 months}",blank)),
+#             sens.tab[31:33,]
+#             )
+
+# sens.tab<-rbind( 
+#             t(c("\\textbf{Ln lactulose (mmol/L)}",blank)),
+#             t(c("\\textbf{at child age 3 months}",blank)),
+#             sens.tab[1:4,],
+#             t(c("\\textbf{Ln mannitol (mmol/L)}",blank)),
+#             t(c("\\textbf{at child age 3 months}",blank)),
+#             sens.tab[5:8,],
+#             t(c("\\textbf{Ln L:M ratio}",blank)),
+#             t(c("\\textbf{at child age 3 months}",blank)),
+#             sens.tab[9:12,],
+#             t(c("\\textbf{Ln lactulose (mmol/L)}",blank)),
+#             t(c("\\textbf{at child age 14 months}",blank)),
+#             sens.tab[13:16,],
+#             t(c("\\textbf{Ln mannitol (mmol/L)}",blank)),
+#             t(c("\\textbf{at child age 14 months}",blank)),
+#             sens.tab[17:20,],
+#             t(c("\\textbf{Ln L:M ratio}",blank)),
+#             t(c("\\textbf{at child age 14 months}",blank)),
+#             sens.tab[21:24,],
+#              t(c("\\textbf{Ln lactulose (mmol/L)}",blank)),
+#             t(c("\\textbf{at child age 28 months}",blank)),
+#             sens.tab[25:27,],
+#             t(c("\\textbf{Ln mannitol (mmol/L)}",blank)),
+#             t(c("\\textbf{at child age 28 months}",blank)),
+#             sens.tab[28:30,],
+#             t(c("\\textbf{Ln L:M ratio}",blank)),
+#             t(c("\\textbf{at child age 28 months}",blank)),
+#             sens.tab[31:33,]
+#             )
+
+
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Tables/")
+save(sens.tab, file="EE-BD-sens.table.RData")
+
+cleantable(sens.tab, 2)
+
+
+
+
+
+
+#--------------------------------
+# Supplementary Table 12: 
+#   L and M %s sensitivity analysis
+#--------------------------------   
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
+load("pre_recovery_sens_res_M.Rdata")
+load("pre_recovery_ipcw_sens_res_M.Rdata")
+
+
+sens.tab12<-rbind(
+  s.glm_print(sens_perl1_N_M, sens_perl1_mn, sens_perl1_unadj_M, sens_perl1_adj_sex_age_M, sens_perl1_adj_M, sens_perl1_adj_ipcw_M),
+  s.glm_print(sens_perm1_N_M, sens_perm1_mn, sens_perm1_unadj_M, sens_perm1_adj_sex_age_M, sens_perm1_adj_M, sens_perm1_adj_ipcw_M),
+  s.glm_print(sens_perl2_N_M, sens_perl2_mn, sens_perl2_unadj_M, sens_perl2_adj_sex_age_M, sens_perl2_adj_M, sens_perl2_adj_ipcw_M),
+  s.glm_print(sens_perm2_N_M, sens_perm2_mn, sens_perm2_unadj_M, sens_perm2_adj_sex_age_M, sens_perm2_adj_M, sens_perm2_adj_ipcw_M),
+  s.glm_print(sens_perl3_N_M, sens_perl3_mn, sens_perl3_unadj_M, sens_perl3_adj_sex_age_M, sens_perl3_adj_M, sens_perl3_adj_ipcw_M),
+  s.glm_print(sens_perm3_N_M, sens_perm3_mn, sens_perm3_unadj_M, sens_perm3_adj_sex_age_M, sens_perm3_adj_M, sens_perm3_adj_ipcw_M)
+)
+
+blank=rep("",7)
+sens.tab12<-as.matrix(sens.tab12)
+sens.tab12<-rbind(t(c("\\textbf{Lactulose recovery (\\%) at child age 3 months}",blank)),
+            sens.tab12[1:4,],
+            t(c("\\textbf{Mannitol recovery (\\%) at child age 3 months}",blank)),
+            sens.tab12[5:8,],
+            t(c("\\textbf{Lactulose recovery (\\%) at child age 14 months}",blank)),
+            sens.tab12[9:12,],
+            t(c("\\textbf{Mannitol recovery (\\%) at child age 14 months}",blank)),
+            sens.tab12[13:16,],
+            t(c("\\textbf{Lactulose recovery (\\%) at child age 28 months}",blank)),
+            sens.tab12[17:20,],
+            t(c("\\textbf{Mannitol recovery (\\%) at child age 28 months}",blank)),
+            sens.tab12[21:24,]
+            )
+
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Tables/")
+save(sens.tab12, file="EE-BD-sens.table12.RData")
+
+cleantable(sens.tab12, 2)
+
+
+
+
+
+
+
 
 
 

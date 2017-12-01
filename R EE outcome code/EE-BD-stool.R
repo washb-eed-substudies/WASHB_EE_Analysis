@@ -258,6 +258,25 @@ neo_t3_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=(.$neo3), id=
 reg1b2_t2_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=(.$reg1b2), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
 
 
+#Means and 95% CI's not stratified by arm
+overall_mn_by_round<- 
+  d %>% subset(., select=c(dataid, childNo, block.x, neo1,mpo1,aat1,neo2,mpo2,aat2,reg1b2,neo3,mpo3,aat3)) %>%
+  gather(key, value, -dataid, -childNo, -block.x) %>%
+  mutate(biomarker = substr(key, 1,3)) %>% 
+  group_by(biomarker) %>% 
+  do(as.data.frame(washb_mean(Y=log(.$value), id=.$block.x, print = F))) %>% 
+  ungroup %>% as.data.frame
+
+overall_mn<- 
+  d %>% subset(., select=c(dataid, childNo, block.x, neo1,mpo1,aat1,neo2,mpo2,aat2,reg1b2,neo3,mpo3,aat3)) %>%
+  gather(key, value, -dataid, -childNo, -block.x) %>%
+  group_by(key) %>% 
+  do(as.data.frame(washb_mean(Y=log(.$value), id=.$block.x, print = F))) %>% 
+  ungroup %>% as.data.frame
+colnames(overall_mn)[1]<-"biomarker"
+stool_overall_mn <- rbind(overall_mn_by_round, overall_mn)
+save(stool_overall_mn, file="stool_overall_means.Rdata")
+
 
 
 #Create empty matrix to hold the glm results:
@@ -653,6 +672,8 @@ save(aat_t1_mn, aat_t2_mn, aat_t3_mn,
      neo_t1_absmn, neo_t2_absmn, neo_t3_absmn, 
      file="stool_res_means.Rdata")
 
+save(stool_overall_mn, file="stool_overall_means.Rdata")
+
 save(neo_t1_unadj_M, mpo_t1_unadj_M, aat_t1_unadj_M,
      neo_t2_unadj_M, mpo_t2_unadj_M, aat_t2_unadj_M, reg1b_t2_unadj_M,
      neo_t3_unadj_M, mpo_t3_unadj_M, aat_t3_unadj_M, 
@@ -668,3 +689,6 @@ save(neo_t1_adj_M, mpo_t1_adj_M, aat_t1_adj_M,
      neo_t3_adj_M, mpo_t3_adj_M, aat_t3_adj_M, 
      file="stool_res_adj_M.Rdata")
 
+#save data for figures
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
+save(d, file="stool_figure_data.Rdata")

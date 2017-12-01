@@ -5,7 +5,8 @@
 # andrew mertens (amertens@berkeley.edu)
 #
 # The urine-based biomarker outcomes for 
-# EED Bangladesh sub-study
+# EED Bangladesh sub-study- sensitivity analysis
+# of dropping leaky and contaminated samples
 #---------------------------------------
 
 ###Load in data
@@ -29,7 +30,7 @@ treatment<-d
 #Load in L/M outcomes
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew")
 outcomes<-read.dta("washb-BD-EE-urine-outcomes-stata12.dta")
-load("urine_volume.Rdata")
+load("urine_volume_sensitivity.Rdata")
 
 #Load in urine survey data
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew/")
@@ -80,7 +81,36 @@ dim(d)
 table(is.na(d$svydate)) 
 
 
+#Tablulate amount of contamination at each round
+tab1<-table(d$bl_contaminated2hr>0 | d$bl_contaminated5hr>0)
+tab2<-table(d$ml_contaminated2hr>0 | d$ml_contaminated5hr>0)
+tab3<-table(d$el_contaminated2hr>0 | d$el_contaminated5hr>0)
 
+
+tab1<-table((d$bl_contaminated2hr>0 & !is.na(d$bl_contaminated2hr)) | (d$bl_contaminated5hr>0 & !is.na(d$bl_contaminated5hr)))
+tab2<-table((d$ml_contaminated2hr>0 & !is.na(d$ml_contaminated2hr)) | (d$ml_contaminated5hr>0 & !is.na(d$ml_contaminated5hr)))
+tab3<-table((d$el_contaminated2hr>0 & !is.na(d$el_contaminated2hr)) | (d$el_contaminated5hr>0 & !is.na(d$el_contaminated5hr)))
+
+
+tab1
+tab1[2]/(tab1[1]+tab1[2])*100
+tab2
+tab2[2]/(tab2[1]+tab2[2])*100
+tab3
+tab3[2]/(tab3[1]+tab3[2])*100
+
+
+#Drop out contaminated samples by setting outcomes to 0 if either 2hr or
+#5hr experienced contamination
+d$Lact1[d$bl_contaminated2hr>0 | d$bl_contaminated5hr>0]<-NA
+d$Mann1[d$bl_contaminated2hr>0 | d$bl_contaminated5hr>0]<-NA
+
+d$Lact2[d$ml_contaminated2hr>0 | d$ml_contaminated5hr>0]<-NA
+d$Mann2[d$ml_contaminated2hr>0 | d$ml_contaminated5hr>0]<-NA
+
+d$Lact3[d$el_contaminated2hr>0 | d$el_contaminated5hr>0]<-NA
+d$Mann3[d$el_contaminated2hr>0 | d$el_contaminated5hr>0]<-NA
+ 
 
 #table number of fully collected aliqouts by arm and year
 head(d)
@@ -191,57 +221,6 @@ age_t3_urine_M<-age_t3_urine_M[,c(1,2,4,3,5,7,6)]
 
 
 
-#Temporarily generate fake outcome data for L and M
-#Mannitol: 1228.8 (1230.07) ug/ml and Lactulose: 245.3 (265.08) ug/ml 
-#set.seed(12345)
-#d$Lact1<-round(abs(rnorm(n=nrow(d), mean=1228.8, sd=1230.07)),4)
-#d$Mann1<-round(abs(rnorm(n=nrow(d), mean=245.3, sd=265.08)),4)
-
-#d$Lact2<-round(abs(rnorm(n=nrow(d), mean=1300, sd=1200)),4)
-#d$Mann2<-round(abs(rnorm(n=nrow(d), mean=300, sd=250)),4)
-
-#d$Lact3<-round(abs(rnorm(n=nrow(d), mean=1200, sd=1100)),4)
-#d$Mann3<-round(abs(rnorm(n=nrow(d), mean=200, sd=200)),4)
-
-#Create and save dataset for Audrie:
-#urine_simulated_outcomes<-d %>%
-#    mutate(childid=as.character(dataid*10+childNo)) %>%
-#    select(childid, Lact1, Mann1, Lact2, Mann2, Lact3, Mann3)
-#library(stringr)
-#urine_simulated_outcomes$childid<-str_pad(urine_simulated_outcomes$childid, 6, pad = "0")
-#head(urine_simulated_outcomes)    
-# 
-# #setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
-# #save(urine_simulated_outcomes, file="washb-BD-EE-sim-urine-outcomes.Rdata")
-# #write.dta(urine_simulated_outcomes, "washb-BD-EE-sim-urine-outcomes.dta")
-# setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
-# outcomes<-read.dta("washb-BD-EE-sim-urine-outcomes-stata12.dta")
-# outcomes$childid<-as.numeric(outcomes$childid)
-# 
-# 
-# dim(d)
-# dim(outcomes)
-# d<-left_join(d,outcomes, by="childid")
-# #d<-cbind(d,outcomes)
-# dim(d)
-# 
-# #Add 1 so no 0's
-# d$Lact1<-d$Lact1+1
-# d$Lact2<-d$Lact2+1
-# d$Lact3<-d$Lact3+1
-# d$Mann1<-d$Mann1+1
-# d$Mann2<-d$Mann2+1
-# d$Mann3<-d$Mann3+1
-# 
-# mean(d$Lact1, na.rm=T)
-# mean(d$Lact2, na.rm=T)
-# mean(d$Lact3, na.rm=T)
-# mean(d$Mann1, na.rm=T)
-# mean(d$Mann1, na.rm=T)
-# mean(d$Mann1, na.rm=T)
-
-
-
 
 
 
@@ -275,27 +254,26 @@ mean(d$mann.dose_t1, na.rm=T)
 
 
 #% lactulose recovery = (urine concentration lactulose (mg/L) * urine volume (L) * 100 / total lactulose dosed (mg))
-d$per.lact.rec_t1<-d$Lact1*(d$urineVol_t1/1000)*100/d$lact.dose_t1
-d$per.lact.rec_t2<-d$Lact2*(d$urineVol_t2/1000)*100/d$lact.dose_t2
-d$per.lact.rec_t3<-d$Lact3*(d$urineVol_t3/1000)*100/d$lact.dose_t3
-mean(d$per.lact.rec_t1, na.rm=T)
-mean(d$per.lact.rec_t2, na.rm=T)
-mean(d$per.lact.rec_t3, na.rm=T)
+d$sens_per.lact.rec_t1<-d$Lact1*(d$urineVol_t1/1000)*100/d$lact.dose_t1
+d$sens_per.lact.rec_t2<-d$Lact2*(d$urineVol_t2/1000)*100/d$lact.dose_t2
+d$sens_per.lact.rec_t3<-d$Lact3*(d$urineVol_t3/1000)*100/d$lact.dose_t3
+mean(d$sens_per.lact.rec_t1, na.rm=T)
+mean(d$sens_per.lact.rec_t2, na.rm=T)
+mean(d$sens_per.lact.rec_t3, na.rm=T)
+
+table(is.na(d$sens_per.lact.rec_t1))
 
 table(d$lact.dose_t1==0)
 table(d$lact.dose_t2==0)
 table(d$lact.dose_t3==0)
 
 #% mannitol recovery = (urine concentration mannitol (mg/L) * urine volume (L) * 100 / total mannitol dosed (mg))
-d$per.mann.rec_t1<-d$Mann1*(d$urineVol_t1/1000)*100/d$mann.dose_t1
-d$per.mann.rec_t2<-d$Mann2*(d$urineVol_t2/1000)*100/d$mann.dose_t2
-d$per.mann.rec_t3<-d$Mann3*(d$urineVol_t3/1000)*100/d$mann.dose_t3
-mean(d$per.mann.rec_t1, na.rm=T)
-mean(d$per.mann.rec_t2, na.rm=T)
-mean(d$per.mann.rec_t3, na.rm=T)
-
-table(is.na(d$per.lact.rec_t1))
-
+d$sens_per.mann.rec_t1<-d$Mann1*(d$urineVol_t1/1000)*100/d$mann.dose_t1
+d$sens_per.mann.rec_t2<-d$Mann2*(d$urineVol_t2/1000)*100/d$mann.dose_t2
+d$sens_per.mann.rec_t3<-d$Mann3*(d$urineVol_t3/1000)*100/d$mann.dose_t3
+mean(d$sens_per.mann.rec_t1, na.rm=T)
+mean(d$sens_per.mann.rec_t2, na.rm=T)
+mean(d$sens_per.mann.rec_t3, na.rm=T)
 
 table(d$lact.dose_t1==0)
 table(d$lact.dose_t2==0)
@@ -303,22 +281,22 @@ table(d$lact.dose_t3==0)
 
 
 #LM ratio
-d$LM1<-d$per.lact.rec_t1/d$per.mann.rec_t1
-d$LM2<-d$per.lact.rec_t2/d$per.mann.rec_t2
-d$LM3<-d$per.lact.rec_t3/d$per.mann.rec_t3
+d$LM1<-d$sens_per.lact.rec_t1/d$sens_per.mann.rec_t1
+d$LM2<-d$sens_per.lact.rec_t2/d$sens_per.mann.rec_t2
+d$LM3<-d$sens_per.lact.rec_t3/d$sens_per.mann.rec_t3
 mean(d$LM1, na.rm=T)
 
 
 #Data check. Why are there less LM than lact or mann?
-table(d$per.mann.rec_t1==0)
-table(d$per.mann.rec_t2==0)
-table(d$per.mann.rec_t3==0)
+table(d$sens_per.mann.rec_t1==0)
+table(d$sens_per.mann.rec_t2==0)
+table(d$sens_per.mann.rec_t3==0)
 
 table(d$urineVol_t1==0)
 table(d$urineVol_t2==0)
 table(d$urineVol_t3==0)
 
-table(is.na(d$per.mann.rec_t1))
+table(is.na(d$sens_per.mann.rec_t1))
 table(is.na(d$Lact1))
 
 
@@ -352,47 +330,49 @@ d$Mann2<-d$Mann2*(1/182.172)
 d$Mann3<-d$Mann3*(1/182.172)
 
 
+
+
 #------------------
 #N's and geometric means
 #------------------
 
 
 #Create empty  matrices to hold the Ns and geometric means:
-lac_t1_N_M<-man_t1_N_M<-lm_t1_N_M<-lac_t2_N_M<-man_t2_N_M<-lm_t2_N_M<-lac_t3_N_M<-man_t3_N_M<-lm_t3_N<-matrix(0,4,2)
+sens_lac_t1_N_M<-sens_man_t1_N_M<-sens_lm_t1_N_M<-sens_lac_t2_N_M<-sens_man_t2_N_M<-sens_lm_t2_N_M<-sens_lac_t3_N_M<-sens_man_t3_N_M<-sens_lm_t3_N<-matrix(0,4,2)
 
 
   #N's and geometric means
-lac_t1_N_M<-d %>% group_by(tr) %>% subset(!is.na(Lact1)) %>% summarize(N=n(), mean= mean(log(Lact1), na.rm=T))   
-man_t1_N_M<-d %>% group_by(tr) %>% subset(!is.na(Mann1)) %>% summarize(N=n(), mean= mean(log(Mann1), na.rm=T))   
-lm_t1_N_M<-d %>% group_by(tr) %>% subset(!is.na(LM1)) %>% summarize(N=n(), mean= mean(log(LM1), na.rm=T))   
-lac_t2_N_M<-d %>% group_by(tr) %>% subset(!is.na(Lact2)) %>% summarize(N=n(), mean= mean(log(Lact2), na.rm=T))   
-man_t2_N_M<-d %>% group_by(tr) %>% subset(!is.na(Mann2)) %>% summarize(N=n(), mean= mean(log(Mann2), na.rm=T))   
-lm_t2_N_M<-d %>% group_by(tr) %>% subset(!is.na(LM2)) %>% summarize(N=n(), mean= mean(log(LM2), na.rm=T))
-lac_t3_N_M<-d %>% group_by(tr) %>% subset(!is.na(Lact3)) %>% summarize(N=n(), mean= mean(log(Lact3), na.rm=T))   
-man_t3_N_M<-d %>% group_by(tr) %>% subset(!is.na(Mann3)) %>% summarize(N=n(), mean= mean(log(Mann3), na.rm=T))   
-lm_t3_N_M<-d %>% group_by(tr) %>% subset(!is.na(LM3)) %>% summarize(N=n(), mean= mean(log(LM3), na.rm=T))   
+sens_lac_t1_N_M<-d %>% group_by(tr) %>% subset(!is.na(Lact1)) %>% summarize(N=n(), mean= mean(log(Lact1), na.rm=T))   
+sens_man_t1_N_M<-d %>% group_by(tr) %>% subset(!is.na(Mann1)) %>% summarize(N=n(), mean= mean(log(Mann1), na.rm=T))   
+sens_lm_t1_N_M<-d %>% group_by(tr) %>% subset(!is.na(LM1)) %>% summarize(N=n(), mean= mean(log(LM1), na.rm=T))   
+sens_lac_t2_N_M<-d %>% group_by(tr) %>% subset(!is.na(Lact2)) %>% summarize(N=n(), mean= mean(log(Lact2), na.rm=T))   
+sens_man_t2_N_M<-d %>% group_by(tr) %>% subset(!is.na(Mann2)) %>% summarize(N=n(), mean= mean(log(Mann2), na.rm=T))   
+sens_lm_t2_N_M<-d %>% group_by(tr) %>% subset(!is.na(LM2)) %>% summarize(N=n(), mean= mean(log(LM2), na.rm=T))
+sens_lac_t3_N_M<-d %>% group_by(tr) %>% subset(!is.na(Lact3)) %>% summarize(N=n(), mean= mean(log(Lact3), na.rm=T))   
+sens_man_t3_N_M<-d %>% group_by(tr) %>% subset(!is.na(Mann3)) %>% summarize(N=n(), mean= mean(log(Mann3), na.rm=T))   
+sens_lm_t3_N_M<-d %>% group_by(tr) %>% subset(!is.na(LM3)) %>% summarize(N=n(), mean= mean(log(LM3), na.rm=T))   
 
 
 #Means and 95% CI's for mean by arm plots
-lac_t1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$Lact1), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-lac_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$Lact2), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-lac_t3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$Lact3), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-man_t1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$Mann1), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-man_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$Mann2), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-man_t3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$Mann3), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-lm_t1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$LM1), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-lm_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$LM2), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-lm_t3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$LM3), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+sens_lac_t1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$Lact1), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+sens_lac_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$Lact2), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+sens_lac_t3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$Lact3), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+sens_man_t1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$Mann1), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+sens_man_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$Mann2), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+sens_man_t3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$Mann3), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+sens_lm_t1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$LM1), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+sens_lm_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$LM2), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+sens_lm_t3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$LM3), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
 
-lac_t1_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Lact1, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-lac_t2_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Lact2, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-lac_t3_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Lact3, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-man_t1_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Mann1, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-man_t2_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Mann2, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-man_t3_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Mann3, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-lm_t1_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$LM1, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-lm_t2_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$LM2, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-lm_t3_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$LM3, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+sens_lac_t1_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Lact1, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+sens_lac_t2_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Lact2, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+sens_lac_t3_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Lact3, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+sens_man_t1_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Mann1, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+sens_man_t2_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Mann2, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+sens_man_t3_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Mann3, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+sens_lm_t1_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$LM1, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+sens_lm_t2_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$LM2, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+sens_lm_t3_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$LM3, id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
 
 #Means and 95% CI's not stratified by arm
 overall_mn_by_round<- 
@@ -431,13 +411,13 @@ contrasts <- list(c("Control","WSH"), c("Control","Nutrition"), c("Control","Nut
 
 
 #Create empty matrix to hold the glm results:
-lact_t1_unadj<-mann_t1_unadj<-lm_t1_unadj<-matrix(0, nrow=5, ncol=6)
-lact_t2_unadj<-mann_t2_unadj<-lm_t2_unadj<-matrix(0, nrow=5, ncol=6)
-lact_t3_unadj<-mann_t3_unadj<-lm_t3_unadj<-matrix(0, nrow=5, ncol=6)
+lact_t1_unadj<-mann_t1_unadj<-sens_lm_t1_unadj<-matrix(0, nrow=5, ncol=6)
+lact_t2_unadj<-mann_t2_unadj<-sens_lm_t2_unadj<-matrix(0, nrow=5, ncol=6)
+lact_t3_unadj<-mann_t3_unadj<-sens_lm_t3_unadj<-matrix(0, nrow=5, ncol=6)
 
-res_unadj<-list(lact_t1_unadj=lact_t1_unadj, mann_t1_unadj=mann_t1_unadj, lm_t1_unadj=lm_t1_unadj, 
-                lact_t2_unadj=lact_t2_unadj, mann_t2_unadj=mann_t2_unadj, lm_t2_unadj=lm_t2_unadj, 
-                lact_t3_unadj=lact_t3_unadj, mann_t3_unadj=mann_t3_unadj, lm_t3_unadj=lm_t3_unadj)
+res_unadj<-list(lact_t1_unadj=lact_t1_unadj, mann_t1_unadj=mann_t1_unadj, sens_lm_t1_unadj=sens_lm_t1_unadj, 
+                lact_t2_unadj=lact_t2_unadj, mann_t2_unadj=mann_t2_unadj, sens_lm_t2_unadj=sens_lm_t2_unadj, 
+                lact_t3_unadj=lact_t3_unadj, mann_t3_unadj=mann_t3_unadj, sens_lm_t3_unadj=sens_lm_t3_unadj)
 
 
 #for(i in 1:ncol(Y)){
@@ -468,13 +448,13 @@ d$sex<-as.factor(d$sex)
   d$sex=relevel(d$sex,ref="female")
 
 #Create empty matrix to hold the glm results:
-lact_t1_sex<-mann_t1_sex<-lm_t1_sex<-matrix(0, nrow=5, ncol=6)
-lact_t2_sex<-mann_t2_sex<-lm_t2_sex<-matrix(0, nrow=5, ncol=6)
-lact_t3_sex<-mann_t3_sex<-lm_t3_sex<-matrix(0, nrow=5, ncol=6)
+lact_t1_sex<-mann_t1_sex<-sens_lm_t1_sex<-matrix(0, nrow=5, ncol=6)
+lact_t2_sex<-mann_t2_sex<-sens_lm_t2_sex<-matrix(0, nrow=5, ncol=6)
+lact_t3_sex<-mann_t3_sex<-sens_lm_t3_sex<-matrix(0, nrow=5, ncol=6)
 
-res_sex<-list(lact_t1_sex=lact_t1_sex, mann_t1_sex=mann_t1_sex, lm_t1_sex=lm_t1_sex, 
-                lact_t2_sex=lact_t2_sex, mann_t2_sex=mann_t2_sex, lm_t2_sex=lm_t2_sex, 
-                lact_t3_sex=lact_t3_sex, mann_t3_sex=mann_t3_sex, lm_t3_sex=lm_t3_sex)
+res_sex<-list(lact_t1_sex=lact_t1_sex, mann_t1_sex=mann_t1_sex, sens_lm_t1_sex=sens_lm_t1_sex, 
+                lact_t2_sex=lact_t2_sex, mann_t2_sex=mann_t2_sex, sens_lm_t2_sex=sens_lm_t2_sex, 
+                lact_t3_sex=lact_t3_sex, mann_t3_sex=mann_t3_sex, sens_lm_t3_sex=sens_lm_t3_sex)
 
 
 #Age and sex adjusted glm models
@@ -743,9 +723,9 @@ for(i in 1:ncol(W3)){
 Y<-d %>% select(Lact1,Mann1,LM1,Lact2,Mann2,LM2,Lact3,Mann3,LM3)
 
 #Create empty matrix to hold the tmle results:
-res_adj<-list(lact_t1_adj=matrix(0,5,6), mann_t1_adj=matrix(0,5,6), lm_t1_adj=matrix(0,5,6), 
-                lact_t2_adj=matrix(0,5,6), mann_t2_adj=matrix(0,5,6), lm_t2_adj=matrix(0,5,6),  
-                lact_t3_adj=matrix(0,5,6), mann_t3_adj=matrix(0,5,6), lm_t3_adj=matrix(0,5,6))
+res_adj<-list(lact_t1_adj=matrix(0,5,6), mann_t1_adj=matrix(0,5,6), sens_lm_t1_adj=matrix(0,5,6), 
+                lact_t2_adj=matrix(0,5,6), mann_t2_adj=matrix(0,5,6), sens_lm_t2_adj=matrix(0,5,6),  
+                lact_t3_adj=matrix(0,5,6), mann_t3_adj=matrix(0,5,6), sens_lm_t3_adj=matrix(0,5,6))
 
 d %>% group_by(tr) %>%
   summarize(Lac=mean(log(Lact1) ,na.rm=T), N=n())
@@ -786,160 +766,140 @@ for(i in 7:9){
 #------------------
 #Save objects
 #------------------
-lac_t1_unadj_M=res_unadj[[1]]
-man_t1_unadj_M=res_unadj[[2]]
-lm_t1_unadj_M=res_unadj[[3]] 
-lac_t2_unadj_M=res_unadj[[4]] 
-man_t2_unadj_M=res_unadj[[5]]
-lm_t2_unadj_M=res_unadj[[6]] 
-lac_t3_unadj_M=res_unadj[[7]]
-man_t3_unadj_M=res_unadj[[8]]
-lm_t3_unadj_M=res_unadj[[9]]
+sens_lac_t1_unadj_M=res_unadj[[1]]
+sens_man_t1_unadj_M=res_unadj[[2]]
+sens_lm_t1_unadj_M=res_unadj[[3]] 
+sens_lac_t2_unadj_M=res_unadj[[4]] 
+sens_man_t2_unadj_M=res_unadj[[5]]
+sens_lm_t2_unadj_M=res_unadj[[6]] 
+sens_lac_t3_unadj_M=res_unadj[[7]]
+sens_man_t3_unadj_M=res_unadj[[8]]
+sens_lm_t3_unadj_M=res_unadj[[9]]
 
-lac_t1_adj_sex_age_M=res_sex[[1]]
-man_t1_adj_sex_age_M=res_sex[[2]]
-lm_t1_adj_sex_age_M=res_sex[[3]] 
-lac_t2_adj_sex_age_M=res_sex[[4]] 
-man_t2_adj_sex_age_M=res_sex[[5]]
-lm_t2_adj_sex_age_M=res_sex[[6]]
-lac_t3_adj_sex_age_M=res_sex[[7]]
-man_t3_adj_sex_age_M=res_sex[[8]]
-lm_t3_adj_sex_age_M=res_sex[[9]]
+sens_lac_t1_adj_sex_age_M=res_sex[[1]]
+sens_man_t1_adj_sex_age_M=res_sex[[2]]
+sens_lm_t1_adj_sex_age_M=res_sex[[3]] 
+sens_lac_t2_adj_sex_age_M=res_sex[[4]] 
+sens_man_t2_adj_sex_age_M=res_sex[[5]]
+sens_lm_t2_adj_sex_age_M=res_sex[[6]]
+sens_lac_t3_adj_sex_age_M=res_sex[[7]]
+sens_man_t3_adj_sex_age_M=res_sex[[8]]
+sens_lm_t3_adj_sex_age_M=res_sex[[9]]
 
-lac_t1_adj_M=res_adj[[1]]
-man_t1_adj_M=res_adj[[2]]
-lm_t1_adj_M=res_adj[[3]] 
-lac_t2_adj_M=res_adj[[4]] 
-man_t2_adj_M=res_adj[[5]]
-lm_t2_adj_M=res_adj[[6]]
-lac_t3_adj_M=res_adj[[7]]
-man_t3_adj_M=res_adj[[8]]
-lm_t3_adj_M=res_adj[[9]]
+sens_lac_t1_adj_M=res_adj[[1]]
+sens_man_t1_adj_M=res_adj[[2]]
+sens_lm_t1_adj_M=res_adj[[3]] 
+sens_lac_t2_adj_M=res_adj[[4]] 
+sens_man_t2_adj_M=res_adj[[5]]
+sens_lm_t2_adj_M=res_adj[[6]]
+sens_lac_t3_adj_M=res_adj[[7]]
+sens_man_t3_adj_M=res_adj[[8]]
+sens_lm_t3_adj_M=res_adj[[9]]
 
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
-save(lac_t1_N_M, man_t1_N_M, lm_t1_N_M,
-     lac_t2_N_M, man_t2_N_M, lm_t2_N_M,
-     lac_t3_N_M, man_t3_N_M,lm_t3_N_M,
-     file="urine_res_N_M.Rdata")
+save(sens_lac_t1_N_M, sens_man_t1_N_M, sens_lm_t1_N_M,
+     sens_lac_t2_N_M, sens_man_t2_N_M, sens_lm_t2_N_M,
+     sens_lac_t3_N_M, sens_man_t3_N_M,sens_lm_t3_N_M,
+     file="urine_sens_res_N_M.Rdata")
 
-save(lm_t1_mn, lm_t2_mn, lm_t3_mn,
-     lac_t1_mn, lac_t2_mn, lac_t3_mn, 
-     man_t1_mn, man_t2_mn, man_t3_mn, 
-     lm_t1_absmn, lm_t2_absmn, lm_t3_absmn,
-     lac_t1_absmn, lac_t2_absmn, lac_t3_absmn, 
-     man_t1_absmn, man_t2_absmn, man_t3_absmn, 
-     file="urine_res_means.Rdata")
+save(sens_lm_t1_mn, sens_lm_t2_mn, sens_lm_t3_mn,
+     sens_lac_t1_mn, sens_lac_t2_mn, sens_lac_t3_mn, 
+     sens_man_t1_mn, sens_man_t2_mn, sens_man_t3_mn, 
+     sens_lm_t1_absmn, sens_lm_t2_absmn, sens_lm_t3_absmn,
+     sens_lac_t1_absmn, sens_lac_t2_absmn, sens_lac_t3_absmn, 
+     sens_man_t1_absmn, sens_man_t2_absmn, sens_man_t3_absmn, 
+     file="urine_sens_res_means.Rdata")
 
-save(urine_overall_mn, file="urine_overall_means.Rdata")
+#save(urine_overall_mn, file="urine_overall_means.Rdata")
 
-save(lac_t1_unadj_M, man_t1_unadj_M, lm_t1_unadj_M,
-     lac_t2_unadj_M, man_t2_unadj_M, lm_t2_unadj_M, 
-     lac_t3_unadj_M,man_t3_unadj_M, lm_t3_unadj_M,
-     file="urine_res_unadj_M.Rdata")
-
-
-save(lac_t1_adj_sex_age_M, man_t1_adj_sex_age_M, lm_t1_adj_sex_age_M,
-     lac_t2_adj_sex_age_M, man_t2_adj_sex_age_M, lm_t2_adj_sex_age_M, 
-     lac_t3_adj_sex_age_M,man_t3_adj_sex_age_M, lm_t3_adj_sex_age_M,
-     file="urine_res_adj_sex_age_M.Rdata")
-
-save(lac_t1_adj_M, man_t1_adj_M, lm_t1_adj_M,
-     lac_t2_adj_M, man_t2_adj_M, lm_t2_adj_M, 
-     lac_t3_adj_M,man_t3_adj_M, lm_t3_adj_M,
-     file="urine_res_adj_M.Rdata")
+save(sens_lac_t1_unadj_M, sens_man_t1_unadj_M, sens_lm_t1_unadj_M,
+     sens_lac_t2_unadj_M, sens_man_t2_unadj_M, sens_lm_t2_unadj_M, 
+     sens_lac_t3_unadj_M,sens_man_t3_unadj_M, sens_lm_t3_unadj_M,
+     file="urine_sens_res_unadj_M.Rdata")
 
 
-#save data for figures
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
-save(d, file="urine_figure_data.Rdata")
+save(sens_lac_t1_adj_sex_age_M, sens_man_t1_adj_sex_age_M, sens_lm_t1_adj_sex_age_M,
+     sens_lac_t2_adj_sex_age_M, sens_man_t2_adj_sex_age_M, sens_lm_t2_adj_sex_age_M, 
+     sens_lac_t3_adj_sex_age_M,sens_man_t3_adj_sex_age_M, sens_lm_t3_adj_sex_age_M,
+     file="urine_sens_res_adj_sex_age_M.Rdata")
+
+save(sens_lac_t1_adj_M, sens_man_t1_adj_M, sens_lm_t1_adj_M,
+     sens_lac_t2_adj_M, sens_man_t2_adj_M, sens_lm_t2_adj_M, 
+     sens_lac_t3_adj_M,sens_man_t3_adj_M, sens_lm_t3_adj_M,
+     file="urine_sens_res_adj_M.Rdata")
+
+
 
 
 
 #--------------------------------
-# Percent L and M recovery
+# sens_percent L and M recovery
 # (for supplimentary table)
 #--------------------------------
 
-#N's and geometric means
-perl1_N_M<-d %>% group_by(tr) %>% subset(!is.na(per.mann.rec_t1)) %>% summarize(N=n(), mean= exp(mean(log(per.mann.rec_t1), na.rm=T)))   
-perl2_N_M<-d %>% group_by(tr) %>% subset(!is.na(per.mann.rec_t2)) %>% summarize(N=n(), mean= exp(mean(log(per.mann.rec_t2), na.rm=T)))  
-perl3_N_M<-d %>% group_by(tr) %>% subset(!is.na(per.mann.rec_t3)) %>% summarize(N=n(), mean= exp(mean(log(per.mann.rec_t3), na.rm=T)))   
 
-perm1_N_M<-d %>% group_by(tr) %>% subset(!is.na(per.lact.rec_t1)) %>% summarize(N=n(), mean= exp(mean(log(per.lact.rec_t1), na.rm=T)))  
-perm2_N_M<-d %>% group_by(tr) %>% subset(!is.na(per.lact.rec_t2)) %>% summarize(N=n(), mean= exp(mean(log(per.lact.rec_t2), na.rm=T))) 
-perm3_N_M<-d %>% group_by(tr) %>% subset(!is.na(per.lact.rec_t3)) %>% summarize(N=n(), mean= exp(mean(log(per.lact.rec_t3), na.rm=T)))
+sens_perl1_N_M<-d %>% group_by(tr) %>% subset(!is.na(sens_per.mann.rec_t1)) %>% summarize(N=n(), mean= mean((sens_per.mann.rec_t1), na.rm=T))   
+sens_perl2_N_M<-d %>% group_by(tr) %>% subset(!is.na(sens_per.mann.rec_t2)) %>% summarize(N=n(), mean= mean((sens_per.mann.rec_t2), na.rm=T))   
+sens_perl3_N_M<-d %>% group_by(tr) %>% subset(!is.na(sens_per.mann.rec_t3)) %>% summarize(N=n(), mean= mean((sens_per.mann.rec_t3), na.rm=T))   
 
-
+sens_perm1_N_M<-d %>% group_by(tr) %>% subset(!is.na(sens_per.lact.rec_t1)) %>% summarize(N=n(), mean= mean((sens_per.lact.rec_t1), na.rm=T))   
+sens_perm2_N_M<-d %>% group_by(tr) %>% subset(!is.na(sens_per.lact.rec_t2)) %>% summarize(N=n(), mean= mean((sens_per.lact.rec_t2), na.rm=T))   
+sens_perm3_N_M<-d %>% group_by(tr) %>% subset(!is.na(sens_per.lact.rec_t3)) %>% summarize(N=n(), mean= mean((sens_per.lact.rec_t3), na.rm=T))   
 
 
 #Means and 95% CI's for mean by arm plots
-perl1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$per.lact.rec_t1), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-perl2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$per.lact.rec_t2), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-perl3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$per.lact.rec_t3), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+sens_perl1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=(.$sens_per.lact.rec_t1), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+sens_perl2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=(.$sens_per.lact.rec_t2), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+sens_perl3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=(.$sens_per.lact.rec_t3), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
 
-perm1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$per.mann.rec_t1), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-perm2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$per.mann.rec_t2), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-perm3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$per.mann.rec_t3), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-
-#Convert from log to raw scale to get the geometric mean
-perl1_mn<-perl1_mn[,-c(3:4)]
-perl2_mn<-perl2_mn[,-c(3:4)]
-perl3_mn<-perl3_mn[,-c(3:4)]
-perm1_mn<-perm1_mn[,-c(3:4)]
-perm2_mn<-perm2_mn[,-c(3:4)]
-perm3_mn<-perm3_mn[,-c(3:4)]
-
-perl1_mn<-exp(perl1_mn[,c(2:4)])
-perl2_mn<-exp(perl2_mn[,c(2:4)])
-perl3_mn<-exp(perl3_mn[,c(2:4)])
-perm1_mn<-exp(perm1_mn[,c(2:4)])
-perm2_mn<-exp(perm2_mn[,c(2:4)])
-perm3_mn<-exp(perm3_mn[,c(2:4)])
+sens_perm1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=(.$sens_per.mann.rec_t1), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+sens_perm2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=(.$sens_per.mann.rec_t2), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+sens_perm3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=(.$sens_per.mann.rec_t3), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
 
 
-perl1_unadj_M<-perl2_unadj_M<-perl3_unadj_M<-matrix(0, nrow=5, ncol=6)
-perm1_unadj_M<-perm2_unadj_M<-perm3_unadj_M<-matrix(0, nrow=5, ncol=6)
-perl1_adj_sex_age_M<-perl2_adj_sex_age_M<-perl3_adj_sex_age_M<-matrix(0, nrow=5, ncol=6)
-perm1_adj_sex_age_M<-perm2_adj_sex_age_M<-perm3_adj_sex_age_M<-matrix(0, nrow=5, ncol=6)
-perl1_adj_M<-perl2_adj_M<-perl3_adj_M<-matrix(0, nrow=5, ncol=6)
-perm1_adj_M<-perm2_adj_M<-perm3_adj_M<-matrix(0, nrow=5, ncol=6)
+sens_perl1_unadj_M<-sens_perl2_unadj_M<-sens_perl3_unadj_M<-matrix(0, nrow=5, ncol=6)
+sens_perm1_unadj_M<-sens_perm2_unadj_M<-sens_perm3_unadj_M<-matrix(0, nrow=5, ncol=6)
+sens_perl1_adj_sex_age_M<-sens_perl2_adj_sex_age_M<-sens_perl3_adj_sex_age_M<-matrix(0, nrow=5, ncol=6)
+sens_perm1_adj_sex_age_M<-sens_perm2_adj_sex_age_M<-sens_perm3_adj_sex_age_M<-matrix(0, nrow=5, ncol=6)
+sens_perl1_adj_M<-sens_perl2_adj_M<-sens_perl3_adj_M<-matrix(0, nrow=5, ncol=6)
+sens_perm1_adj_M<-sens_perm2_adj_M<-sens_perm3_adj_M<-matrix(0, nrow=5, ncol=6)
 
-colnames(perl1_unadj_M)<-colnames(perl2_unadj_M)<-colnames(perl3_unadj_M)<-c("RD","ci.l","ci.u", "Std. Error", "z value", "Pval")
-colnames(perm1_unadj_M)<-colnames(perm2_unadj_M)<-colnames(perm3_unadj_M)<-c("RD","ci.l","ci.u", "Std. Error", "z value", "Pval")
-colnames(perl1_adj_sex_age_M)<-colnames(perl2_adj_sex_age_M)<-colnames(perl3_adj_sex_age_M)<-c("RD","ci.l","ci.u", "Std. Error", "z value", "Pval")
-colnames(perm1_adj_sex_age_M)<-colnames(perm2_adj_sex_age_M)<-colnames(perm3_adj_sex_age_M)<-c("RD","ci.l","ci.u", "Std. Error", "z value", "Pval")
-colnames(perl1_adj_M)<-colnames(perl2_adj_M)<-colnames(perl3_adj_M)<-c("RD","ci.l","ci.u", "Std. Error", "z value", "Pval")
-colnames(perm1_adj_M)<-colnames(perm2_adj_M)<-colnames(perm3_adj_M)<-c("RD","ci.l","ci.u", "Std. Error", "z value", "Pval")
+colnames(sens_perl1_unadj_M)<-colnames(sens_perl2_unadj_M)<-colnames(sens_perl3_unadj_M)<-c("RD","ci.l","ci.u", "Std. Error", "z value", "Pval")
+colnames(sens_perm1_unadj_M)<-colnames(sens_perm2_unadj_M)<-colnames(sens_perm3_unadj_M)<-c("RD","ci.l","ci.u", "Std. Error", "z value", "Pval")
+colnames(sens_perl1_adj_sex_age_M)<-colnames(sens_perl2_adj_sex_age_M)<-colnames(sens_perl3_adj_sex_age_M)<-c("RD","ci.l","ci.u", "Std. Error", "z value", "Pval")
+colnames(sens_perm1_adj_sex_age_M)<-colnames(sens_perm2_adj_sex_age_M)<-colnames(sens_perm3_adj_sex_age_M)<-c("RD","ci.l","ci.u", "Std. Error", "z value", "Pval")
+colnames(sens_perl1_adj_M)<-colnames(sens_perl2_adj_M)<-colnames(sens_perl3_adj_M)<-c("RD","ci.l","ci.u", "Std. Error", "z value", "Pval")
+colnames(sens_perm1_adj_M)<-colnames(sens_perm2_adj_M)<-colnames(sens_perm3_adj_M)<-c("RD","ci.l","ci.u", "Std. Error", "z value", "Pval")
 
-rownames(perl1_unadj_M)<-rownames(perl2_unadj_M)<-rownames(perl3_unadj_M)<-c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH")
-rownames(perm1_unadj_M)<-rownames(perm2_unadj_M)<-rownames(perm3_unadj_M)<-c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH")
-rownames(perl1_adj_sex_age_M)<-rownames(perl2_adj_sex_age_M)<-rownames(perl3_adj_sex_age_M)<-c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH")
-rownames(perm1_adj_sex_age_M)<-rownames(perm2_adj_sex_age_M)<-rownames(perm3_adj_sex_age_M)<-c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH")
-rownames(perl1_adj_M)<-rownames(perl2_adj_M)<-rownames(perl3_adj_M)<-c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH")
-rownames(perm1_adj_M)<-rownames(perm2_adj_M)<-rownames(perm3_adj_M)<-c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH")
+rownames(sens_perl1_unadj_M)<-rownames(sens_perl2_unadj_M)<-rownames(sens_perl3_unadj_M)<-c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH")
+rownames(sens_perm1_unadj_M)<-rownames(sens_perm2_unadj_M)<-rownames(sens_perm3_unadj_M)<-c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH")
+rownames(sens_perl1_adj_sex_age_M)<-rownames(sens_perl2_adj_sex_age_M)<-rownames(sens_perl3_adj_sex_age_M)<-c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH")
+rownames(sens_perm1_adj_sex_age_M)<-rownames(sens_perm2_adj_sex_age_M)<-rownames(sens_perm3_adj_sex_age_M)<-c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH")
+rownames(sens_perl1_adj_M)<-rownames(sens_perl2_adj_M)<-rownames(sens_perl3_adj_M)<-c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH")
+rownames(sens_perm1_adj_M)<-rownames(sens_perm2_adj_M)<-rownames(sens_perm3_adj_M)<-c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH")
 
   for(j in 1:5){
-    perl1_unadj_M[j,]<-as.numeric(washb_glm(Y=d$per.lact.rec_t1, tr=d$tr, W=NULL, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
-    perl2_unadj_M[j,]<-as.numeric(washb_glm(Y=d$per.lact.rec_t2, tr=d$tr, W=NULL, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
-    perl3_unadj_M[j,]<-as.numeric(washb_glm(Y=d$per.lact.rec_t3, tr=d$tr, W=NULL, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
-    perm1_unadj_M[j,]<-as.numeric(washb_glm(Y=d$per.mann.rec_t1, tr=d$tr, W=NULL, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
-    perm2_unadj_M[j,]<-as.numeric(washb_glm(Y=d$per.mann.rec_t2, tr=d$tr, W=NULL, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
-    perm3_unadj_M[j,]<-as.numeric(washb_glm(Y=d$per.mann.rec_t3, tr=d$tr, W=NULL, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
+    sens_perl1_unadj_M[j,]<-as.numeric(washb_glm(Y=d$sens_per.lact.rec_t1, tr=d$tr, W=NULL, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
+    sens_perl2_unadj_M[j,]<-as.numeric(washb_glm(Y=d$sens_per.lact.rec_t2, tr=d$tr, W=NULL, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
+    sens_perl3_unadj_M[j,]<-as.numeric(washb_glm(Y=d$sens_per.lact.rec_t3, tr=d$tr, W=NULL, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
+    sens_perm1_unadj_M[j,]<-as.numeric(washb_glm(Y=d$sens_per.mann.rec_t1, tr=d$tr, W=NULL, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
+    sens_perm2_unadj_M[j,]<-as.numeric(washb_glm(Y=d$sens_per.mann.rec_t2, tr=d$tr, W=NULL, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
+    sens_perm3_unadj_M[j,]<-as.numeric(washb_glm(Y=d$sens_per.mann.rec_t3, tr=d$tr, W=NULL, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
  
-    perl1_adj_sex_age_M[j,]<-as.numeric(washb_glm(Y=d$per.lact.rec_t1, tr=d$tr, W=cbind(d$sex, d$aged1), id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
-    perl2_adj_sex_age_M[j,]<-as.numeric(washb_glm(Y=d$per.lact.rec_t2, tr=d$tr, W=cbind(d$sex, d$aged2), id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
-    perl3_adj_sex_age_M[j,]<-as.numeric(washb_glm(Y=d$per.lact.rec_t3, tr=d$tr, W=cbind(d$sex, d$aged3), id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
-    perm1_adj_sex_age_M[j,]<-as.numeric(washb_glm(Y=d$per.mann.rec_t1, tr=d$tr, W=cbind(d$sex, d$aged1), id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
-    perm2_adj_sex_age_M[j,]<-as.numeric(washb_glm(Y=d$per.mann.rec_t2, tr=d$tr, W=cbind(d$sex, d$aged2), id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
-    perm3_adj_sex_age_M[j,]<-as.numeric(washb_glm(Y=d$per.mann.rec_t3, tr=d$tr, W=cbind(d$sex, d$aged3), id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
+    sens_perl1_adj_sex_age_M[j,]<-as.numeric(washb_glm(Y=d$sens_per.lact.rec_t1, tr=d$tr, W=cbind(d$sex, d$aged1), id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
+    sens_perl2_adj_sex_age_M[j,]<-as.numeric(washb_glm(Y=d$sens_per.lact.rec_t2, tr=d$tr, W=cbind(d$sex, d$aged2), id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
+    sens_perl3_adj_sex_age_M[j,]<-as.numeric(washb_glm(Y=d$sens_per.lact.rec_t3, tr=d$tr, W=cbind(d$sex, d$aged3), id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
+    sens_perm1_adj_sex_age_M[j,]<-as.numeric(washb_glm(Y=d$sens_per.mann.rec_t1, tr=d$tr, W=cbind(d$sex, d$aged1), id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
+    sens_perm2_adj_sex_age_M[j,]<-as.numeric(washb_glm(Y=d$sens_per.mann.rec_t2, tr=d$tr, W=cbind(d$sex, d$aged2), id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
+    sens_perm3_adj_sex_age_M[j,]<-as.numeric(washb_glm(Y=d$sens_per.mann.rec_t3, tr=d$tr, W=cbind(d$sex, d$aged3), id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
  
-    perl1_adj_M[j,]<-as.numeric(washb_glm(Y=d$per.lact.rec_t1, tr=d$tr, W=W1, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
-    perl2_adj_M[j,]<-as.numeric(washb_glm(Y=d$per.lact.rec_t2, tr=d$tr, W=W2, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
-    perl3_adj_M[j,]<-as.numeric(washb_glm(Y=d$per.lact.rec_t3, tr=d$tr, W=W3, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
-    perm1_adj_M[j,]<-as.numeric(washb_glm(Y=d$per.mann.rec_t1, tr=d$tr, W=W1, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
-    perm2_adj_M[j,]<-as.numeric(washb_glm(Y=d$per.mann.rec_t2, tr=d$tr, W=W2, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
-    perm3_adj_M[j,]<-as.numeric(washb_glm(Y=d$per.mann.rec_t3, tr=d$tr, W=W3, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
+    sens_perl1_adj_M[j,]<-as.numeric(washb_glm(Y=d$sens_per.lact.rec_t1, tr=d$tr, W=W1, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
+    sens_perl2_adj_M[j,]<-as.numeric(washb_glm(Y=d$sens_per.lact.rec_t2, tr=d$tr, W=W2, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
+    sens_perl3_adj_M[j,]<-as.numeric(washb_glm(Y=d$sens_per.lact.rec_t3, tr=d$tr, W=W3, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
+    sens_perm1_adj_M[j,]<-as.numeric(washb_glm(Y=d$sens_per.mann.rec_t1, tr=d$tr, W=W1, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
+    sens_perm2_adj_M[j,]<-as.numeric(washb_glm(Y=d$sens_per.mann.rec_t2, tr=d$tr, W=W2, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
+    sens_perm3_adj_M[j,]<-as.numeric(washb_glm(Y=d$sens_per.mann.rec_t3, tr=d$tr, W=W3, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)$TR)
   }
 
 
@@ -948,23 +908,26 @@ rownames(perm1_adj_M)<-rownames(perm2_adj_M)<-rownames(perm3_adj_M)<-c("Control 
 
 
 save(
-perl1_N_M,
-perl2_N_M, 
-perl3_N_M, 
-perm1_N_M,  
-perm2_N_M,
-perm3_N_M,  
-perl1_mn,
-perl2_mn,
-perl3_mn,
-perm1_mn,
-perm2_mn,
-perm3_mn,
-perl1_unadj_M,perl2_unadj_M,perl3_unadj_M,
-perm1_unadj_M,perm2_unadj_M,perm3_unadj_M,
-perl1_adj_sex_age_M,perl2_adj_sex_age_M,perl3_adj_sex_age_M,
-perm1_adj_sex_age_M,perm2_adj_sex_age_M,perm3_adj_sex_age_M,
-perl1_adj_M,perl2_adj_M,perl3_adj_M,
-perm1_adj_M,perm2_adj_M,perm3_adj_M,
-     file="pre_recovery_res_M.Rdata")
+sens_perl1_N_M,
+sens_perl2_N_M, 
+sens_perl3_N_M, 
+sens_perm1_N_M,  
+sens_perm2_N_M,
+sens_perm3_N_M,  
+sens_perl1_mn,
+sens_perl2_mn,
+sens_perl3_mn,
+sens_perm1_mn,
+sens_perm2_mn,
+sens_perm3_mn,
+sens_perl1_unadj_M,sens_perl2_unadj_M,sens_perl3_unadj_M,
+sens_perm1_unadj_M,sens_perm2_unadj_M,sens_perm3_unadj_M,
+sens_perl1_adj_sex_age_M,sens_perl2_adj_sex_age_M,sens_perl3_adj_sex_age_M,
+sens_perm1_adj_sex_age_M,sens_perm2_adj_sex_age_M,sens_perm3_adj_sex_age_M,
+sens_perl1_adj_M,sens_perl2_adj_M,sens_perl3_adj_M,
+sens_perm1_adj_M,sens_perm2_adj_M,sens_perm3_adj_M,
+     file="pre_recovery_sens_res_M.Rdata")
+
+
+
 

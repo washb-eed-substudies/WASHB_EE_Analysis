@@ -4,7 +4,7 @@
 #
 # andrew mertens (amertens@berkeley.edu)
 #
-# The tabulate enrollment variables for 
+# Creation of
 # telomere manuscript table 3 - elife format
 #---------------------------------------
 
@@ -18,6 +18,7 @@ library(washb)
 library(tidyr)
 library(reshape2)
 library(xtable)
+
 
 
 # Table functions
@@ -140,6 +141,8 @@ rnd(x)
 #load objects
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
 load("telo_res.Rdata")
+load("telo_ipcw_res.Rdata")
+
 ts_t2_N_M
 ts_t3_N_M
 ts_t2_unadj_M
@@ -174,13 +177,23 @@ glm_print<-function(obj, t=F){
   }
 
   #rownames(obj)<-colnames(obj)<-NULL
-  out<-paste(obj[1],"(",obj[2],",",obj[3],") P=",obj[4], sep="")
+  out<-paste(obj[1]," (",obj[2],",",obj[3],") P=",obj[4], sep="")
   return(out)
 }
 
+
+
+
+#Drop out var.psi from ipcw objects so that glm_print() works 
+ts_t2_adj_ipcw_M<-ts_t2_adj_ipcw_M[-2,]
+ts_t3_adj_ipcw_M<-ts_t3_adj_ipcw_M[-2,]
+delta_ts_adj_ipcw_M<-delta_ts_adj_ipcw_M[-2,]
+
+
+
 tab2<-data.frame(rbind(ts_t2_N_M,ts_t3_N_M,delta_ts_N_M))
 tab2[,3]<-rnd(tab2[,3],2)
-tab2[,4:6]<-matrix("",6,3)
+tab2[,4:7]<-matrix("",6,4)
 tab2[2,4]<-glm_print(ts_t2_unadj_M)
 tab2[4,4]<-glm_print(ts_t3_unadj_M)
 tab2[6,4]<-glm_print(delta_ts_unadj_M)
@@ -190,7 +203,9 @@ tab2[6,5]<-glm_print(delta_ts_adj_sex_age_M)
 tab2[2,6]<-glm_print(ts_t2_adj_M)
 tab2[4,6]<-glm_print(ts_t3_adj_M)
 tab2[6,6]<-glm_print(delta_ts_adj_M)
-colnames(tab2)<-NULL
+tab2[2,7]<-glm_print((c(ts_t2_adj_ipcw_M[1:3],NA,NA,ts_t2_adj_ipcw_M[4])), t=T)
+tab2[4,7]<-glm_print((c(ts_t3_adj_ipcw_M[1:3],NA,NA,ts_t3_adj_ipcw_M[4])), t=T)
+tab2[6,7]<-glm_print((c(delta_ts_adj_ipcw_M[1:3],NA,NA,delta_ts_adj_ipcw_M[4])), t=T)
 
 tab2[,1]<-as.character(tab2[,1])
 tab2[c(1,3,5),1]<-rep("~~~Control",3)
@@ -212,4 +227,24 @@ setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Tables/"
 save(tab2, file="table2.RData")
 
 cleantable(tab2, 2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

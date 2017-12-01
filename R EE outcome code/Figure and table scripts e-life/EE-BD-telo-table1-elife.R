@@ -58,15 +58,31 @@ table(is.na(d$svydate))
 colnames(d)
 d$foodsecure<-ifelse(d$hfiacat=="Food Secure", 1,0)
 
+d %>% group_by(tr) %>% distinct(dataid) %>% summarise(N=n())
+
 
 vlist <- c("momage","momeduy","dadeduy","dadagri","Nhh","elec","cement","landacre","tubewell","storewat","treatwat","watmin","odmen","odwom","odch815","odch38","odchu3",
            "latown","latslab","latseal","latfeces","potty","humfeces","humfecesch", "hwlatwat","hwlatsoap","hwkitwat","hwkitsoap","foodsecure")
 
 
+d1<-subset(d, !is.na(TS2))
+d2<-subset(d, !is.na(TS3))
+d1$col<-1
+d2$col<-2
+
+#Number of children in each subset
+d1 %>% group_by(tr) %>% distinct(dataid) %>% summarise(N=n())
+d2 %>% group_by(tr) %>% distinct(dataid) %>% summarise(N=n())
+
+
 table(vlist %in% colnames(d))
 
-table.dat<-subset(d, select=c("tr", vlist)) %>% subset(tr=="Control" | tr=="Nutrition + WSH")
+table.dat1<-subset(d1, select=c("tr", "col", vlist)) %>% subset(tr=="Control" | tr=="Nutrition + WSH")
+table.dat2<-subset(d2, select=c("tr", "col", vlist)) %>% subset(tr=="Control" | tr=="Nutrition + WSH")
 
+#combine:
+table.dat<-rbind(table.dat1,table.dat2)
+head(table.dat)
 
 #Change factors to indicators
 for(i in 1:ncol(table.dat)){
@@ -77,24 +93,27 @@ for(i in 1:ncol(table.dat)){
 #Calculate number of compounds
 
 table1_mu<-table.dat%>%
-        group_by(tr) %>%
+        group_by(col, tr) %>%
         summarise_each(funs(mean(., na.rm = TRUE))) %>%
         ungroup %>% as.data.frame
 
 table1_N<-table.dat%>%
-        group_by(tr) %>%
+        group_by(col, tr) %>%
         summarise_each(funs(sum(., na.rm = TRUE))) %>%
         ungroup %>% as.data.frame
 
 table1_sd<-table.dat%>%
-        group_by(tr) %>%
+        group_by(col, tr) %>%
         summarise_each(funs(sd(., na.rm = TRUE))) %>%
         ungroup %>% as.data.frame
 
-Ns<-table(table.dat$tr)
-balance.tab.mu_M<-rbind(Ns,t((table1_mu[,2:ncol(table1_mu)])))
-balance.tab.n_M<-rbind(Ns,t((table1_N[,2:ncol(table1_N)])))
-balance.tab.sd_M<-rbind(Ns,t((table1_sd[,2:ncol(table1_sd)])))
+Ns<-table(table.dat$tr, table.dat$col)
+Ns<-c(Ns[1,1],Ns[2,1],Ns[1,2],Ns[2,2])
+
+
+balance.tab.mu_M<-rbind(Ns,t((table1_mu[,3:ncol(table1_mu)])))
+balance.tab.n_M<-rbind(Ns,t((table1_N[,3:ncol(table1_N)])))
+balance.tab.sd_M<-rbind(Ns,t((table1_sd[,3:ncol(table1_sd)])))
 
 
 #save objects
@@ -183,8 +202,12 @@ table1_create<-function(mu, n, sd, mean.ind, vargroup, vargroup.row, Rownames, r
       col1<-rbind(col1, temp1)
       col2<-rbind(col2, temp2)           
         }else{
-      temp1<-cbind(paste(dat[j,1]," (",dat[j,2],"\\%)",sep=""))
-      temp2<-cbind(paste(dat[j,3]," (",dat[j,4],"\\%)",sep=""))
+                  #Drop N's
+      #temp1<-cbind(paste(dat[j,1]," (",dat[j,2],"\\%)",sep=""))
+      #temp2<-cbind(paste(dat[j,3]," (",dat[j,4],"\\%)",sep=""))
+      
+      temp1<-cbind(paste(dat[j,2],"\\%",sep=""))
+      temp2<-cbind(paste(dat[j,4],"\\%",sep=""))
       col1<-rbind(col1, temp1)
       col2<-rbind(col2, temp2) 
         }
@@ -269,6 +292,56 @@ Rownames<-c("No. of compounds",
     "Household is food secure"
   )
 
+
+
+table1_create<-function(mu, n, sd, mean.ind, vargroup, vargroup.row, Rownames, round){
+  dat<-NULL
+  for(j in 1:nrow(n)){
+      if(mean.ind[j]==1){
+      temp<-cbind(mu[j,1],sd[j,1],mu[j,2],sd[j,2])
+      temp<-rnd(temp, 0)
+      dat<-rbind(dat, temp)
+      }else{
+      temp<-cbind(n[j,1],(mu[j,1])*100,n[j,2],(mu[j,2])*100)
+      temp<-rnd(temp, 0)
+      dat<-rbind(dat, temp)
+      }
+  }
+  rownames(dat)<-rownames(mu)
+
+  col1<-NULL
+  col2<-NULL
+  for(j in 1:nrow(n)){
+      if(mean.ind[j]==1){
+      temp1<-cbind(paste(dat[j,1]," (",dat[j,2],")",sep=""))
+      temp2<-cbind(paste(dat[j,3]," (",dat[j,4],")",sep=""))
+      col1<-rbind(col1, temp1)
+      col2<-rbind(col2, temp2)
+      }else{
+        if(j==1){
+      temp1<-cbind(paste(dat[j,1],sep=""))
+      temp2<-cbind(paste(dat[j,3],sep=""))
+      col1<-rbind(col1, temp1)
+      col2<-rbind(col2, temp2)           
+        }else{
+                        #Drop N's
+      #temp1<-cbind(paste(dat[j,1]," (",dat[j,2],"\\%)",sep=""))
+      #temp2<-cbind(paste(dat[j,3]," (",dat[j,4],"\\%)",sep=""))
+      
+      temp1<-cbind(paste(dat[j,2],"\\%",sep=""))
+      temp2<-cbind(paste(dat[j,4],"\\%",sep=""))
+      col1<-rbind(col1, temp1)
+      col2<-rbind(col2, temp2) 
+        }
+      }
+  } 
+  dat<-cbind(Rownames, col1, col2)
+  colnames(dat)=c(" ","Control","Nutrition + WSH")
+  return(dat)
+}
+
+
+#Telomere substudy: Year 1
 tab<-table1_create(mu=balance.tab.mu_M, 
                    n=balance.tab.n_M, 
                    sd=balance.tab.sd_M, 
@@ -277,6 +350,17 @@ tab<-table1_create(mu=balance.tab.mu_M,
                    round=1)
 tab
 
+#Telomere substudy: Year 2 
+tab2<-table1_create(mu=balance.tab.mu_M[,3:4], 
+                   n=balance.tab.n_M[,3:4], 
+                   sd=balance.tab.sd_M[,3:4], 
+                   mean.ind=mean.ind,
+                   Rownames=Rownames,
+                   round=1)
+tab2
+
+
+tab<-cbind(tab,tab2[,2:3])
 
 
 #Add in variable group labels

@@ -6,7 +6,9 @@
 #
 # The analysis script for the WASH Benefits
 # EED substudy -IPCW analysis for missing 
-# outcomes of urine-based biomarkers
+# outcomes of urine-based biomarkers 
+# - sensitivity analysis
+# of dropping leaky and contaminated samples
 #---------------------------------------
 
 ###Load in data
@@ -38,7 +40,7 @@ ipcw<-read.csv("BD-EE-ipcw.csv", stringsAsFactors = T) %>% select(-c(tr,block))
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew")
 outcomes<-read.dta("washb-BD-EE-urine-outcomes-stata12.dta")
 outcomes$childid<-as.numeric(outcomes$childid)
-load("urine_volume.Rdata")
+load("urine_volume_sensitivity.Rdata")
 
 #Load in urine survey data
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew/")
@@ -47,6 +49,7 @@ urine<-read.csv("BD-EE-urine.csv")
 #Drop and merge fixed urine volumes
 urine<-urine %>% subset(select=-c(urineVol_t1,urineVol_t2,urineVol_t3))
 urine<-merge(urine, urineVol, by=c("dataid", "childNo"))
+
 
 
 
@@ -67,7 +70,9 @@ urine_outcomes<-subset(urine, select=c(dataid,childNo,
                                        LMvol_t1,LMvol_t2,LMvol_t3,
                                        urineVol_t1, urineVol_t2, urineVol_t3,
                                        Lact1, Lact2, Lact3, 
-                                       Mann1, Mann2, Mann3))
+                                       Mann1, Mann2, Mann3,
+                                       bl_contaminated2hr, ml_contaminated2hr,el_contaminated2hr,
+                                       bl_contaminated5hr, ml_contaminated5hr,el_contaminated5hr))
 dim(urine_outcomes)
 d<-merge(ipcw, urine_outcomes, by=c("dataid", "childNo"), all.x=T, all.y=F)
 dim(d)
@@ -221,7 +226,18 @@ d$walls<-factor(d$walls)
 W<- subset(d, select=Wvars)
 
 
+#Drop out contaminated samples by setting outcomes to 0 if either 2hr or
+#5hr experienced contamination
+table(is.na(d$Lact1))
+d$Lact1[d$bl_contaminated2hr>0 | d$bl_contaminated5hr>0]<-NA
+d$Mann1[d$bl_contaminated2hr>0 | d$bl_contaminated5hr>0]<-NA
 
+d$Lact2[d$ml_contaminated2hr>0 | d$ml_contaminated5hr>0]<-NA
+d$Mann2[d$ml_contaminated2hr>0 | d$ml_contaminated5hr>0]<-NA
+
+d$Lact3[d$el_contaminated2hr>0 | d$el_contaminated5hr>0]<-NA
+d$Mann3[d$el_contaminated2hr>0 | d$el_contaminated5hr>0]<-NA
+table(is.na(d$Lact1))
 
 
 
@@ -430,17 +446,17 @@ for(i in 1:ncol(Y)){
 
 
 #Extract estimates
-l1_unadj_ipcw_M<-res_unadj[[1]]
-l2_unadj_ipcw_M<-res_unadj[[4]]
-l3_unadj_ipcw_M<-res_unadj[[7]]
+sens_l1_unadj_ipcw_M<-res_unadj[[1]]
+sens_l2_unadj_ipcw_M<-res_unadj[[4]]
+sens_l3_unadj_ipcw_M<-res_unadj[[7]]
 
-m1_unadj_ipcw_M<-res_unadj[[2]]
-m2_unadj_ipcw_M<-res_unadj[[5]]
-m3_unadj_ipcw_M<-res_unadj[[8]]
+sens_m1_unadj_ipcw_M<-res_unadj[[2]]
+sens_m2_unadj_ipcw_M<-res_unadj[[5]]
+sens_m3_unadj_ipcw_M<-res_unadj[[8]]
 
-lmr1_unadj_ipcw_M<-res_unadj[[3]]
-lmr2_unadj_ipcw_M<-res_unadj[[6]]
-lmr3_unadj_ipcw_M<-res_unadj[[9]]
+sens_lmr1_unadj_ipcw_M<-res_unadj[[3]]
+sens_lmr2_unadj_ipcw_M<-res_unadj[[6]]
+sens_lmr3_unadj_ipcw_M<-res_unadj[[9]]
 
 
 
@@ -466,17 +482,17 @@ dim(Y)
 table(is.na(Y$Lact1Delta))
 
 #Extract estimates
-l1_adj_ipcw_M<-res_adj[[1]]
-l2_adj_ipcw_M<-res_adj[[4]]
-l3_adj_ipcw_M<-res_adj[[7]]
+sens_l1_adj_ipcw_M<-res_adj[[1]]
+sens_l2_adj_ipcw_M<-res_adj[[4]]
+sens_l3_adj_ipcw_M<-res_adj[[7]]
 
-m1_adj_ipcw_M<-res_adj[[2]]
-m2_adj_ipcw_M<-res_adj[[5]]
-m3_adj_ipcw_M<-res_adj[[8]]
+sens_m1_adj_ipcw_M<-res_adj[[2]]
+sens_m2_adj_ipcw_M<-res_adj[[5]]
+sens_m3_adj_ipcw_M<-res_adj[[8]]
 
-lmr1_adj_ipcw_M<-res_adj[[3]]
-lmr2_adj_ipcw_M<-res_adj[[6]]
-lmr3_adj_ipcw_M<-res_adj[[9]]
+sens_lmr1_adj_ipcw_M<-res_adj[[3]]
+sens_lmr2_adj_ipcw_M<-res_adj[[6]]
+sens_lmr3_adj_ipcw_M<-res_adj[[9]]
 
 mean(miss$Lact2.miss)
 mean(log(Y$Lact2Delta))
@@ -506,99 +522,101 @@ for(i in 1:ncol(W)){
 }
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
-save(l1_unadj_ipcw_M,
-l2_unadj_ipcw_M,
-l3_unadj_ipcw_M,
-m1_unadj_ipcw_M,
-m2_unadj_ipcw_M,
-m3_unadj_ipcw_M,
-lmr1_unadj_ipcw_M,
-lmr2_unadj_ipcw_M,
-lmr3_unadj_ipcw_M,
-l1_adj_ipcw_M,
-l2_adj_ipcw_M,
-l3_adj_ipcw_M,
-m1_adj_ipcw_M,
-m2_adj_ipcw_M,
-m3_adj_ipcw_M,
-lmr1_adj_ipcw_M,
-lmr2_adj_ipcw_M,
-lmr3_adj_ipcw_M,
-file="urine_ipcw_res.Rdata")
+save(sens_l1_unadj_ipcw_M,
+sens_l2_unadj_ipcw_M,
+sens_l3_unadj_ipcw_M,
+sens_m1_unadj_ipcw_M,
+sens_m2_unadj_ipcw_M,
+sens_m3_unadj_ipcw_M,
+sens_lmr1_unadj_ipcw_M,
+sens_lmr2_unadj_ipcw_M,
+sens_lmr3_unadj_ipcw_M,
+sens_l1_adj_ipcw_M,
+sens_l2_adj_ipcw_M,
+sens_l3_adj_ipcw_M,
+sens_m1_adj_ipcw_M,
+sens_m2_adj_ipcw_M,
+sens_m3_adj_ipcw_M,
+sens_lmr1_adj_ipcw_M,
+sens_lmr2_adj_ipcw_M,
+sens_lmr3_adj_ipcw_M,
+file="urine_ipcw_sens_res.Rdata")
+
+
 
 
 #--------------------------------
-# Percent L and M recovery
+# sens_percent L and M recovery
 # (for supplimentary table)
 #--------------------------------
 
 #Create indicators for missingness
-d$perl1.miss<-ifelse(is.na(d$per.lact.rec_t1),0,1)
-d$perl2.miss<-ifelse(is.na(d$per.lact.rec_t2),0,1)
-d$perl3.miss<-ifelse(is.na(d$per.lact.rec_t3),0,1)
+d$sens_perl1.miss<-ifelse(is.na(d$per.lact.rec_t1),0,1)
+d$sens_perl2.miss<-ifelse(is.na(d$per.lact.rec_t2),0,1)
+d$sens_perl3.miss<-ifelse(is.na(d$per.lact.rec_t3),0,1)
 
-d$perm1.miss<-ifelse(is.na(d$per.mann.rec_t1),0,1)
-d$perm2.miss<-ifelse(is.na(d$per.mann.rec_t2),0,1)
-d$perm3.miss<-ifelse(is.na(d$per.mann.rec_t3),0,1)
+d$sens_perm1.miss<-ifelse(is.na(d$per.mann.rec_t1),0,1)
+d$sens_perm2.miss<-ifelse(is.na(d$per.mann.rec_t2),0,1)
+d$sens_perm3.miss<-ifelse(is.na(d$per.mann.rec_t3),0,1)
 
 # set missing outcomes to an arbitrary, non-missing value. In this case use 9
-d$perl1Delta <- d$per.lact.rec_t1
-d$perl1Delta[d$perl1.miss==0] <- (9)
+d$sens_perl1Delta <- d$per.lact.rec_t1
+d$sens_perl1Delta[d$sens_perl1.miss==0] <- (9)
 
-d$perl2Delta <- d$per.lact.rec_t2
-d$perl2Delta[d$perl2.miss==0] <- (9)
+d$sens_perl2Delta <- d$per.lact.rec_t2
+d$sens_perl2Delta[d$sens_perl2.miss==0] <- (9)
 
-d$perl3Delta <- d$per.lact.rec_t3
-d$perl3Delta[d$perl3.miss==0] <- (9)
+d$sens_perl3Delta <- d$per.lact.rec_t3
+d$sens_perl3Delta[d$sens_perl3.miss==0] <- (9)
 
-d$perm1Delta <- d$per.mann.rec_t1
-d$perm1Delta[d$perm1.miss==0] <- (9)
+d$sens_perm1Delta <- d$per.mann.rec_t1
+d$sens_perm1Delta[d$sens_perm1.miss==0] <- (9)
 
-d$perm2Delta <- d$per.mann.rec_t2
-d$perm2Delta[d$perm2.miss==0] <- (9)
+d$sens_perm2Delta <- d$per.mann.rec_t2
+d$sens_perm2Delta[d$sens_perm2.miss==0] <- (9)
 
-d$perm3Delta <- d$per.mann.rec_t3
-d$perm3Delta[d$perm3.miss==0] <- (9)
+d$sens_perm3Delta <- d$per.mann.rec_t3
+d$sens_perm3Delta[d$sens_perm3.miss==0] <- (9)
 
-perY<-d %>% select(perl1Delta,perm1Delta,
-                perl2Delta,perm2Delta,
-                perl3Delta,perm3Delta)
-per.miss<-d %>% select(perl1.miss,perm1.miss,
-                perl2.miss,perm2.miss,
-                perl3.miss,perm3.miss)
+sens_perY<-d %>% select(sens_perl1Delta,sens_perm1Delta,
+                sens_perl2Delta,sens_perm2Delta,
+                sens_perl3Delta,sens_perm3Delta)
+sens_per.miss<-d %>% select(sens_perl1.miss,sens_perm1.miss,
+                sens_perl2.miss,sens_perm2.miss,
+                sens_perl3.miss,sens_perm3.miss)
 
-res_per<-list(perl_t1_adj=matrix(0,5,5), perm_t1_adj=matrix(0,5,5), 
-                perl_t2_adj=matrix(0,5,5), perm_t2_adj=matrix(0,5,5), 
-                perl_t3_adj=matrix(0,5,5), perm_t3_adj=matrix(0,5,5))
+res_sens_per<-list(sens_perl_t1_adj=matrix(0,5,5), sens_perm_t1_adj=matrix(0,5,5), 
+                sens_perl_t2_adj=matrix(0,5,5), sens_perm_t2_adj=matrix(0,5,5), 
+                sens_perl_t3_adj=matrix(0,5,5), sens_perm_t3_adj=matrix(0,5,5))
 
 
-for(i in 1:ncol(perY)){
+for(i in 1:ncol(sens_perY)){
   for(j in 1:5){
-    temp<-washb_tmle(Y=(perY[,i]), Delta=per.miss[,i], tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], Q.SL.library = c("SL.glm"), seed=12345, print=T)
+    temp<-washb_tmle(Y=(sens_perY[,i]), Delta=sens_per.miss[,i], tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], Q.SL.library = c("SL.glm"), seed=12345, print=T)
     cat(i," : ",j, "\n")
-    res_per[[i]][j,]<-(t(unlist(temp$estimates$ATE)))
-    colnames(res_per[[i]])<-c("psi","var.psi","ci.l","ci.u", "Pval")
-    rownames(res_per[[i]])<-c(c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH"))
+    res_sens_per[[i]][j,]<-(t(unlist(temp$estimates$ATE)))
+    colnames(res_sens_per[[i]])<-c("psi","var.psi","ci.l","ci.u", "Pval")
+    rownames(res_sens_per[[i]])<-c(c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH"))
   }
 }
 
 
 
 #Extract estimates
-perl1_adj_ipcw_M<-res_per[[1]]
-perl2_adj_ipcw_M<-res_per[[3]]
-perl3_adj_ipcw_M<-res_per[[5]]
+sens_perl1_adj_ipcw_M<-res_sens_per[[1]]
+sens_perl2_adj_ipcw_M<-res_sens_per[[3]]
+sens_perl3_adj_ipcw_M<-res_sens_per[[5]]
 
-perm1_adj_ipcw_M<-res_per[[2]]
-perm2_adj_ipcw_M<-res_per[[4]]
-perm3_adj_ipcw_M<-res_per[[6]]
+sens_perm1_adj_ipcw_M<-res_sens_per[[2]]
+sens_perm2_adj_ipcw_M<-res_sens_per[[4]]
+sens_perm3_adj_ipcw_M<-res_sens_per[[6]]
 
 
-save(perl1_adj_ipcw_M,
-     perl2_adj_ipcw_M,
-     perl3_adj_ipcw_M,
-     perm1_adj_ipcw_M,
-     perm2_adj_ipcw_M,
-     perm3_adj_ipcw_M,
-     file="pre_recovery_ipcw_res_M.Rdata"
+save(sens_perl1_adj_ipcw_M,
+     sens_perl2_adj_ipcw_M,
+     sens_perl3_adj_ipcw_M,
+     sens_perm1_adj_ipcw_M,
+     sens_perm2_adj_ipcw_M,
+     sens_perm3_adj_ipcw_M,
+     file="pre_recovery_ipcw_sens_res_M.Rdata"
      )

@@ -108,6 +108,12 @@ for(i in 1:ncol(table.dat)){
   cat(colnames(table.dat)[i]," : ",class((table.dat[,i])),"\n")
 }
 
+#Flip the latfeces variables so that it indicates visible feces rather than no visible feces
+table(table.dat$latfeces)
+table.dat$latfeces[table.dat$latfeces==1 & !is.na(table.dat$latfeces)] <- table.dat$latfeces[table.dat$latfeces==1 & !is.na(table.dat$latfeces)] - 2
+table.dat$latfeces <- table.dat$latfeces +1
+table(table.dat$latfeces)
+
 
 #Calculate number of compounds
 
@@ -165,7 +171,7 @@ overallN1<-cbind("Overall", overallN1)
 colnames(overallN1)[1]<-"tr"
 
 suppd1<-d %>% 
-    subset(is.na(d$Lact2)&is.na(d$Mann2)&is.na(d$t2_aat)&is.na(d$t2_mpo)&is.na(d$t2_neo))
+    subset(is.na(d$Lact2) & is.na(d$Mann2)&is.na(d$t2_aat)&is.na(d$t2_mpo)&is.na(d$t2_neo))
 dim(suppd1)
 
 
