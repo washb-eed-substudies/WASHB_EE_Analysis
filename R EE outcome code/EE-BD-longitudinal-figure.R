@@ -29,15 +29,29 @@ library(lattice)
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
 load("stool_res_N_M.Rdata")
 load("stool_res_unadj_M.Rdata")
+load("stool_res_adj_M.Rdata")
 load("urine_res_N_M.Rdata")
 load("urine_res_unadj_M.Rdata")
+load("urine_res_adj_M.Rdata")
 load("stool_res_means.Rdata")
 load("urine_res_means.Rdata")
 
 ls()
 
 #-----------------------------------
-# Unadjusted difference processing
+# Adjusted results cleaning
+#-----------------------------------
+
+rownames(aat_t3_adj_M) <- rownames(aat_t2_adj_M) <- rownames(aat_t1_adj_M) <- rownames(aat_t1_unadj_M)
+rownames(mpo_t3_adj_M) <- rownames(mpo_t2_adj_M) <- rownames(mpo_t1_adj_M) <- rownames(mpo_t1_unadj_M)
+rownames(neo_t3_adj_M) <- rownames(neo_t2_adj_M) <- rownames(neo_t1_adj_M) <- rownames(neo_t1_unadj_M)
+rownames(lac_t3_adj_M) <- rownames(lac_t2_adj_M) <- rownames(lac_t1_adj_M) <- rownames(lac_t1_unadj_M)
+rownames(man_t3_adj_M) <- rownames(man_t2_adj_M) <- rownames(man_t1_adj_M) <- rownames(man_t1_unadj_M)
+rownames(lm_t3_adj_M) <- rownames(lm_t2_adj_M) <- rownames(lm_t1_adj_M) <- rownames(lm_t1_unadj_M)
+rownames(reg1b_t2_adj_M) <- rownames(reg1b_t2_unadj_M)
+
+#-----------------------------------
+# Adjusted difference processing
 #-----------------------------------
 
 #Compile N's
@@ -69,29 +83,29 @@ m_N3<-cbind("Mann","T3", rownames(man_t3_mn), as.data.frame(man_t3_mn)) %>% `row
 
 
 #Compile differences
-aat_dif1<-cbind("AAT","T1", rownames(aat_t1_unadj_M), as.data.frame(aat_t1_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-neo_dif1<-cbind("NEO","T1", rownames(neo_t1_unadj_M), as.data.frame(neo_t1_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-mpo_dif1<-cbind("MPO","T1", rownames(mpo_t1_unadj_M), as.data.frame(mpo_t1_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-lm_dif1<-cbind("LM","T1", rownames(lm_t1_unadj_M), as.data.frame(lm_t1_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-l_dif1<-cbind("Lact","T1", rownames(lac_t1_unadj_M), as.data.frame(lac_t1_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-m_dif1<-cbind("Mann","T1", rownames(man_t1_unadj_M), as.data.frame(man_t1_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+aat_dif1<-cbind("AAT","T1", rownames(aat_t1_adj_M), as.data.frame(aat_t1_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+neo_dif1<-cbind("NEO","T1", rownames(neo_t1_adj_M), as.data.frame(neo_t1_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+mpo_dif1<-cbind("MPO","T1", rownames(mpo_t1_adj_M), as.data.frame(mpo_t1_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+lm_dif1<-cbind("LM","T1", rownames(lm_t1_adj_M), as.data.frame(lm_t1_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+l_dif1<-cbind("Lact","T1", rownames(lac_t1_adj_M), as.data.frame(lac_t1_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+m_dif1<-cbind("Mann","T1", rownames(man_t1_adj_M), as.data.frame(man_t1_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
 
 
 
-aat_dif2<-cbind("AAT","T2", rownames(aat_t2_unadj_M), as.data.frame(aat_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-neo_dif2<-cbind("NEO","T2", rownames(neo_t2_unadj_M), as.data.frame(neo_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-mpo_dif2<-cbind("MPO","T2", rownames(mpo_t2_unadj_M), as.data.frame(mpo_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-lm_dif2<-cbind("LM","T2", rownames(lm_t2_unadj_M), as.data.frame(lm_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-reg_dif2<-cbind("REG","T2", rownames(reg1b_t2_unadj_M), as.data.frame(reg1b_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-l_dif2<-cbind("Lact","T2", rownames(lac_t2_unadj_M), as.data.frame(lac_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-m_dif2<-cbind("Mann","T2", rownames(man_t2_unadj_M), as.data.frame(man_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+aat_dif2<-cbind("AAT","T2", rownames(aat_t2_adj_M), as.data.frame(aat_t2_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+neo_dif2<-cbind("NEO","T2", rownames(neo_t2_adj_M), as.data.frame(neo_t2_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+mpo_dif2<-cbind("MPO","T2", rownames(mpo_t2_adj_M), as.data.frame(mpo_t2_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+lm_dif2<-cbind("LM","T2", rownames(lm_t2_adj_M), as.data.frame(lm_t2_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+reg_dif2<-cbind("REG","T2", rownames(reg1b_t2_adj_M), as.data.frame(reg1b_t2_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+l_dif2<-cbind("Lact","T2", rownames(lac_t2_adj_M), as.data.frame(lac_t2_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+m_dif2<-cbind("Mann","T2", rownames(man_t2_adj_M), as.data.frame(man_t2_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
 
-aat_dif3<-cbind("AAT","T3", rownames(aat_t3_unadj_M), as.data.frame(aat_t3_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-neo_dif3<-cbind("NEO","T3", rownames(neo_t3_unadj_M), as.data.frame(neo_t3_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-mpo_dif3<-cbind("MPO","T3", rownames(mpo_t3_unadj_M), as.data.frame(mpo_t3_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-lm_dif3<-cbind("LM","T3", rownames(lm_t3_unadj_M), as.data.frame(lm_t3_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-l_dif3<-cbind("Lact","T3", rownames(lac_t3_unadj_M), as.data.frame(lac_t3_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-m_dif3<-cbind("Mann","T3", rownames(man_t3_unadj_M), as.data.frame(man_t3_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+aat_dif3<-cbind("AAT","T3", rownames(aat_t3_adj_M), as.data.frame(aat_t3_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+neo_dif3<-cbind("NEO","T3", rownames(neo_t3_adj_M), as.data.frame(neo_t3_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+mpo_dif3<-cbind("MPO","T3", rownames(mpo_t3_adj_M), as.data.frame(mpo_t3_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+lm_dif3<-cbind("LM","T3", rownames(lm_t3_adj_M), as.data.frame(lm_t3_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+l_dif3<-cbind("Lact","T3", rownames(lac_t3_adj_M), as.data.frame(lac_t3_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+m_dif3<-cbind("Mann","T3", rownames(man_t3_adj_M), as.data.frame(man_t3_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
 
 
 
