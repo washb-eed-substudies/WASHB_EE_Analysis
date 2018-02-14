@@ -8,11 +8,15 @@
 # EED Bangladesh sub-study
 #---------------------------------------
 
+## capture all the output to a file.
+zz <- file("EE-BD-stool.Rout", open="wt")
+sink(zz, type="output")
+
+
 ###Load in data
 rm(list=ls())
-try(detach(package:plyr))
+library(tidyverse)
 library(foreign)
-library(dplyr)
 library(washb)
 
 
@@ -258,20 +262,20 @@ neo_t3_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=(.$neo3), id=
 reg1b2_t2_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=(.$reg1b2), id=.$block.x, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
 
 
-#Means and 95% CI's not stratified by arm
-overall_mn_by_round<- 
+# #Means and 95% CI's not stratified by arm
+overall_mn_by_round<-
   d %>% subset(., select=c(dataid, childNo, block.x, neo1,mpo1,aat1,neo2,mpo2,aat2,reg1b2,neo3,mpo3,aat3)) %>%
   gather(key, value, -dataid, -childNo, -block.x) %>%
-  mutate(biomarker = substr(key, 1,3)) %>% 
-  group_by(biomarker) %>% 
-  do(as.data.frame(washb_mean(Y=log(.$value), id=.$block.x, print = F))) %>% 
+  mutate(biomarker = substr(key, 1,3)) %>%
+  group_by(biomarker) %>%
+  do(as.data.frame(washb_mean(Y=log(.$value), id=.$block.x, print = F))) %>%
   ungroup %>% as.data.frame
 
-overall_mn<- 
+overall_mn<-
   d %>% subset(., select=c(dataid, childNo, block.x, neo1,mpo1,aat1,neo2,mpo2,aat2,reg1b2,neo3,mpo3,aat3)) %>%
   gather(key, value, -dataid, -childNo, -block.x) %>%
-  group_by(key) %>% 
-  do(as.data.frame(washb_mean(Y=log(.$value), id=.$block.x, print = F))) %>% 
+  group_by(key) %>%
+  do(as.data.frame(washb_mean(Y=log(.$value), id=.$block.x, print = F))) %>%
   ungroup %>% as.data.frame
 colnames(overall_mn)[1]<-"biomarker"
 stool_overall_mn <- rbind(overall_mn_by_round, overall_mn)
@@ -306,7 +310,7 @@ for(i in 1:10){
 #Age and sex adjusted GLMs
 ############################
 d$sex<-as.factor(d$sex)
-  d$sex=relevel(d$sex,ref="female")
+  d$sex=relevel(d$sex,ref="0")
 
 #Create empty matrix to hold the glm results:
 neo_t1_sex<-mpo_t1_sex<-aat_t1_sex<-matrix(0, nrow=5, ncol=6)
@@ -594,13 +598,13 @@ res_adj<-list(neo_t1_adj=matrix(0,5,6), mpo_t1_adj=matrix(0,5,6), aat_t1_adj=mat
 
 for(i in 1:3){
   for(j in 1:5){
-  temp<-washb_glm(Y=log(Y[,i]), tr=d$tr, W=W1, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]])
+  temp<-washb_glm(Y=log(Y[,i]), tr=d$tr, W=W1, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=T)
   res_adj[[i]][j,]<-as.numeric(temp$TR)
   }
 }
 for(i in 4:6){
   for(j in 1:5){
-  temp<-washb_glm(Y=log(Y[,i]), tr=d$tr, W=W2, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]])
+  temp<-washb_glm(Y=log(Y[,i]), tr=d$tr, W=W2, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=T)
   res_adj[[i]][j,]<-as.numeric(temp$TR)
   }
 }
@@ -692,3 +696,5 @@ save(neo_t1_adj_M, mpo_t1_adj_M, aat_t1_adj_M,
 #save data for figures
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
 save(d, file="stool_figure_data.Rdata")
+
+sink()

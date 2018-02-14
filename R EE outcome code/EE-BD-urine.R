@@ -8,11 +8,14 @@
 # EED Bangladesh sub-study
 #---------------------------------------
 
+## capture all the output to a file.
+zz <- file("EE-BD-urine.Rout", open="wt")
+sink(zz, type="output")
+
 ###Load in data
 rm(list=ls())
-try(detach(package:plyr))
+library(tidyverse)
 library(foreign)
-library(dplyr)
 library(washb)
 library(tidyr)
 
@@ -465,14 +468,14 @@ for(i in 1:ncol(Y)){
 #Age and sex adjusted GLMs
 #------------------
 d$sex<-as.factor(d$sex)
-  d$sex=relevel(d$sex,ref="female")
+  d$sex=relevel(d$sex,ref="0")
 
 #Create empty matrix to hold the glm results:
 lact_t1_sex<-mann_t1_sex<-lm_t1_sex<-matrix(0, nrow=5, ncol=6)
 lact_t2_sex<-mann_t2_sex<-lm_t2_sex<-matrix(0, nrow=5, ncol=6)
 lact_t3_sex<-mann_t3_sex<-lm_t3_sex<-matrix(0, nrow=5, ncol=6)
 
-res_sex<-list(lact_t1_sex=lact_t1_sex, mann_t1_sex=mann_t1_sex, lm_t1_sex=lm_t1_sex, 
+res_diff <- res_month <- res_sex <- list(lact_t1_sex=lact_t1_sex, mann_t1_sex=mann_t1_sex, lm_t1_sex=lm_t1_sex, 
                 lact_t2_sex=lact_t2_sex, mann_t2_sex=mann_t2_sex, lm_t2_sex=lm_t2_sex, 
                 lact_t3_sex=lact_t3_sex, mann_t3_sex=mann_t3_sex, lm_t3_sex=lm_t3_sex)
 
@@ -506,6 +509,44 @@ for(i in 7:9){
   }
 }
 
+
+#Age and sex and month adjusted glm models
+for(i in 1:3){
+  for(j in 1:5){
+    #note the log transformation of the outcome prior to running GLM model:
+    temp<-washb_glm(Y=log(Y[,i]), tr=d$tr, W=cbind(d$sex, d$aged1, d$month1), id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)
+    res_month[[i]][j,]<-as.numeric(temp$TR)
+    colnames(res_month[[i]])<-c("RD","ci.l","ci.u", "Std. Error", "z value", "Pval")
+    rownames(res_month[[i]])<-c(c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH"))
+  }
+}
+for(i in 4:6){
+  for(j in 1:5){
+    #note the log transformation of the outcome prior to running GLM model:
+    temp<-washb_glm(Y=log(Y[,i]), tr=d$tr, W=cbind(d$sex, d$aged2, d$month2), id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)
+    res_month[[i]][j,]<-as.numeric(temp$TR)
+    colnames(res_month[[i]])<-c("RD","ci.l","ci.u", "Std. Error", "z value", "Pval")
+    rownames(res_month[[i]])<-c(c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH"))
+  }
+}
+for(i in 7:9){
+  for(j in 1:5){
+    #note the log transformation of the outcome prior to running GLM model:
+    temp<-washb_glm(Y=log(Y[,i]), tr=d$tr, W=cbind(d$sex, d$aged3, d$month3), id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)
+    res_month[[i]][j,]<-as.numeric(temp$TR)
+    colnames(res_month[[i]])<-c("RD","ci.l","ci.u", "Std. Error", "z value", "Pval")
+    rownames(res_month[[i]])<-c(c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH"))
+  }
+}
+
+#check change when adding month
+for(i in 1:length(res_sex)) res_diff[[i]]<-res_sex[[i]]-res_month[[i]]
+
+#Stack dataframes and add a column for variable and time
+
+#look at mean and max RD change
+
+#list contrasts where significance changes with added month
 
 #------------------
 #Adjusted GLM
@@ -588,7 +629,7 @@ table(d$n_chickens)
 
 #Relevel all factors
 W$sex<-as.factor(W$sex)
-  d$sex=relevel(d$sex,ref="female")
+  d$sex=relevel(d$sex,ref="0")
 d$momedu=relevel(d$momedu,ref="No education")
 d$hfiacat=relevel(d$hfiacat,ref="Food Secure")
     d$hfiacat<-addNA(d$hfiacat)
@@ -765,13 +806,13 @@ for(i in 1:3){
 }
 for(i in 4:6){
   for(j in 1:5){
-  temp<-washb_glm(Y=log(Y[,i]), tr=d$tr, W=W2, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]])
+  temp<-washb_glm(Y=log(Y[,i]), tr=d$tr, W=W2, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=T)
   res_adj[[i]][j,]<-as.numeric(temp$TR)
   }
 }
 for(i in 7:9){
   for(j in 1:5){
-  temp<-washb_glm(Y=log(Y[,i]), tr=d$tr, W=W3, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]])
+  temp<-washb_glm(Y=log(Y[,i]), tr=d$tr, W=W3, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=T)
   res_adj[[i]][j,]<-as.numeric(temp$TR)
   }
 }
@@ -968,3 +1009,4 @@ perl1_adj_M,perl2_adj_M,perl3_adj_M,
 perm1_adj_M,perm2_adj_M,perm3_adj_M,
      file="pre_recovery_res_M.Rdata")
 
+sink()
