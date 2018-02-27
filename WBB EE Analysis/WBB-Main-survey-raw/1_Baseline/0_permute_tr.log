@@ -1,0 +1,102 @@
+---------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Users/jadederong/Dropbox/WASHB-Bangladesh-Data/0-Untouched-data/1-M
+> ain-survey/1_Baseline/0_permute_tr.log
+  log type:  text
+ opened on:  19 Aug 2016, 09:34:08
+
+. 
+. *----------------------------------------
+. * WASH Benefits Spillover Study
+. * Randomly permute treatment
+. * Cannot permute within blocks because the
+. * design is not balanced across blocks
+. *----------------------------------------
+. use "~/Dropbox/WASHB-Spillover-Data/Data/Untouched/Complete/WashB Spillover_mai
+> n_clean_all.dta", clear
+
+. 
+. * merge in blocks
+. preserve
+
+. *use "~/Dropbox/WBB-primary-analysis/Data/Untouched/3_Endline/02. WASHB_Endline
+> _Arm_Identification.dta", clear
+. use "~/Dropbox/WASHB-Bangladesh-Data/0-Untouched-data/1-Main-survey/1_Baseline/
+> 0. WASHB_Blinded_tr_assignment.dta", clear
+
+. gen clusterid = substr(dataid,1,3)
+
+. keep clusterid tr 
+
+. duplicates drop
+
+Duplicates in terms of all variables
+
+(4,831 observations deleted)
+
+. tempfile blockf
+
+. save `blockf'
+file /var/folders/gh/bgfnnwkd7wdg7cw3q0_zwvt40000gp/T//S_08593.000002 saved
+
+. restore
+
+. 
+. merge m:1 clusterid using `blockf'
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                           540
+        from master                         0  (_merge==1)
+        from using                        540  (_merge==2)
+
+    matched                             1,799  (_merge==3)
+    -----------------------------------------
+
+. keep if _m==3
+(540 observations deleted)
+
+. drop _m
+
+. stop
+command stop is unrecognized
+r(199);
+
+end of do-file
+
+r(199);
+
+. tab tr
+
+      Treatment |
+   assignment - |
+  scrambled for |
+        blinded |
+       analysis |      Freq.     Percent        Cum.
+----------------+-----------------------------------
+          Water |        240       13.34       13.34
+     Sanitation |        210       11.67       25.01
+    Handwashing |        230       12.78       37.80
+            WSH |        220       12.23       50.03
+      Nutrition |        250       13.90       63.92
+Nutrition + WSH |        230       12.78       76.71
+        Control |        229       12.73       89.44
+        Control |        190       10.56      100.00
+----------------+-----------------------------------
+          Total |      1,799      100.00
+
+. use "/Volumes/0-Treatment-assignments/washb-bangladesh-tr.dta", clear
+(WASH Benefits Bangladesh cluster level treatment assignments)
+
+. do "/var/folders/gh/bgfnnwkd7wdg7cw3q0_zwvt40000gp/T//SD08593.000000"
+
+. use "/Volumes/0-Treatment-assignments/washb-bangladesh-tr.dta", clear
+(WASH Benefits Bangladesh cluster level treatment assignments)
+
+. 
+end of do-file
+
+. do "/Users/jadederong/Documents/CRG/washb-spillover/primary/0_permute_tr.do"
+
+. 
+. capture log close
