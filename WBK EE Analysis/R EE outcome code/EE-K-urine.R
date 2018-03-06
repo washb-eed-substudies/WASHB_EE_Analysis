@@ -1,152 +1,49 @@
 
 #---------------------------------------
-# EE-BD-urine.R
+# EE-K-urine.R
 #
 # andrew mertens (amertens@berkeley.edu)
 #
 # The urine-based biomarker outcomes for 
-# EED Bangladesh sub-study
+# EED Kenya sub-study
 #---------------------------------------
 
-## capture all the output to a file.
-zz <- file("EE-BD-urine.Rout", open="wt")
-sink(zz, type="output")
+
 
 ###Load in data
 rm(list=ls())
 library(tidyverse)
-library(foreign)
 library(washb)
-library(tidyr)
 
 
 #Load in blinded treatment information
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/")
-load("washb-bangladesh-tr.Rdata")
-d$clusterid<-as.numeric(d$clusterid)
-treatment<-d
-# levels(treatment$tr)
-# treatment$tr <- factor(treatment$tr,levels=c("Control","WSH","Nutrition","Nutrition + WSH"))
-# levels(treatment$tr)
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew")
+tr <- read.csv("washk_blindTR.csv")
+head(tr)
 
-#Load in L/M outcomes
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew")
-outcomes<-read.dta("washb-BD-EE-urine-outcomes-stata12.dta")
-load("urine_volume.Rdata")
+dob <- readRDS("WBK-EE-childDOB.rds")
 
-#Load in urine survey data
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew/")
-urine<-read.csv("BD-EE-urine.csv")
+lm <- readRDS("WBK-EE-LM-outcomes.rds")
+head(lm)
 
-#Drop and merge fixed urine volumes
-urine<-urine %>% subset(select=-c(urineVol_t1,urineVol_t2,urineVol_t3))
-urine<-merge(urine, urineVol, by=c("dataid", "childNo"))
+enrol <- readRDS("WBK-EE-covariates.rds")
+head(enrol)
+
+d <- left_join(lm, dob, by="childid")
+
+d <- left_join(d, enrol, by="hhid")
+
+d <- left_join(d, tr, by="clusterid")
 
 
-#Load in enrollment data for adjusted analysis
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
-enrol<-read.csv("washb-bangladesh-enrol+animals.csv",stringsAsFactors = TRUE)
-
-
-
-#Merge L/M outcomes
-dim(urine)
-dim(outcomes)
-outcomes$childid<-as.numeric(outcomes$childid)
-d<-left_join(urine,outcomes, by="childid")
-#d<-cbind(d,outcomes)
-dim(d)
-
-#Remove empty row
-dim(d)
-d<-d[!(is.na(d$childNo) & is.na(d$dataid)),]
-dim(d)
-
-#Merge treatment information 
-dim(d)
-d<-left_join(d,treatment, by="clusterid")
-dim(d)
-head(d)
-table(d$tr)
-
-
-
-
-#Merge in enrollment information
-dim(d)
-dim(enrol)
-d$dataid<-as.numeric(d$dataid)
-d<-left_join(d,enrol, by="dataid")
-dim(d)
-
-#test that all rows are matched to enrollment data
-table(is.na(d$svydate)) 
-
-
-
-
-#table number of fully collected aliqouts by arm and year
-head(d)
-
-#aliqout time 1
-t1s1<-d%>% subset(h2aliqout1_t1>1)%>%group_by(tr) %>%summarize(h2sample1=n()) 
-t1s2<-d%>% subset(h2aliqout2_t1>1)%>%group_by(tr) %>%summarize(h2sample2=n()) 
-t1s3<-d%>% subset(h2aliqout3_t1>1)%>%group_by(tr) %>%summarize(h2sample3=n()) 
-t1s4<-d%>% subset(h2aliqout4_t1>1)%>%group_by(tr) %>%summarize(h2sample4=n()) 
-t1s5<-d%>% subset(h2aliqout5_t1>1)%>%group_by(tr) %>%summarize(h2sample5=n()) 
-t1s6<-d%>% subset(h2aliqout6_t1>1)%>%group_by(tr) %>%summarize(h2sample6=n()) 
-t1s7<-d%>% subset(h5aliqout7_t1>1)%>%group_by(tr) %>%summarize(h5sample7=n()) 
-t1s8<-d%>% subset(h5aliqout8_t1>1)%>%group_by(tr) %>%summarize(h5sample8=n()) 
-t1s9<-d%>% subset(h5aliqout9_t1>1)%>%group_by(tr) %>%summarize(h5sample9=n()) 
-t1s10<-d%>% subset(h5aliqout10_t1>1)%>%group_by(tr) %>%summarize(h5sample10=n()) 
-t1s11<-d%>% subset(h5aliqout11_t1>1)%>%group_by(tr) %>%summarize(h5sample11=n()) 
-t1s12<-d%>% subset(h5aliqout12_t1>1)%>%group_by(tr) %>%summarize(h5sample12=n()) 
-
- 
-aliquotN_t1<-cbind(t1s1,t1s2[,2],t1s3[,2],t1s4[,2],t1s5[,2],t1s6[,2],t1s7[,2],t1s8[,2],t1s9[,2],t1s10[,2],t1s11[,2],t1s12[,2])
-
-
-#aliqout time 2
-t2s1<-d%>% subset(h2aliqout1_t2>1)%>%group_by(tr) %>%summarize(h2sample1=n()) 
-t2s2<-d%>% subset(h2aliqout2_t2>1)%>%group_by(tr) %>%summarize(h2sample2=n()) 
-t2s3<-d%>% subset(h2aliqout3_t2>1)%>%group_by(tr) %>%summarize(h2sample3=n()) 
-t2s4<-d%>% subset(h2aliqout4_t2>1)%>%group_by(tr) %>%summarize(h2sample4=n()) 
-t2s5<-d%>% subset(h2aliqout5_t2>1)%>%group_by(tr) %>%summarize(h2sample5=n()) 
-t2s6<-d%>% subset(h2aliqout6_t2>1)%>%group_by(tr) %>%summarize(h2sample6=n()) 
-t2s7<-d%>% subset(h5aliqout7_t2>1)%>%group_by(tr) %>%summarize(h5sample7=n()) 
-t2s8<-d%>% subset(h5aliqout8_t2>1)%>%group_by(tr) %>%summarize(h5sample8=n()) 
-t2s9<-d%>% subset(h5aliqout9_t2>1)%>%group_by(tr) %>%summarize(h5sample9=n()) 
-t2s10<-d%>% subset(h5aliqout10_t2>1)%>%group_by(tr) %>%summarize(h5sample10=n()) 
-t2s11<-d%>% subset(h5aliqout11_t2>1)%>%group_by(tr) %>%summarize(h5sample11=n()) 
-t2s12<-d%>% subset(h5aliqout12_t2>1)%>%group_by(tr) %>%summarize(h5sample12=n()) 
-t3s13<-d%>% subset(preLMaliqout13_t2>1)%>%group_by(tr) %>%summarize(preLMsample13_t2=n()) 
-
- 
-aliquotN_t2<-cbind(t2s1,t2s2[,2],t2s3[,2],t2s4[,2],t2s5[,2],t2s6[,2],t2s7[,2],t2s8[,2],t2s9[,2],t2s10[,2],t2s11[,2],t2s12[,2],t3s13[,2])
-
-
-#aliqout time 3
-t3s1<-d%>% subset(h2aliqout1_t3>1)%>%group_by(tr) %>%summarize(h2sample1=n()) 
-t3s2<-d%>% subset(h2aliqout2_t3>1)%>%group_by(tr) %>%summarize(h2sample2=n()) 
-t3s3<-d%>% subset(h2aliqout3_t3>1)%>%group_by(tr) %>%summarize(h2sample3=n()) 
-t3s4<-d%>% subset(h2aliqout4_t3>1)%>%group_by(tr) %>%summarize(h2sample4=n()) 
-t3s5<-d%>% subset(h2aliqout5_t3>1)%>%group_by(tr) %>%summarize(h2sample5=n()) 
-t3s6<-d%>% subset(h2aliqout6_t3>1)%>%group_by(tr) %>%summarize(h2sample6=n()) 
-t3s7<-d%>% subset(h5aliqout7_t3>1)%>%group_by(tr) %>%summarize(h5sample7=n()) 
-t3s8<-d%>% subset(h5aliqout8_t3>1)%>%group_by(tr) %>%summarize(h5sample8=n()) 
-t3s9<-d%>% subset(h5aliqout9_t3>1)%>%group_by(tr) %>%summarize(h5sample9=n()) 
-t3s10<-d%>% subset(h5aliqout10_t3>1)%>%group_by(tr) %>%summarize(h5sample10=n()) 
-t3s11<-d%>% subset(h5aliqout11_t3>1)%>%group_by(tr) %>%summarize(h5sample11=n()) 
-t3s12<-d%>% subset(h5aliqout12_t3>1)%>%group_by(tr) %>%summarize(h5sample12=n()) 
-t3s13<-d%>% subset(preLMaliqout13_t3>1)%>%group_by(tr) %>%summarize(preLMsample13_t3=n()) 
-
- 
-aliquotN_t3<-cbind(t3s1,t3s2[,2],t3s3[,2],t3s4[,2],t3s5[,2],t3s6[,2],t3s7[,2],t3s8[,2],t3s9[,2],t3s10[,2],t3s11[,2],t3s12[,2],t3s13[,2])
-
-
-aliquotN_t1[c(1,3,4,2),c(1:2,8)]
-aliquotN_t2[c(1,3,4,2),c(1:2,8,14)]
-aliquotN_t3[c(1,3,4,2),c(1:2,8,14)]
+#Calcultate child age at each measurement
+d <- d %>% 
+        mutate(aged1= urine_bl_date-DOB,
+               aged2= urine_ml_date-DOB,
+               aged3= urine_el_date-DOB,
+               agem1= as.numeric(aged1/30.25), 
+               agem2= as.numeric(aged2/30.25), 
+               agem3= as.numeric(aged3/30.25))
 
 
 
@@ -192,167 +89,8 @@ age_t1_urine_M<-age_t1_urine_M[,c(1,2,4,3,5,7,6)]
 age_t2_urine_M<-age_t2_urine_M[,c(1,2,4,3,5,7,6)]
 age_t3_urine_M<-age_t3_urine_M[,c(1,2,4,3,5,7,6)]
 
+table(d$vlgid)
 
-
-#Temporarily generate fake outcome data for L and M
-#Mannitol: 1228.8 (1230.07) ug/ml and Lactulose: 245.3 (265.08) ug/ml 
-#set.seed(12345)
-#d$Lact1<-round(abs(rnorm(n=nrow(d), mean=1228.8, sd=1230.07)),4)
-#d$Mann1<-round(abs(rnorm(n=nrow(d), mean=245.3, sd=265.08)),4)
-
-#d$Lact2<-round(abs(rnorm(n=nrow(d), mean=1300, sd=1200)),4)
-#d$Mann2<-round(abs(rnorm(n=nrow(d), mean=300, sd=250)),4)
-
-#d$Lact3<-round(abs(rnorm(n=nrow(d), mean=1200, sd=1100)),4)
-#d$Mann3<-round(abs(rnorm(n=nrow(d), mean=200, sd=200)),4)
-
-#Create and save dataset for Audrie:
-#urine_simulated_outcomes<-d %>%
-#    mutate(childid=as.character(dataid*10+childNo)) %>%
-#    select(childid, Lact1, Mann1, Lact2, Mann2, Lact3, Mann3)
-#library(stringr)
-#urine_simulated_outcomes$childid<-str_pad(urine_simulated_outcomes$childid, 6, pad = "0")
-#head(urine_simulated_outcomes)    
-# 
-# #setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
-# #save(urine_simulated_outcomes, file="washb-BD-EE-sim-urine-outcomes.Rdata")
-# #write.dta(urine_simulated_outcomes, "washb-BD-EE-sim-urine-outcomes.dta")
-# setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
-# outcomes<-read.dta("washb-BD-EE-sim-urine-outcomes-stata12.dta")
-# outcomes$childid<-as.numeric(outcomes$childid)
-# 
-# 
-# dim(d)
-# dim(outcomes)
-# d<-left_join(d,outcomes, by="childid")
-# #d<-cbind(d,outcomes)
-# dim(d)
-# 
-# #Add 1 so no 0's
-# d$Lact1<-d$Lact1+1
-# d$Lact2<-d$Lact2+1
-# d$Lact3<-d$Lact3+1
-# d$Mann1<-d$Mann1+1
-# d$Mann2<-d$Mann2+1
-# d$Mann3<-d$Mann3+1
-# 
-# mean(d$Lact1, na.rm=T)
-# mean(d$Lact2, na.rm=T)
-# mean(d$Lact3, na.rm=T)
-# mean(d$Mann1, na.rm=T)
-# mean(d$Mann1, na.rm=T)
-# mean(d$Mann1, na.rm=T)
-
-
-
-
-
-
-#------------------
-#Generate LM ratio
-#------------------
-
-#Destring urine and LM volume
-d$urineVol_t1<-as.numeric(d$urineVol_t1)
-d$urineVol_t2<-as.numeric(d$urineVol_t2)
-d$urineVol_t3<-as.numeric(d$urineVol_t3)
-d$LMvol_t1<-as.numeric(d$LMvol_t1)
-d$LMvol_t2<-as.numeric(d$LMvol_t2)
-d$LMvol_t3<-as.numeric(d$LMvol_t3)
-
-#To calculate total lactulose dosed (mg) or total mannitol dosed (mg):
- #The children ingest a solution of 250 mg/ml lactulose and 50 mg/ml of mannitol in a dose of 2 ml/kg of weight up to 20 ml maximum.
- #Q9 of the EE urine form is the total volume of LM solution ingested (in ml). For example, a child who ingested 20 ml of LM solution (the maximum dose), would have ingested 1000 mg of mannitol and 5000 mg of lactulose. The 1000 mg and 5000 mg would then be used in the above formula as the "total mannitol dosed (mg) or total lactulose dosed (mg)".
- mean(d$LMvol_t1, na.rm=T)
- mean(d$urineVol_t1, na.rm=T)/1000
-
-d$lact.dose_t1<-d$LMvol_t1*250
-d$lact.dose_t2<-d$LMvol_t2*250
-d$lact.dose_t3<-d$LMvol_t3*250
-d$mann.dose_t1<-d$LMvol_t1*50
-d$mann.dose_t2<-d$LMvol_t2*50
-d$mann.dose_t3<-d$LMvol_t3*50
-
-mean(d$lact.dose_t1, na.rm=T)
-mean(d$mann.dose_t1, na.rm=T)
-
-
-#% lactulose recovery = (urine concentration lactulose (mg/L) * urine volume (L) * 100 / total lactulose dosed (mg))
-d$per.lact.rec_t1<-d$Lact1*(d$urineVol_t1/1000)*100/d$lact.dose_t1
-d$per.lact.rec_t2<-d$Lact2*(d$urineVol_t2/1000)*100/d$lact.dose_t2
-d$per.lact.rec_t3<-d$Lact3*(d$urineVol_t3/1000)*100/d$lact.dose_t3
-mean(d$per.lact.rec_t1, na.rm=T)
-mean(d$per.lact.rec_t2, na.rm=T)
-mean(d$per.lact.rec_t3, na.rm=T)
-
-table(d$lact.dose_t1==0)
-table(d$lact.dose_t2==0)
-table(d$lact.dose_t3==0)
-
-#% mannitol recovery = (urine concentration mannitol (mg/L) * urine volume (L) * 100 / total mannitol dosed (mg))
-d$per.mann.rec_t1<-d$Mann1*(d$urineVol_t1/1000)*100/d$mann.dose_t1
-d$per.mann.rec_t2<-d$Mann2*(d$urineVol_t2/1000)*100/d$mann.dose_t2
-d$per.mann.rec_t3<-d$Mann3*(d$urineVol_t3/1000)*100/d$mann.dose_t3
-mean(d$per.mann.rec_t1, na.rm=T)
-mean(d$per.mann.rec_t2, na.rm=T)
-mean(d$per.mann.rec_t3, na.rm=T)
-
-table(is.na(d$per.lact.rec_t1))
-
-
-table(d$lact.dose_t1==0)
-table(d$lact.dose_t2==0)
-table(d$lact.dose_t3==0)
-
-
-#LM ratio
-d$LM1<-d$per.lact.rec_t1/d$per.mann.rec_t1
-d$LM2<-d$per.lact.rec_t2/d$per.mann.rec_t2
-d$LM3<-d$per.lact.rec_t3/d$per.mann.rec_t3
-mean(d$LM1, na.rm=T)
-
-
-#Data check. Why are there less LM than lact or mann?
-table(d$per.mann.rec_t1==0)
-table(d$per.mann.rec_t2==0)
-table(d$per.mann.rec_t3==0)
-
-table(d$urineVol_t1==0)
-table(d$urineVol_t2==0)
-table(d$urineVol_t3==0)
-
-table(is.na(d$per.mann.rec_t1))
-table(is.na(d$Lact1))
-
-
-#We also need to report Lactulose recovery and Mannitol recovery in mmol/L (as indicated on our table shells).
-    #mmol/L of Lactulose = ??g/ml * 1000 ml/L * 1 mg/1000??g * 1g/1000mg * 1mol/342.296g * 1000mmol/1 mol
-#The above simplifies to (??g/ml) * (1 / 342.296) = mmol/L
-    #mmol/L of Mannitol = ??g/ml * 1000 ml/L * 1 mg/1000??g * 1g/1000mg * 1mol/182.172g * 1000mmol/1 mol
-#The above simplifies to (??g/ml) * (1 / 182.172) = mmol/L
-mean(d$Lact1, na.rm=T)
-mean(d$LMvol_t1, na.rm=T)
-mean(d$Mann1, na.rm=T)
-
-d$lact.rec.MMOL_t1<-(d$Lact1/1000)*(1/342.296)
-d$lact.rec.MMOL_t2<-(d$Lact2/1000)*(1/342.296)
-d$lact.rec.MMOL_t3<-(d$Lact3/1000)*(1/342.296)
-d$mann.rec.MMOL_t1<-(d$Mann1/1000)*(1/182.172)
-d$mann.rec.MMOL_t2<-(d$Mann2/1000)*(1/182.172)
-d$mann.rec.MMOL_t3<-(d$Mann3/1000)*(1/182.172)
-mean(d$lact.rec.MMOL_t1, na.rm=T)
-
-############################
-#Calculate outcomes:
-############################
-
-d$Lact1<-d$Lact1*(1/342.296)
-d$Lact2<-d$Lact2*(1/342.296)
-d$Lact3<-d$Lact3*(1/342.296)
-
-d$Mann1<-d$Mann1*(1/182.172)
-d$Mann2<-d$Mann2*(1/182.172)
-d$Mann3<-d$Mann3*(1/182.172)
 
 
 #------------------
