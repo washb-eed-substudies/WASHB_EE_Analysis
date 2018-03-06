@@ -8,9 +8,6 @@
 # EED Bangladesh sub-study
 #---------------------------------------
 
-## capture all the output to a file.
-zz <- file("EE-BD-stool.Rout", open="wt")
-sink(zz, type="output")
 
 
 ###Load in data
@@ -359,17 +356,6 @@ for(i in 8:10){
 #Adjusted GLMs
 ############################
 
-#Truncate staffid at <100
-table(rbind(d$staffid1,d$staffid2,d$staffid3))
-names(table(rbind(d$staffid1,d$staffid2,d$staffid3)))
-
-#Which staff ids had <100 samples collected
-inexp_staff_id<-names(which(table(rbind(d$staffid1,d$staffid2,d$staffid3))<100))
-inexp_staff_id
-#Assign new category to inexperienced IDs across the 3 staffid-round variables
-d$staffid1[d$staffid1 %in% inexp_staff_id]<-"inexp"
-d$staffid2[d$staffid2 %in% inexp_staff_id]<-"inexp"
-d$staffid3[d$staffid3 %in% inexp_staff_id]<-"inexp"
 
 #Set birthorder to 1, >=2, or missing
 class(d$birthord)
@@ -387,15 +373,6 @@ Wvars<-c('sex', 'birthord',
          'asset_tv', 'asset_refrig', 'asset_bike',
          'asset_moto', 'asset_sewmach', 'asset_mobile',
          'n_cows', 'n_goats', 'n_chickens')
-
-
-#Add in time varying covariates:
-Wvars1<-c("aged1", "month1", "staffid1") 
-Wvars2<-c("aged2", "month2", "staffid2") 
-Wvars3<-c("aged3", "month3", "staffid3") 
-
-
-
 
 
 #subset time-constant W adjustment set
@@ -533,26 +510,25 @@ for(i in 1:ncol(W)){
 
 
 #Add in time-varying covariates
+d <- d %>% mutate(monsoon1 = ifelse(month1 > 4 & month1 < 11, "1", "0"),
+                  monsoon2 = ifelse(month2 > 4 & month2 < 11, "1", "0"),
+                  monsoon3 = ifelse(month3 > 4 & month3 < 11, "1", "0"),
+                  monsoon1 = ifelse(is.na(month1),"missing", monsoon1),
+                  monsoon2 = ifelse(is.na(month2),"missing", monsoon2),
+                  monsoon3 = ifelse(is.na(month3),"missing", monsoon3),
+                  monsoon1 = factor(monsoon1),
+                  monsoon2 = factor(monsoon2),
+                  monsoon3 = factor(monsoon3))
+
+
+Wvars1<-c("aged1", "monsoon1") 
+Wvars2<-c("aged2", "monsoon2") 
+Wvars3<-c("aged3", "monsoon3") 
+
 W1<- cbind(W, subset(d, select=Wvars1))
 W2<- cbind(W, subset(d, select=Wvars2))
 W3<- cbind(W, subset(d, select=Wvars3))
 
-#Replace missingness in time varying covariates as a new level
-W1$month1[is.na(W1$month1)]<-"missing"
-W2$month2[is.na(W2$month2)]<-"missing"
-W3$month3[is.na(W3$month3)]<-"missing"
-W1$staffid1[is.na(W1$staffid1)]<-"missing"
-W2$staffid2[is.na(W2$staffid2)]<-"missing"
-W3$staffid3[is.na(W3$staffid3)]<-"missing"
-
-
-#Set time-varying covariates as factors
-W1$month1<-as.factor(W1$month1)
-W2$month2<-as.factor(W2$month2)
-W3$month3<-as.factor(W3$month3)
-W1$staffid1<-factor(W1$staffid1)
-W2$staffid2<-factor(W2$staffid2)
-W3$staffid3<-factor(W3$staffid3)
 
 
 
@@ -697,4 +673,3 @@ save(neo_t1_adj_M, mpo_t1_adj_M, aat_t1_adj_M,
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
 save(d, file="stool_figure_data.Rdata")
 
-sink()

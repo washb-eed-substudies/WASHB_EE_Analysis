@@ -8,9 +8,7 @@
 # EED Bangladesh sub-study
 #---------------------------------------
 
-## capture all the output to a file.
-zz <- file("EE-BD-urine.Rout", open="wt")
-sink(zz, type="output")
+
 
 ###Load in data
 rm(list=ls())
@@ -194,60 +192,6 @@ age_t3_urine_M<-age_t3_urine_M[,c(1,2,4,3,5,7,6)]
 
 
 
-#Temporarily generate fake outcome data for L and M
-#Mannitol: 1228.8 (1230.07) ug/ml and Lactulose: 245.3 (265.08) ug/ml 
-#set.seed(12345)
-#d$Lact1<-round(abs(rnorm(n=nrow(d), mean=1228.8, sd=1230.07)),4)
-#d$Mann1<-round(abs(rnorm(n=nrow(d), mean=245.3, sd=265.08)),4)
-
-#d$Lact2<-round(abs(rnorm(n=nrow(d), mean=1300, sd=1200)),4)
-#d$Mann2<-round(abs(rnorm(n=nrow(d), mean=300, sd=250)),4)
-
-#d$Lact3<-round(abs(rnorm(n=nrow(d), mean=1200, sd=1100)),4)
-#d$Mann3<-round(abs(rnorm(n=nrow(d), mean=200, sd=200)),4)
-
-#Create and save dataset for Audrie:
-#urine_simulated_outcomes<-d %>%
-#    mutate(childid=as.character(dataid*10+childNo)) %>%
-#    select(childid, Lact1, Mann1, Lact2, Mann2, Lact3, Mann3)
-#library(stringr)
-#urine_simulated_outcomes$childid<-str_pad(urine_simulated_outcomes$childid, 6, pad = "0")
-#head(urine_simulated_outcomes)    
-# 
-# #setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
-# #save(urine_simulated_outcomes, file="washb-BD-EE-sim-urine-outcomes.Rdata")
-# #write.dta(urine_simulated_outcomes, "washb-BD-EE-sim-urine-outcomes.dta")
-# setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
-# outcomes<-read.dta("washb-BD-EE-sim-urine-outcomes-stata12.dta")
-# outcomes$childid<-as.numeric(outcomes$childid)
-# 
-# 
-# dim(d)
-# dim(outcomes)
-# d<-left_join(d,outcomes, by="childid")
-# #d<-cbind(d,outcomes)
-# dim(d)
-# 
-# #Add 1 so no 0's
-# d$Lact1<-d$Lact1+1
-# d$Lact2<-d$Lact2+1
-# d$Lact3<-d$Lact3+1
-# d$Mann1<-d$Mann1+1
-# d$Mann2<-d$Mann2+1
-# d$Mann3<-d$Mann3+1
-# 
-# mean(d$Lact1, na.rm=T)
-# mean(d$Lact2, na.rm=T)
-# mean(d$Lact3, na.rm=T)
-# mean(d$Mann1, na.rm=T)
-# mean(d$Mann1, na.rm=T)
-# mean(d$Mann1, na.rm=T)
-
-
-
-
-
-
 #------------------
 #Generate LM ratio
 #------------------
@@ -297,7 +241,6 @@ mean(d$per.mann.rec_t1, na.rm=T)
 mean(d$per.mann.rec_t2, na.rm=T)
 mean(d$per.mann.rec_t3, na.rm=T)
 
-table(is.na(d$per.lact.rec_t1))
 
 
 table(d$lact.dose_t1==0)
@@ -552,17 +495,7 @@ for(i in 1:length(res_sex)) res_diff[[i]]<-res_sex[[i]]-res_month[[i]]
 #Adjusted GLM
 #------------------
 
-#Truncate staffid at <100
-table(rbind(d$staffid1,d$staffid2,d$staffid3))
-names(table(rbind(d$staffid1,d$staffid2,d$staffid3)))
 
-#Which staff ids had <100 samples collected
-inexp_staff_id<-names(which(table(rbind(d$staffid1,d$staffid2,d$staffid3))<100))
-inexp_staff_id
-#Assign new category to inexperienced IDs across the 3 staffid-round variables
-d$staffid1[d$staffid1 %in% inexp_staff_id]<-"inexp"
-d$staffid2[d$staffid2 %in% inexp_staff_id]<-"inexp"
-d$staffid3[d$staffid3 %in% inexp_staff_id]<-"inexp"
 
 #Set birthorder to 1, >=2, or missing
 class(d$birthord)
@@ -583,11 +516,25 @@ Wvars<-c('sex', 'birthord',
 
 
 #Add in time varying covariates:
-Wvars1<-c("aged1", "month1", "staffid1") 
-Wvars2<-c("aged2", "month2", "staffid2") 
-Wvars3<-c("aged3", "month3", "staffid3") 
 
+d <- d %>% mutate(monsoon1 = ifelse(month1 > 4 & month1 < 11, "1", "0"),
+                  monsoon2 = ifelse(month2 > 4 & month2 < 11, "1", "0"),
+                  monsoon3 = ifelse(month3 > 4 & month3 < 11, "1", "0"),
+                  monsoon1 = ifelse(is.na(month1),"missing", monsoon1),
+                  monsoon2 = ifelse(is.na(month2),"missing", monsoon2),
+                  monsoon3 = ifelse(is.na(month3),"missing", monsoon3),
+                  monsoon1 = factor(monsoon1),
+                  monsoon2 = factor(monsoon2),
+                  monsoon3 = factor(monsoon3))
 
+table(is.na(d$monsoon1))
+table(d$monsoon1)
+
+Wvars1<-c("aged1", "monsoon1") 
+Wvars2<-c("aged2", "monsoon2") 
+Wvars3<-c("aged3", "monsoon3") 
+
+table(is.na(d$aged1), is.na(d$LM1))
 
 
 
@@ -729,22 +676,6 @@ W1<- cbind(W, subset(d, select=Wvars1))
 W2<- cbind(W, subset(d, select=Wvars2))
 W3<- cbind(W, subset(d, select=Wvars3))
 
-#Replace missingness in time varying covariates as a new level
-W1$month1[is.na(W1$month1)]<-"missing"
-W2$month2[is.na(W2$month2)]<-"missing"
-W3$month3[is.na(W3$month3)]<-"missing"
-W1$staffid1[is.na(W1$staffid1)]<-"missing"
-W2$staffid2[is.na(W2$staffid2)]<-"missing"
-W3$staffid3[is.na(W3$staffid3)]<-"missing"
-
-
-#Set time-varying covariates as factors
-W1$month1<-as.factor(W1$month1)
-W2$month2<-as.factor(W2$month2)
-W3$month3<-as.factor(W3$month3)
-W1$staffid1<-factor(W1$staffid1)
-W2$staffid2<-factor(W2$staffid2)
-W3$staffid3<-factor(W3$staffid3)
 
 
 
@@ -1009,4 +940,3 @@ perl1_adj_M,perl2_adj_M,perl3_adj_M,
 perm1_adj_M,perm2_adj_M,perm3_adj_M,
      file="pre_recovery_res_M.Rdata")
 
-sink()

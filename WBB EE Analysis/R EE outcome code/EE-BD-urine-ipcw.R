@@ -120,37 +120,32 @@ d$month3[is.na(d$month3)] <-  month1_median3
 table(d$month1)
 
 
-#impute child age with overall median
-# d$aged1[is.na(d$aged1)] <- median(d$aged1, na.rm = T)
-# d$aged2[is.na(d$aged2)] <- median(d$aged2, na.rm = T)
-# d$aged3[is.na(d$aged3)] <- median(d$aged3, na.rm = T)
+table(d$month1)
+table(d$month2)
+table(d$month3)
 
+d <- d %>% mutate(monsoon1 = ifelse(month1 > 4 & month1 < 11, "1", "0"),
+                  monsoon2 = ifelse(month2 > 4 & month2 < 11, "1", "0"),
+                  monsoon3 = ifelse(month3 > 4 & month3 < 11, "1", "0"),
+                  monsoon1 = ifelse(is.na(month1),"missing", monsoon1),
+                  monsoon2 = ifelse(is.na(month2),"missing", monsoon2),
+                  monsoon3 = ifelse(is.na(month3),"missing", monsoon3),
+                  monsoon1 = factor(monsoon1),
+                  monsoon2 = factor(monsoon2),
+                  monsoon3 = factor(monsoon3))
+table(d$monsoon1)
+table(d$monsoon2)
+table(d$monsoon3)
+table(d$monsoon1, d$tr)
+table(d$monsoon2, d$tr)
+table(d$monsoon3, d$tr)
+
+
+#impute child age with overall median
 d$aged1[is.na(d$aged1)] <- 84
 d$aged2[is.na(d$aged2)] <- 428
 d$aged3[is.na(d$aged3)] <- 857
 
-summary(d$aged1)
-table(d$aged1)
-summary(d$aged1[d$tr=="Control"])
-summary(d$aged1[d$tr=="WSH"])
-
-
-#Mark missing staffid
-d$staffid1[is.na(d$staffid1)] <- "missing"
-d$staffid2[is.na(d$staffid2)] <- "missing"
-d$staffid3[is.na(d$staffid3)] <- "missing"
-
-#Truncate staffid at <100
-table(rbind(d$staffid1,d$staffid2,d$staffid3))
-names(table(rbind(d$staffid1,d$staffid2,d$staffid3)))
-
-#Which staff ids had <100 samples collected
-inexp_staff_id<-names(which(table(rbind(d$staffid1,d$staffid2,d$staffid3))<100))
-inexp_staff_id
-#Assign new category to inexperienced IDs across the 3 staffid-round variables
-d$staffid1[d$staffid1 %in% inexp_staff_id]<-"inexp"
-d$staffid2[d$staffid2 %in% inexp_staff_id]<-"inexp"
-d$staffid3[d$staffid3 %in% inexp_staff_id]<-"inexp"
 
 
 
@@ -291,41 +286,12 @@ d$walls<-factor(d$walls)
 W<- subset(d, select=Wvars)
 
 #Add in time-varying covariates
-Wvars1<-c("aged1", "month1", "staffid1") 
-Wvars2<-c("aged2", "month2", "staffid2") 
-Wvars3<-c("aged3", "month3", "staffid3") 
+Wvars1<-c("aged1", "monsoon1") 
+Wvars2<-c("aged2", "monsoon2") 
+Wvars3<-c("aged3", "monsoon3") 
 W1<- cbind(W, subset(d, select=Wvars1))
 W2<- cbind(W, subset(d, select=Wvars2))
 W3<- cbind(W, subset(d, select=Wvars3))
-
-#Replace missingness in time varying covariates as a new level
-W1$month1[is.na(W1$month1)]<-"missing"
-W2$month2[is.na(W2$month2)]<-"missing"
-W3$month3[is.na(W3$month3)]<-"missing"
-W1$staffid1[is.na(W1$staffid1)]<-"missing"
-W2$staffid2[is.na(W2$staffid2)]<-"missing"
-W3$staffid3[is.na(W3$staffid3)]<-"missing"
-
-
-#Set time-varying covariates as factors
-W1$month1<-as.factor(W1$month1)
-W2$month2<-as.factor(W2$month2)
-W3$month3<-as.factor(W3$month3)
-W1$staffid1<-factor(W1$staffid1)
-W2$staffid2<-factor(W2$staffid2)
-W3$staffid3<-factor(W3$staffid3)
-
-W2$month2 <- relevel(W2$month2, ref="1")
-W2$staffid2 <- relevel(W2$staffid2, ref="missing")
-W2 <- droplevels(W2)
-
-W3$month3 <- relevel(W3$month3, ref="1")
-W3$staffid3 <- relevel(W3$staffid3, ref="missing")
-W3 <- droplevels(W3)
-
-W1$month1 <- relevel(W1$month1, ref="1")
-W1$staffid1 <- relevel(W1$staffid1, ref="missing")
-W1 <- droplevels(W1)
 
 
 
@@ -520,32 +486,32 @@ res_unadj<-list(lact_t1_unadj=lact_t1_unadj, mann_t1_unadj=mann_t1_unadj, lm_t1_
 
 
 # # #Unadjusted glm models
-# for(i in 1:ncol(Y)){
-#   for(j in 1:5){
-#     #note the log transformation of the outcome prior to running GLM model:
-#     temp<-washb_tmle(Y=log(Y[,i]), Delta=miss[,i], tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], Q.SL.library = c("SL.glm"), seed=12345, print=T)
-#     cat(i," : ",j, "\n")
-#     res_unadj[[i]][j,]<-(t(unlist(temp$estimates$ATE)))
-#     colnames(res_unadj[[i]])<-c("psi","var.psi","ci.l","ci.u", "Pval")
-#     rownames(res_unadj[[i]])<-c(c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH"))
-#   }
-# }
-# 
-# 
-# 
-# #Extract estimates
-# l1_unadj_ipcw_M<-res_unadj[[1]]
-# l2_unadj_ipcw_M<-res_unadj[[4]]
-# l3_unadj_ipcw_M<-res_unadj[[7]]
-# 
-# m1_unadj_ipcw_M<-res_unadj[[2]]
-# m2_unadj_ipcw_M<-res_unadj[[5]]
-# m3_unadj_ipcw_M<-res_unadj[[8]]
-# 
-# lmr1_unadj_ipcw_M<-res_unadj[[3]]
-# lmr2_unadj_ipcw_M<-res_unadj[[6]]
-# lmr3_unadj_ipcw_M<-res_unadj[[9]]
-# 
+for(i in 1:ncol(Y)){
+  for(j in 1:5){
+    #note the log transformation of the outcome prior to running GLM model:
+    temp<-washb_tmle(Y=log(Y[,i]), Delta=miss[,i], tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], Q.SL.library = c("SL.glm"), seed=12345, print=T)
+    cat(i," : ",j, "\n")
+    res_unadj[[i]][j,]<-(t(unlist(temp$estimates$ATE)))
+    colnames(res_unadj[[i]])<-c("psi","var.psi","ci.l","ci.u", "Pval")
+    rownames(res_unadj[[i]])<-c(c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH"))
+  }
+}
+
+
+
+#Extract estimates
+l1_unadj_ipcw_M<-res_unadj[[1]]
+l2_unadj_ipcw_M<-res_unadj[[4]]
+l3_unadj_ipcw_M<-res_unadj[[7]]
+
+m1_unadj_ipcw_M<-res_unadj[[2]]
+m2_unadj_ipcw_M<-res_unadj[[5]]
+m3_unadj_ipcw_M<-res_unadj[[8]]
+
+lmr1_unadj_ipcw_M<-res_unadj[[3]]
+lmr2_unadj_ipcw_M<-res_unadj[[6]]
+lmr3_unadj_ipcw_M<-res_unadj[[9]]
+
 
 
 #Run the adjusted ipcw analysis
@@ -581,9 +547,7 @@ for(i in 1:ncol(Y)){
   }
 }
 
-mean(Y$Lact1Delta)
-dim(Y)
-table(is.na(Y$Lact1Delta))
+
 
 #Extract estimates
 l1_adj_ipcw_M<-res_adj[[1]]
@@ -598,32 +562,7 @@ lmr1_adj_ipcw_M<-res_adj[[3]]
 lmr2_adj_ipcw_M<-res_adj[[6]]
 lmr3_adj_ipcw_M<-res_adj[[9]]
 
-mean(miss$Lact2.miss)
-mean(log(Y$Lact2Delta))
 
-temp<-washb_tmle(Y=log(Y$Lact2Delta), Delta=miss$Lact2.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[1]], Q.SL.library = c("SL.glm"), seed=12345, print=T)
-
-mean(log(Y$Lact2Delta))
-mean(miss$Lact2.miss)
-mean(d$block)
-
-
-dim(W)
-table(is.na(W))
-
-#Where is walls?
-
-for(i in 1:ncol(W)){
-  cat(colnames(W)[i],":\n")
-  print(mean(W[,i],na.rm=T))
-}
-
-for(i in 1:ncol(W)){
-  if(class(W[,i])=="factor"){
-  cat(colnames(W)[i],":\n")
-  print(table(W[,i]))
-  }
-}
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
 save(l1_unadj_ipcw_M,

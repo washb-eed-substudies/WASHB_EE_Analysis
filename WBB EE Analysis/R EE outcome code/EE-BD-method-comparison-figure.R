@@ -1,3 +1,5 @@
+
+
 rm(list=ls())
 library(tidyverse)
 library(ggthemes) 
@@ -22,7 +24,7 @@ load("stool_res_adj_M.Rdata")
 load("urine_res_adj_M.Rdata")
 load("stool_ipcw_res.Rdata")
 load("urine_ipcw_res.Rdata")
-load("urine_ipcw_res_SL.Rdata")
+#load("urine_ipcw_res_SL.Rdata")
 
 listnames <- ls()
 objlist <- lapply(listnames, get)

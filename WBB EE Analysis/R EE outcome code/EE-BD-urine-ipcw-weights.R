@@ -18,6 +18,22 @@ library(dplyr)
 library(washb)
 
 
+i <- 1
+j <- 1
+outcome=colnames(Y)[i]
+Y=log(Y[,i])
+Delta=miss[,i]
+tr=d$tr
+W=Wlist[[i]]
+id=d$block
+pair=NULL
+family="gaussian"
+contrast= contrasts[[j]]
+Q.SL.library = c("SL.glm")
+seed=12345
+print=T
+
+
 #----------------------------
 # Ipcw weight function
 #----------------------------
@@ -26,6 +42,9 @@ ipcw_weights <- function(outcome, Y, tr, W = NULL, id = 1:length(Y), pair = NULL
     length(Y)), family = "gaussian", contrast, Q.SL.library = c("SL.mean", 
     "SL.glm", "SL.bayesglm", "SL.gam", "SL.glmnet"), g.SL.library = Q.SL.library, 
     pval = 0.2, FECR = NULL, seed = NULL, print = TRUE){
+    
+  covariates <- W
+  
     require(tmle)
     require(SuperLearner)
     fnargs <- as.list(match.call())
@@ -54,16 +73,13 @@ ipcw_weights <- function(outcome, Y, tr, W = NULL, id = 1:length(Y), pair = NULL
     if (is.null(W)) {
         if (is.null(pair)) {
             tmledat <- data.frame(id, Y, Delta, tr)
-        }
-        else {
+        }else{
             tmledat <- data.frame(id, pair, Y, Delta, tr)
         }
-    }
-    else {
+    }else{
         if (is.null(pair)) {
             tmledat <- data.frame(id, Y, Delta, tr, W)
-        }
-        else {
+        }else{
             tmledat <- data.frame(id, pair, Y, Delta, tr, W)
         }
     }
@@ -121,8 +137,7 @@ ipcw_weights <- function(outcome, Y, tr, W = NULL, id = 1:length(Y), pair = NULL
                 g.SL.library <- g.SL.library[-grep("SL.glmnet", 
                   g.SL.library)]
             }
-        }
-        else {
+        }else{
             cat("\n\nSince no covariates were associated with the outcome,\nthe estimates below are unadjusted...")
             if (n_orig > n_sub) {
                 cat("\n\nIn this case, since", n_orig - n_sub, 
@@ -151,8 +166,8 @@ ipcw_weights <- function(outcome, Y, tr, W = NULL, id = 1:length(Y), pair = NULL
         cat("\n-----------------------------------------\n")
     }
     
-    res <- list(outcome=outcome, weights=tmle_fit$g$g1W, contrast=contrast, Y = tmle_Y, A = tmle_A, W = Wselect, Delta = tmle_Delta, 
-        id = tmle_id)
+    res <- list(outcome=outcome, weights=tmle_fit$g$g1W, censoring_weights=tmle_fit$g.Delta$g1W, Delta = tmle_Delta, contrast=contrast, Y = tmle_Y, A = tmle_A, Delta = tmle_Delta, 
+        id = tmle_id, W=tmledat)
     
    
     return(res)
@@ -674,13 +689,20 @@ for(i in 1:ncol(Y)){
 p <- ggplot(df, aes(tr ,weights)) + geom_boxplot() + geom_jitter(width = 0.2) + ggtitle(df$comparison[1])
 p
 
+i <- 1
 
-pdf("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Figures/urine_ipcw_weights.pdf", h=10, w=10)
+
+pdf("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Figures/urine_ipcw_treatment_and_censoring_weights.pdf", h=10, w=10)
 for(i in 1:length(weight_list)){
  N<-length(weight_list[[i]]$weights)
- df <- data.frame(weights=weight_list[[i]]$weights, tr=factor(weight_list[[i]]$A), comparison=rep(paste0(weight_list[[i]]$outcome,": ", weight_list[[i]]$contrast[1], " vs. ", weight_list[[i]]$contrast[2]),N))
-p <- ggplot(df, aes(tr ,weights)) + geom_boxplot() + geom_jitter(width = 0.2) + ggtitle(df$comparison[1])
+ df <- data.frame(weights=weight_list[[i]]$weights,censorwt=weight_list[[i]]$censoring_weights, tr=factor(weight_list[[i]]$A), delta=factor(ifelse(weight_list[[i]]$Delta==1,"Censored","Observed")), comparison=rep(paste0(weight_list[[i]]$outcome,": ", weight_list[[i]]$contrast[1], " vs. ", weight_list[[i]]$contrast[2]),N))
+p <- ggplot(df, aes(tr ,weights)) + geom_violin() + #geom_jitter(width = 0.2) +
+  ggtitle(paste0("Treatment weights- ",df$comparison[1])) + facet_wrap(~delta)
 print(p)
+
+p2 <- ggplot(df, aes(tr ,censorwt.Z1A1)) + geom_violin() + #geom_jitter(width = 0.2) +
+  ggtitle(paste0("Censoring weights Z1A1- ",df$comparison[1])) + facet_wrap(~delta)
+print(p2)
 }
 dev.off()
 
@@ -688,4 +710,42 @@ dev.off()
 # save(weight_list,
 # file="urine_ipcw_weights.Rdata")
 
+
+
+
+pdf("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Figures/urine_ipcw_treatment_weights_by_covariate_level.pdf", h=10, w=10)
+i<-1
+ N<-length(weight_list[[i]]$weights)
+ df <- data.frame(weights=weight_list[[i]]$weights,censorwt=weight_list[[i]]$censoring_weights,
+                  wvar=weight_list[[i]]$W$month1,
+                  tr=factor(weight_list[[i]]$A), delta=factor(ifelse(weight_list[[i]]$Delta==1,"Censored","Observed")), comparison=rep(paste0(weight_list[[i]]$outcome,": ", weight_list[[i]]$contrast[1], " vs. ", weight_list[[i]]$contrast[2]),N))
+p <- ggplot(df, aes(tr ,weights)) + geom_violin() + #geom_jitter(width = 0.2) +
+  ggtitle(paste0("Treatment weights- ",df$comparison[1], "stratified by month")) + facet_grid(delta~wvar)
+print(p)
+
+
+
+
+
+ N<-length(weight_list[[i]]$weights)
+ df <- data.frame(weights=weight_list[[i]]$weights,censorwt=weight_list[[i]]$censoring_weights,
+                  wvar=weight_list[[i]]$W$staffid1,
+                  tr=factor(weight_list[[i]]$A), delta=factor(ifelse(weight_list[[i]]$Delta==1,"Censored","Observed")), comparison=rep(paste0(weight_list[[i]]$outcome,": ", weight_list[[i]]$contrast[1], " vs. ", weight_list[[i]]$contrast[2]),N))
+p <- ggplot(df, aes(tr ,weights)) + geom_violin() + #geom_jitter(width = 0.2) +
+  ggtitle(paste0("Treatment weights- ",df$comparison[1], "stratified by staff ID")) + facet_grid(delta~wvar)
+print(p)
+
+
+
+
+
+ N<-length(weight_list[[i]]$weights)
+ df <- data.frame(weights=weight_list[[i]]$weights,censorwt=weight_list[[i]]$censoring_weights,
+                  wvar=ntile(weight_list[[i]]$W$aged1,4),
+                  tr=factor(weight_list[[i]]$A), delta=factor(ifelse(weight_list[[i]]$Delta==1,"Censored","Observed")), comparison=rep(paste0(weight_list[[i]]$outcome,": ", weight_list[[i]]$contrast[1], " vs. ", weight_list[[i]]$contrast[2]),N))
+p <- ggplot(df, aes(tr ,weights)) + geom_violin() + #geom_jitter(width = 0.2) +
+  ggtitle(paste0("Treatment weights- ",df$comparison[1], "stratified by quartile of child age")) + facet_grid(delta~wvar)
+print(p)
+
+dev.off()
 

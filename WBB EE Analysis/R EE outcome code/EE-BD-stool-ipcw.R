@@ -136,54 +136,27 @@ d$month3 <- ceiling(d$month3)
 
 
 #impute month with overall median for those observations not in a cluster measured in the EED subsample
-# d$month1[is.na(d$month1)] <-  month1_median
-# d$month2[is.na(d$month2)] <-  month2_median
-# d$month3[is.na(d$month3)] <-  month3_median
-
 d$month1[is.na(d$month1)] <-  7
 d$month2[is.na(d$month2)] <-  8
 d$month3[is.na(d$month3)] <-  6
 
-#temp replace months to match audrie
-#d$month1[which(d$childid %in% c(33011, 33021, 33031, 33041, 33051, 33061, 33081))]<-7
 
+d <- d %>% mutate(monsoon1 = ifelse(month1 > 4 & month1 < 11, "1", "0"),
+                  monsoon2 = ifelse(month2 > 4 & month2 < 11, "1", "0"),
+                  monsoon3 = ifelse(month3 > 4 & month3 < 11, "1", "0"),
+                  monsoon1 = ifelse(is.na(month1),"missing", monsoon1),
+                  monsoon2 = ifelse(is.na(month2),"missing", monsoon2),
+                  monsoon3 = ifelse(is.na(month3),"missing", monsoon3),
+                  monsoon1 = factor(monsoon1),
+                  monsoon2 = factor(monsoon2),
+                  monsoon3 = factor(monsoon3))
 
-table(d$month1)
-table(d$month1[d$tr=="Control"])
-table(is.na(d$month1))
-
-table(d$month1[d$tr=="Nutrition + WSH"])
 
 #impute child age with overall median
-# d$aged1[is.na(d$aged1)] <- median(d$aged1, na.rm = T)
-# d$aged2[is.na(d$aged2)] <- median(d$aged2, na.rm = T)
-# d$aged3[is.na(d$aged3)] <- median(d$aged3, na.rm = T)
-
 d$aged1[is.na(d$aged1)] <- 84
 d$aged2[is.na(d$aged2)] <- 428
 d$aged3[is.na(d$aged3)] <- 857
 
-
-#Mark missing staffid
-d$staffid1[is.na(d$staffid1)] <- "missing"
-d$staffid2[is.na(d$staffid2)] <- "missing"
-d$staffid3[is.na(d$staffid3)] <- "missing"
-
-#Truncate staffid at <100
-table(rbind(d$staffid1,d$staffid2,d$staffid3))
-names(table(rbind(d$staffid1,d$staffid2,d$staffid3)))
-
-#Which staff ids had <100 samples collected
-inexp_staff_id<-names(which(table(rbind(d$staffid1,d$staffid2,d$staffid3))<100))
-inexp_staff_id
-#Assign new category to inexperienced IDs across the 3 staffid-round variables
-d$staffid1[d$staffid1 %in% inexp_staff_id]<-"inexp"
-d$staffid2[d$staffid2 %in% inexp_staff_id]<-"inexp"
-d$staffid3[d$staffid3 %in% inexp_staff_id]<-"inexp"
-
-table(d$staffid1)
-table(d$staffid1[d$tr=="Control"])
-table(d$staffid1[d$tr=="Nutrition + WSH"])
 
 #Clean covariates for adjusted analysis
 #Set birthorder to 1, >=2, or missing
@@ -220,7 +193,6 @@ for(i in 1:ncol(W)){
 #Replace missingness for factors with new level
 #in main dataset 
 d$sex<-as.factor(d$sex)
-#d$birthord[is.na(d$birthord)]<-"99"
 d$birthord<-factor(d$birthord)
 table(d$birthord)
 table(W$birthord)
@@ -326,44 +298,18 @@ W<- subset(d, select=Wvars)
 
 
 #Add in time-varying covariates
-Wvars1<-c("aged1", "month1", "staffid1") 
-Wvars2<-c("aged2", "month2", "staffid2") 
-Wvars3<-c("aged3", "month3", "staffid3") 
+Wvars1<-c("aged1", "monsoon1") 
+Wvars2<-c("aged2", "monsoon2") 
+Wvars3<-c("aged3", "monsoon3") 
 W1<- cbind(W, subset(d, select=Wvars1))
 W2<- cbind(W, subset(d, select=Wvars2))
 W3<- cbind(W, subset(d, select=Wvars3))
 
 #Replace missingness in time varying covariates as a new level
-W1$month1[is.na(W1$month1)]<-"missing"
-W2$month2[is.na(W2$month2)]<-"missing"
-W3$month3[is.na(W3$month3)]<-"missing"
-W1$staffid1[is.na(W1$staffid1)]<-"missing"
-W2$staffid2[is.na(W2$staffid2)]<-"missing"
-W3$staffid3[is.na(W3$staffid3)]<-"missing"
+W1$monsoon1[is.na(W1$monsoon1)]<-"missing"
+W2$monsoon2[is.na(W2$monsoon2)]<-"missing"
+W3$monsoon3[is.na(W3$monsoon3)]<-"missing"
 
-
-#Set time-varying covariates as factors
-W1$month1<-as.factor(W1$month1)
-W2$month2<-as.factor(W2$month2)
-W3$month3<-as.factor(W3$month3)
-W1$staffid1<-factor(W1$staffid1)
-W2$staffid2<-factor(W2$staffid2)
-W3$staffid3<-factor(W3$staffid3)
-
-table(W1$month1)
-
-
-W2$month2 <- relevel(W2$month2, ref="1")
-W2$staffid2 <- relevel(W2$staffid2, ref="missing")
-W2 <- droplevels(W2)
-
-W3$month3 <- relevel(W3$month3, ref="1")
-W3$staffid3 <- relevel(W3$staffid3, ref="missing")
-W3 <- droplevels(W3)
-
-W1$month1 <- relevel(W1$month1, ref="1")
-W1$staffid1 <- relevel(W1$staffid1, ref="missing")
-W1 <- droplevels(W1)
 
 
 
