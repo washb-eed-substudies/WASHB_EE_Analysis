@@ -53,24 +53,13 @@ Ncomp,            Nunder18  )) %>%
     asset_mobile=mobilephone,
     n_cows=cow, 
     n_goats=goat, 
-    n_chicken=poultry,
+    n_chickens=poultry,
     n_dogs=dog
   )
 
 
-       
-
-saveRDS(d, file="C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew/WBK-EE-covariates.rds")
 
 
-
-
-
-
-
-
-#subset time-constant d adjustment set
-d<- subset(d, select=Wvars)
 
 #Clean adjustment variables 
 #Check missingness
@@ -79,101 +68,46 @@ for(i in 1:ncol(d)){
   print(table(is.na(d[,i])))
 }
 
-#Replace missingness for factors with new level
-#in main dataset 
 
 
-d$asset_clock[is.na(d$asset_clock)]<-99
-d$asset_clock<-factor(d$asset_clock)
+#Impute missing for momage (74 missing) and momheight (1498 missing) and watmin (73 missing)?
 
-#Order data to replicate SL
-d <- d[order(d$dataid,d$childNo, d$svy),]
+
+
+
 
 
 
 #check that all the factor variables are set
 for(i in 1:ncol(d)){
-  print(colnames(d)[i])
-  print(class(d[,i])  )
+  cat(colnames(d)[i]," ", class(d[,i]),"\n"  )
 }
 
+
+#Do this?
 #Truncate unrealistic levels of n_chickens to 60
-table(d$n_chickens)
-d$n_chickens[d$n_chickens>60]<-60
-table(d$n_chickens)
+# table(d$n_chickens)
+# d$n_chickens[d$n_chickens>60]<-60
+# table(d$n_chickens)
 
 #Relevel all factors
-d$sex<-as.factor(d$sex)
-  d$sex=relevel(d$sex,ref="0")
-d$momedu=relevel(d$momedu,ref="No education")
-d$hfiacat=relevel(d$hfiacat,ref="Food Secure")
-    d$hfiacat<-addNA(d$hfiacat)
-d$wall<-factor(d$wall)
-    d$wall<-addNA(d$wall)
-    levels(d$wall)<-c("No improved wall","Improved wall","Missing")
-    d$wall=relevel(d$wall,ref="No improved wall")
-d$floor<-factor(d$floor)
-    d$floor<-addNA(d$floor)
-    levels(d$floor)<-c("No improved floor","Improved floor","Missing")
-    d$floor=relevel(d$floor,ref="No improved floor")
-d$elec<-factor(d$elec)
-    d$elec<-addNA(d$elec)
-    levels(d$elec)<-c("No electricity","Electricity","Missing")
-    d$elec=relevel(d$elec,ref="No electricity")
-d$asset_wardrobe<-factor(d$asset_wardrobe)
-    d$asset_wardrobe<-addNA(d$asset_wardrobe)
-    levels(d$asset_wardrobe)<-c("No wardrobe","Wardrobe","Missing")
-    d$asset_wardrobe=relevel(d$asset_wardrobe,ref="No wardrobe")
-d$asset_table<-factor(d$asset_table)
-    d$asset_table<-addNA(d$asset_table)
-    levels(d$asset_table)<-c("No table","Improved table","Missing")
-    d$asset_table=relevel(d$asset_table,ref="No table")
-d$asset_chair<-factor(d$asset_chair)
-    d$asset_chair<-addNA(d$asset_chair)
-    levels(d$asset_chair)<-c("No chair","Chair","Missing")
-    d$asset_chair=relevel(d$asset_chair,ref="No chair")
-d$asset_clock[is.na(d$asset_clock)]<-99
-    d$asset_clock<-factor(d$asset_clock)
-    d$asset_clock<-addNA(d$asset_clock)
-    levels(d$asset_clock)<-c("No clock","Clock","Missing", "Missing")
-    d$asset_clock=relevel(d$asset_clock,ref="No clock")
-d$asset_khat<-factor(d$asset_khat)
-    d$asset_khat<-addNA(d$asset_khat)
-    levels(d$asset_khat)<-c("No khat","Khat","Missing")
-    d$asset_khat=relevel(d$asset_khat,ref="No khat")
-d$asset_chouki<-factor(d$asset_chouki)
-    d$asset_chouki<-addNA(d$asset_chouki)
-    levels(d$asset_chouki)<-c("No chouki","Chouki","Missing")
-    d$asset_chouki=relevel(d$asset_chouki,ref="No chouki")
-d$asset_tv<-factor(d$asset_tv)
-    d$asset_tv<-addNA(d$asset_tv)
-    levels(d$asset_tv)<-c("No TV","Improved TV","Missing")
-    d$asset_tv=relevel(d$asset_tv,ref="No TV")
-d$asset_refrig<-factor(d$asset_refrig)
-    d$asset_refrig<-addNA(d$asset_refrig)
-    levels(d$asset_refrig)<-c("No refrigerator","Refrigerator","Missing")
-    d$asset_refrig=relevel(d$asset_refrig,ref="No refrigerator")
-d$asset_bike<-factor(d$asset_bike)
-    d$asset_bike<-addNA(d$asset_bike)
-    levels(d$asset_bike)<-c("No bicycle","Bicycle","Missing")
-    d$asset_bike=relevel(d$asset_bike,ref="No bicycle")
-d$asset_moto<-factor(d$asset_moto)
-    d$asset_moto<-addNA(d$asset_moto)
-    levels(d$asset_moto)<-c("No motorcycle","Motorcycle","Missing")
-    d$asset_moto=relevel(d$asset_moto,ref="No motorcycle")
-d$asset_sewmach<-factor(d$asset_sewmach)
-    d$asset_sewmach<-addNA(d$asset_sewmach)
-    levels(d$asset_sewmach)<-c("No sewing machine","Sewing machine","Missing")
-    d$asset_sewmach=relevel(d$asset_sewmach,ref="No sewing machine")
-d$asset_mobile<-factor(d$asset_mobile)
-    d$asset_mobile<-addNA(d$asset_mobile)
-    levels(d$asset_mobile)<-c("No mobile phone","Mobile phone","Missing")
-    d$asset_mobile=relevel(d$asset_mobile,ref="No mobile phone")    
-
+d$momedu=relevel(d$momedu,ref="Incomplete primary")
+d$father_edu=relevel(d$father_edu,ref="incomplete primary")
+d$father_agri=relevel(d$father_agri,ref="does not work in ag")
+d$hfiacat=relevel(d$hfiacat,ref="Little to none")
+d$floor=relevel(d$floor,ref="Earth/dung") #Not used due to sparsity
+d$roof=relevel(d$roof,ref="Iron/other") #Not used due to sparsity
+d$elec=relevel(d$elec,ref="No electricity")
+d$asset_tv=relevel(d$asset_tv,ref="No TV")
+d$asset_cooker=relevel(d$asset_cooker,ref="No gas cooker")
+d$asset_car=relevel(d$asset_car,ref="No car")
+                                            
+            
+                              
 
 
 #Check that prevalence >5% for all binary variables
-for(i in 1:ncol(d)){
+for(i in 3:ncol(d)){
   if(class(d[,i])=="factor"){
     for(j in 1:dim(table(d[,i]))){
       flag<-0
@@ -187,10 +121,17 @@ for(i in 1:ncol(d)){
         print(table(d[,i]))
       }
   }else{
-    if(sum(is.na(W[,i]))/nrow(W)*100>95){
-      cat("\n>95% missing: ",colnames(W)[i],"\n")
+    if(sum(is.na(d[,i]))/nrow(d)*100>95){
+      cat("\n>95% missing: ",colnames(d)[i],"\n")
     }
   }
 }
+
+
+
+#Order data to replicate SL
+d <- d[order(d$hhid),]  
+
+saveRDS(d, file="C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew/WBK-EE-covariates.rds")
 
 

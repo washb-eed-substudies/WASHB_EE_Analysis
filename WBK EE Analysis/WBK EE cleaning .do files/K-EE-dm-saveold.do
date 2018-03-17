@@ -80,7 +80,7 @@ use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Untouched/was
 tostring childid, replace 
 outsheet using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew/raw CSV/washk_eeml_blood.csv", comma replace
 
-use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Untouched/washk_eeel_blood_audrie_20180301.dta", clear
+use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Untouched/washk_eeel_blood_audrie_20180306.dta", clear
 tostring childid, replace 
 outsheet using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew/raw CSV/washk_eeel_blood.csv", comma replace
 
