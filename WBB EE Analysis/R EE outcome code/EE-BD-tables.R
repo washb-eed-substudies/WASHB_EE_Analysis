@@ -1465,7 +1465,7 @@ cleantable(tab,digits=0)
 #--------------------------------
 #Supplementary Table 11: 
 #   Effect of intervention on environmental enteric dysfunction measurements 
-# at follow-up 1 
+# at follow-up 1 when excluding contaminated samples
 #--------------------------------
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
@@ -1575,75 +1575,6 @@ sens.tab<-rbind(
             sens.tab[33:36,]
             )
 
-
-# sens.tab<-rbind( 
-#             t(c("\\textbf{Ln lactulose}",blank)),
-#             t(c("\\textbf{(mmol/L) at child}",blank)),
-#             t(c("\\textbf{age 3 months}",blank)),
-#             sens.tab[1:4,],
-#             t(c("\\textbf{Ln mannitol}",blank)),
-#                         t(c("\\textbf{(mmol/L) at child}",blank)),
-#             t(c("\\textbf{age 3 months}",blank)),
-#             sens.tab[5:8,],
-#             t(c("\\textbf{Ln L:M ratio}",blank)),
-#                         t(c("\\textbf{(mmol/L) at child}",blank)),
-#             t(c("\\textbf{age 3 months}",blank)),
-#             sens.tab[9:12,],
-#             t(c("\\textbf{Ln lactulose}",blank)),
-#                         t(c("\\textbf{(mmol/L) at child}",blank)),
-#             t(c("\\textbf{age 14 months}",blank)),
-#             sens.tab[13:16,],
-#             t(c("\\textbf{Ln mannitol}",blank)),
-#                         t(c("\\textbf{(mmol/L) at child}",blank)),
-#             t(c("\\textbf{age 14 months}",blank)),
-#             sens.tab[17:20,],
-#             t(c("\\textbf{Ln L:M ratio}",blank)),
-#                         t(c("\\textbf{(mmol/L) at child}",blank)),
-#             t(c("\\textbf{age 14 months}",blank)),
-#             sens.tab[21:24,],
-#              t(c("\\textbf{Ln lactulose}",blank)),
-#                         t(c("\\textbf{(mmol/L) at child}",blank)),
-#             t(c("\\textbf{age 28 months}",blank)),
-#             sens.tab[25:27,],
-#             t(c("\\textbf{Ln mannitol}",blank)),
-#                         t(c("\\textbf{(mmol/L) at child}",blank)),
-#             t(c("\\textbf{age 28 months}",blank)),
-#             sens.tab[28:30,],
-#             t(c("\\textbf{Ln L:M ratio}",blank)),
-#                         t(c("\\textbf{(mmol/L) at child}",blank)),
-#             t(c("\\textbf{age 28 months}",blank)),
-#             sens.tab[31:33,]
-#             )
-
-# sens.tab<-rbind( 
-#             t(c("\\textbf{Ln lactulose (mmol/L)}",blank)),
-#             t(c("\\textbf{at child age 3 months}",blank)),
-#             sens.tab[1:4,],
-#             t(c("\\textbf{Ln mannitol (mmol/L)}",blank)),
-#             t(c("\\textbf{at child age 3 months}",blank)),
-#             sens.tab[5:8,],
-#             t(c("\\textbf{Ln L:M ratio}",blank)),
-#             t(c("\\textbf{at child age 3 months}",blank)),
-#             sens.tab[9:12,],
-#             t(c("\\textbf{Ln lactulose (mmol/L)}",blank)),
-#             t(c("\\textbf{at child age 14 months}",blank)),
-#             sens.tab[13:16,],
-#             t(c("\\textbf{Ln mannitol (mmol/L)}",blank)),
-#             t(c("\\textbf{at child age 14 months}",blank)),
-#             sens.tab[17:20,],
-#             t(c("\\textbf{Ln L:M ratio}",blank)),
-#             t(c("\\textbf{at child age 14 months}",blank)),
-#             sens.tab[21:24,],
-#              t(c("\\textbf{Ln lactulose (mmol/L)}",blank)),
-#             t(c("\\textbf{at child age 28 months}",blank)),
-#             sens.tab[25:27,],
-#             t(c("\\textbf{Ln mannitol (mmol/L)}",blank)),
-#             t(c("\\textbf{at child age 28 months}",blank)),
-#             sens.tab[28:30,],
-#             t(c("\\textbf{Ln L:M ratio}",blank)),
-#             t(c("\\textbf{at child age 28 months}",blank)),
-#             sens.tab[31:33,]
-#             )
 
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Tables/")
