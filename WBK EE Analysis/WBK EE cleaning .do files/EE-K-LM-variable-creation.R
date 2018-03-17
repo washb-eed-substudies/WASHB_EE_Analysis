@@ -38,6 +38,17 @@ lm <- lm.full %>% subset(., select=c(childid, hhid,
                          Lact3= lactulose_postLM_el,
                          Mann3= mannitol_postLM_el)
 
+#Set 0 concentrations to the lower limit of detection
+lm$Lact1[lm$Lact1==0 & !is.na(lm$Lact1)] <- 0.3
+lm$Mann1[lm$Mann1==0 & !is.na(lm$Mann1)] <- 0.3
+lm$Lact2[lm$Lact2==0 & !is.na(lm$Lact2)] <- 0.3
+lm$Mann2[lm$Mann2==0 & !is.na(lm$Mann2)] <- 0.3
+lm$Lact3[lm$Lact3==0 & !is.na(lm$Lact3)] <- 0.3
+lm$Mann3[lm$Mann3==0 & !is.na(lm$Mann3)] <- 0.3
+
+
+
+#Merge in urine volumes
 d <- merge(lm, urinevol, by="childid")
 
 
@@ -54,12 +65,18 @@ inexp_staff_id
 d$staffid1[d$staffid1 %in% inexp_staff_id]<-"inexp"
 d$staffid2[d$staffid2 %in% inexp_staff_id]<-"inexp"
 d$staffid3[d$staffid3 %in% inexp_staff_id]<-"inexp"
+table(rbind(d$staffid1,d$staffid2,d$staffid3))
 
 
 #------------------
 #Generate LM ratio
 #------------------
 
+
+#Replace 0 volumes with NA
+d$LMvol_t1[d$LMvol_t1==0 & !is.na(d$LMvol_t1)] <- NA
+d$LMvol_t2[d$LMvol_t2==0 & !is.na(d$LMvol_t2)] <- NA
+d$LMvol_t3[d$LMvol_t3==0 & !is.na(d$LMvol_t3)] <- NA
 
 
 #To calculate total lactulose dosed (mg) or total mannitol dosed (mg):
@@ -162,6 +179,9 @@ d$Mann3<-d$Mann3*(1/182.172)
 #and save data
 ############################
 
-d <- d %>% subset(., select=c(childid:Lact3,LM1,LM2,LM3,urine_bl_date,urine_ml_date,urine_el_date,staffid1,staffid2,staffid3))
+d <- d %>% subset(., select=c(childid:Lact3,LM1,LM2,LM3,urine_bl_date,urine_ml_date,urine_el_date,staffid1,staffid2,staffid3, per.lact.rec_t1, per.lact.rec_t2, per.lact.rec_t3, per.mann.rec_t1, per.mann.rec_t2, per.mann.rec_t3))
 
 saveRDS(d, file="C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew/WBK-EE-LM-outcomes.rds")
+
+
+
