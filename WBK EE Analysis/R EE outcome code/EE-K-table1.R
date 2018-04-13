@@ -18,13 +18,8 @@ library(reshape2)
 
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/")
-load("washb-bangladesh-tr.Rdata")
-d$clusterid<-as.numeric(d$clusterid)
-treatment<-d
-# load("washb-BD-EE-blind-tr.Rdata")
- levels(treatment$tr)
- treatment$tr <- factor(treatment$tr,levels=c("Control","WSH","Nutrition","Nutrition + WSH"))
- levels(treatment$tr)
+tr <- read.csv("raw CSV/washk_TR.csv")
+tr$tr <- factor(tr$tr, levels = c("Control",  "WSH", "Nutrition", "Nutrition + WSH"))
 
 #Load in enrollment data for adjusted analysis
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")

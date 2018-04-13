@@ -64,12 +64,15 @@ tostring childid, replace
 outsheet using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew/raw CSV/washk_eeel_urine.csv", comma replace
 
 use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Untouched/Kenya-Baseline-LM-Data-September 2017 (1).dta", clear
+tostring Child_ID, replace 
 outsheet using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew/raw CSV/washk_eebl_LM.csv", comma replace
 
 use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Untouched/Kenya-Midline-LM Data-September 25, 2017.dta", clear
+tostring Child_ID, replace 
 outsheet using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew/raw CSV/washk_eeml_LM.csv", comma replace
 
 use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Untouched/Kenya Endline LM Data-Revised-September 25, 2017.dta", clear
+tostring Child_ID, replace 
 outsheet using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew/raw CSV/washk_eeel_LM.csv", comma replace
 
 use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Untouched/washk_eebl_blood_audrie_20180301.dta", clear

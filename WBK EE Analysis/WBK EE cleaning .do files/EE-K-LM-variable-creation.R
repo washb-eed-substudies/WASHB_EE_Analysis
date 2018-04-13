@@ -20,8 +20,8 @@ vol_bl <- data.frame(childid=bl$childid, urine_bl_date=dmy(bl$ee_bl_urine_date),
 vol_ml <- data.frame(childid=ml$childid, urine_ml_date=dmy(ml$ee_ml_urine_date), staffid2=ml$cm_20_502, LMvol_t2=ml$cm_20_509, urineVol_t2= ml %>% select(contains("cm_20_516")) %>% rowSums(., na.rm=T))
 vol_el <- data.frame(childid=el$childid, urine_el_date=dmy(el$ee_el_urine_date), staffid3=el$cm_20_502, LMvol_t3=el$cm_20_509, urineVol_t3= el %>% select(contains("cm_20_516")) %>% rowSums(., na.rm=T))
 
-urinevol <- merge(vol_bl, vol_ml, by="childid")
-urinevol <- merge(urinevol, vol_el, by="childid")
+urinevol <- full_join(vol_bl, vol_ml, by="childid")
+urinevol <- full_join(urinevol, vol_el, by="childid")
 
 
 #extract L and M concentrations
@@ -49,8 +49,10 @@ lm$Mann3[lm$Mann3==0 & !is.na(lm$Mann3)] <- 0.3
 
 
 #Merge in urine volumes
+dim(lm)
+dim(urinevol)
 d <- merge(lm, urinevol, by="childid")
-
+dim(d)
 
 
 
@@ -72,6 +74,9 @@ table(rbind(d$staffid1,d$staffid2,d$staffid3))
 #Generate LM ratio
 #------------------
 
+#Identify children with 0 volume
+d$childid[d$LMvol_t1==0 & !is.na(d$LMvol_t1)] 
+d$childid[d$LMvol_t2==0 & !is.na(d$LMvol_t2)] 
 
 #Replace 0 volumes with NA
 d$LMvol_t1[d$LMvol_t1==0 & !is.na(d$LMvol_t1)] <- NA

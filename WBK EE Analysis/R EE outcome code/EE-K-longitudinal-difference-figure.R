@@ -26,7 +26,14 @@ library(lattice)
 #---------------------------------------
 
 
+#Temp use WBB stool results
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
+load("stool_res_N_M.Rdata")
+load("stool_res_unadj_M.Rdata")
+load("stool_res_adj_M.Rdata")
+load("stool_res_means.Rdata")
+
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Andrew/")
 load("stool_res_N_M.Rdata")
 load("stool_res_unadj_M.Rdata")
 load("stool_res_adj_M.Rdata")
@@ -83,29 +90,29 @@ m_N3<-cbind("Mann","T3", rownames(man_t3_mn), as.data.frame(man_t3_mn)) %>% `row
 
 
 #Compile differences
-aat_dif1<-cbind("AAT","T1", rownames(aat_t1_adj_M), as.data.frame(aat_t1_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-neo_dif1<-cbind("NEO","T1", rownames(neo_t1_adj_M), as.data.frame(neo_t1_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-mpo_dif1<-cbind("MPO","T1", rownames(mpo_t1_adj_M), as.data.frame(mpo_t1_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-lm_dif1<-cbind("LM","T1", rownames(lm_t1_adj_M), as.data.frame(lm_t1_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-l_dif1<-cbind("Lact","T1", rownames(lac_t1_adj_M), as.data.frame(lac_t1_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-m_dif1<-cbind("Mann","T1", rownames(man_t1_adj_M), as.data.frame(man_t1_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+aat_dif1<-cbind("AAT","T1", rownames(aat_t1_unadj_M), as.data.frame(aat_t1_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+neo_dif1<-cbind("NEO","T1", rownames(neo_t1_unadj_M), as.data.frame(neo_t1_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+mpo_dif1<-cbind("MPO","T1", rownames(mpo_t1_unadj_M), as.data.frame(mpo_t1_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+lm_dif1<-cbind("LM","T1", rownames(lm_t1_unadj_M), as.data.frame(lm_t1_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+l_dif1<-cbind("Lact","T1", rownames(lac_t1_unadj_M), as.data.frame(lac_t1_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+m_dif1<-cbind("Mann","T1", rownames(man_t1_unadj_M), as.data.frame(man_t1_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
 
 
 
-aat_dif2<-cbind("AAT","T2", rownames(aat_t2_adj_M), as.data.frame(aat_t2_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-neo_dif2<-cbind("NEO","T2", rownames(neo_t2_adj_M), as.data.frame(neo_t2_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-mpo_dif2<-cbind("MPO","T2", rownames(mpo_t2_adj_M), as.data.frame(mpo_t2_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-lm_dif2<-cbind("LM","T2", rownames(lm_t2_adj_M), as.data.frame(lm_t2_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-reg_dif2<-cbind("REG","T2", rownames(reg1b_t2_adj_M), as.data.frame(reg1b_t2_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-l_dif2<-cbind("Lact","T2", rownames(lac_t2_adj_M), as.data.frame(lac_t2_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-m_dif2<-cbind("Mann","T2", rownames(man_t2_adj_M), as.data.frame(man_t2_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+aat_dif2<-cbind("AAT","T2", rownames(aat_t2_unadj_M), as.data.frame(aat_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+neo_dif2<-cbind("NEO","T2", rownames(neo_t2_unadj_M), as.data.frame(neo_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+mpo_dif2<-cbind("MPO","T2", rownames(mpo_t2_unadj_M), as.data.frame(mpo_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+lm_dif2<-cbind("LM","T2", rownames(lm_t2_unadj_M), as.data.frame(lm_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+reg_dif2<-cbind("REG","T2", rownames(reg1b_t2_unadj_M), as.data.frame(reg1b_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+l_dif2<-cbind("Lact","T2", rownames(lac_t2_unadj_M), as.data.frame(lac_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+m_dif2<-cbind("Mann","T2", rownames(man_t2_unadj_M), as.data.frame(man_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
 
-aat_dif3<-cbind("AAT","T3", rownames(aat_t3_adj_M), as.data.frame(aat_t3_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-neo_dif3<-cbind("NEO","T3", rownames(neo_t3_adj_M), as.data.frame(neo_t3_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-mpo_dif3<-cbind("MPO","T3", rownames(mpo_t3_adj_M), as.data.frame(mpo_t3_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-lm_dif3<-cbind("LM","T3", rownames(lm_t3_adj_M), as.data.frame(lm_t3_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-l_dif3<-cbind("Lact","T3", rownames(lac_t3_adj_M), as.data.frame(lac_t3_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-m_dif3<-cbind("Mann","T3", rownames(man_t3_adj_M), as.data.frame(man_t3_adj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+aat_dif3<-cbind("AAT","T3", rownames(aat_t3_unadj_M), as.data.frame(aat_t3_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+neo_dif3<-cbind("NEO","T3", rownames(neo_t3_unadj_M), as.data.frame(neo_t3_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+mpo_dif3<-cbind("MPO","T3", rownames(mpo_t3_unadj_M), as.data.frame(mpo_t3_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+lm_dif3<-cbind("LM","T3", rownames(lm_t3_unadj_M), as.data.frame(lm_t3_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+l_dif3<-cbind("Lact","T3", rownames(lac_t3_unadj_M), as.data.frame(lac_t3_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
+m_dif3<-cbind("Mann","T3", rownames(man_t3_unadj_M), as.data.frame(man_t3_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
 
 
 
@@ -240,25 +247,25 @@ long.diff.plot<-function(d, yrange=c(-1.5,0.5),  cols=cols, tickspace=0.2){
   op <- par(mar=c(3,3,2,0)+0.1)
 
     if((d$Location=="AAT")[1]){yrange<-yrange
-    ytics <- seq(-1.5,0.5,by=0.2)
+    ytics <- seq(-1.5,1.5,by=0.1)
     title<-"Ln alpha 1-antitrypsin (mg/g)"}
   if((d$Location=="NEO")[1]){yrange<-yrange
-    ytics <- seq(-1.5,0.5,by=0.2)
+    ytics <- seq(-1.5,1.5,by=0.1)
     title<-"Ln neopterin (nmol/L)"}
   if((d$Location=="MPO")[1]){yrange<-yrange
-    ytics <- seq(-1.5,0.5,by=0.2)
+    ytics <- seq(-1.5,1.5,by=0.1)
     title<-"Ln myeloperoxidase (ng/ml)"}
   if((d$Location=="Lact")[1]){yrange<-yrange
-    ytics <- seq(-1.5,0.5,by=0.2)
+    ytics <- seq(-1.5,1.5,by=0.1)
     title<-"Ln lactulose (mmol/L)"}
   if((d$Location=="Mann")[1]){yrange<-yrange
-    ytics <- seq(-1.5,0.5,by=0.2)
+    ytics <- seq(-1.5,1.5,by=0.1)
     title<-"Ln mannitol (mmol/L)"}
   if((d$Location=="LM")[1]){yrange<-yrange
-    ytics <- seq(-1.5,0.5,by=0.2)
+    ytics <- seq(-1.5,1.5,by=0.1)
     title<-"Ln L:M ratio"}
   if((d$Location=="REG")[1]){yrange<-yrange
-    ytics <- seq(-1.5,0.5,by=0.2)
+    ytics <- seq(-1.5,1.5,by=0.1)
     title<-""}
 
 
@@ -317,19 +324,20 @@ legendplot<-function(legend=T, cex=1, x=0.1, y=0.8){
 
 
 
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Figures")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Figures")
 pdf("EE-mean-longitudinal-difference-plots.pdf",width=10,height=8.5, paper="USr")
 lo <- layout(mat=matrix(1:9,ncol=3,nrow=3,byrow=T),widths=c(1,1,0.6))
 op <- par(mar=c(4,0,3,0)+0.1)
+range=c(-0.5,0.9)
 
-long.diff.plot(d<-dif_df[dif_df$Location=="AAT",], yrange=c(-1.3,0.7),  cols=cols, tickspace=0.2)
-long.diff.plot(d<-dif_df[dif_df$Location=="Lact",], yrange=c(-1.3,0.7),  cols=cols, tickspace=0.2)
+long.diff.plot(d<-dif_df[dif_df$Location=="AAT",], yrange=range,  cols=cols, tickspace=0.1)
+long.diff.plot(d<-dif_df[dif_df$Location=="Lact",], yrange=range,  cols=cols, tickspace=0.1)
 legendplot(F,1)
-long.diff.plot(d<-dif_df[dif_df$Location=="NEO",], yrange=c(-1.3,0.7),  cols=cols, tickspace=0.2)
-long.diff.plot(d<-dif_df[dif_df$Location=="Mann",], yrange=c(-1.3,0.7),  cols=cols, tickspace=0.2)
+long.diff.plot(d<-dif_df[dif_df$Location=="NEO",], yrange=range,  cols=cols, tickspace=0.1)
+long.diff.plot(d<-dif_df[dif_df$Location=="Mann",], yrange=range,  cols=cols, tickspace=0.1)
 legendplot(x=0.5, y=.5, T, 1.3)
-long.diff.plot(d<-dif_df[dif_df$Location=="MPO",], yrange=c(-1.3,0.7),  cols=cols, tickspace=0.2)
-long.diff.plot(d<-dif_df[dif_df$Location=="LM",], yrange=c(-1.3,0.7),  cols=cols, tickspace=0.2)
+long.diff.plot(d<-dif_df[dif_df$Location=="MPO",], yrange=range,  cols=cols, tickspace=0.1)
+long.diff.plot(d<-dif_df[dif_df$Location=="LM",], yrange=range,  cols=cols, tickspace=0.1)
 legendplot(F,1)
 
  

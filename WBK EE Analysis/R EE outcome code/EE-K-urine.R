@@ -14,11 +14,14 @@
 rm(list=ls())
 library(tidyverse)
 library(washb)
+library(lubridate)
 
 
 #Load in blinded treatment information
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew")
 tr <- read.csv("raw CSV/washk_blindTR.csv")
+#tr <- read.csv("raw CSV/washk_TR.csv")
+tr$tr <- factor(tr$tr, levels = c("Control",  "WSH", "Nutrition", "Nutrition + WSH"))
 head(tr)
 
 dob <- readRDS("WBK-EE-childDOB.rds")
@@ -266,6 +269,7 @@ for(i in 7:9){
 
 #Make vectors of adjustment variable names
 Wvars<-c("sex", "birthord",  "momage", "momedu",  "Ncomp", "Nlt18", "elec","roof",
+         "momheight",
          "asset_radio", "asset_tv", "asset_mobile", "asset_clock", "asset_bike", "asset_moto", "asset_stove",  
          "n_cows", "n_goats","n_chickens", "n_dogs", "watmin", "hfiacat")
 

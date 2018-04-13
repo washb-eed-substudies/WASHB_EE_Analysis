@@ -1,6 +1,6 @@
 
 #---------------------------------------
-# EE-BD-tables.R
+# EE-K-tables.R
 #
 # andrew mertens (amertens@berkeley.edu)
 #
@@ -152,124 +152,124 @@ rnd<- function(x, n=2) {
 
 
 #load objects
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
-load("EE-BD-table1.Rdata")
-
-
-balance.tab.mu_M 
-balance.tab.n_M 
-balance.tab.sd_M
-
-mean.ind<-c(0,1,1,1,0,1,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
-
-rownames(balance.tab.mu_M)[which(mean.ind==1)]
-rownames(balance.tab.mu_M)[which(mean.ind!=1)]
-balance.tab.n_M[which(mean.ind!=1),]
-#vargroup<-c(0)
-#vargroup.row<-c(2,5,8,13,20,21,27,32,33,36,37,40,43)
-Rownames<-c("No. of compounds",
-            "Age (years)",
-  "Years of education",
-  "Years of education",
-  "Works in agriculture",
-  "Number of persons"
-  ,"Has electricity"
-  ,"Has a cement floor"
-  ,"Acres of agricultural land owned",
-      "Shallow tubewell primary water source",
-    "Stored water observed at home",
-    "Reported treating water yesterday",
-    "Distance (mins) to primary water source",
-        "Adult men",
-        "Adult women",
-        "Children: 8-\\textless 15 years",
-        "Children: 3-\\textless 8 years",
-        "Children: 0-\\textless 3 years",
-        "Owned",
-        "Concrete slab",
-        "Functional water seal",
-        "Visible stool on slab or floor",
-        "Owned a potty",
-        "House",
-        "Child's play area",
-        "Has water",
-        "Has soap",
-        "Has water",
-        "Has soap",
-    "Household is food secure"
-  )
-
-tab<-table1_create(mu=balance.tab.mu_M, 
-                   n=balance.tab.n_M, 
-                   sd=balance.tab.sd_M, 
-                   mean.ind=mean.ind,
-                   Rownames=Rownames,
-                   round=1)
-tab
-
-
-
-#Add in variable group labels
-blank=rep("",12)
-
-n.comp.f<-tab[1,]
-tab<-tab[-1,]
-
-table1_f=   rbind(
-               c("\\textbf{Maternal}",blank,blank),
-               tab[c(1:2),],
-               c( "\\textbf{Paternal}",blank,blank),
-               tab[c(3:4),],
-               c("\\textbf{Household}",blank,blank),
-               tab[c(5:8),],
-               c("\\textbf{Drinking Water}",blank,blank),
-               tab[c(9:12),],
-               c("\\textbf{Sanitation}",blank,blank),
-               c("Reported daily open defecation",blank,blank),
-               tab[c(13:17),],
-               c("Latrine",blank,blank),
-               tab[c(18:22),],
-               c("Human feces observed in the",blank,blank),
-               tab[c(23:24),],
-               c("\\textbf{Handwashing}",blank,blank),
-               c("Within 6 steps of latrine",blank,blank),
-               tab[c(25:26),],
-               c("Within 6 steps of kitchen",blank,blank),
-               tab[c(27:28),],
-               c("\\textbf{Nutrition}",blank,blank),
-               tab[c(29),])
-
-rownames(table1_f)=NULL
-
-table1_f
-n.comp.f
-
-n.comp.f[2]=paste(" (N=",n.comp.f[2],")",sep="")
-n.comp.f[3]=paste(" (N=",n.comp.f[3],")",sep="")
-n.comp.f[4]=paste(" (N=",n.comp.f[4],")",sep="")
-n.comp.f[5]=paste(" (N=",n.comp.f[5],")",sep="")
-n.comp.f<-n.comp.f[2:5]
-colnames(n.comp.f)<-NULL
-
-
-for(i in c(2:3,5:6,8:11,13:16,18,24,29:30,34,37,41)){
-  table1_f[i,1]=paste("~~~",table1_f[i,1],sep="")
-}
-for(i in c(19:23,25:28,26:27,31,32,35:36,38:39)){
-  table1_f[i,1]=paste("~~~~~",table1_f[i,1],sep="")
-}
-
-table1_f
-
-#n.comp.f<-c("No. of compounds:")
-
-
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Tables/")
-save(n.comp.f, table1_f, file="EE-BD-table1_f.RData")
-
-
-#cleantable(n.comp.f,digits=0)
-cleantable(table1_f,digits=0)
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Andrew/")
+# load("EE-K-table1.Rdata")
+# 
+# 
+# balance.tab.mu_M 
+# balance.tab.n_M 
+# balance.tab.sd_M
+# 
+# mean.ind<-c(0,1,1,1,0,1,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+# 
+# rownames(balance.tab.mu_M)[which(mean.ind==1)]
+# rownames(balance.tab.mu_M)[which(mean.ind!=1)]
+# balance.tab.n_M[which(mean.ind!=1),]
+# #vargroup<-c(0)
+# #vargroup.row<-c(2,5,8,13,20,21,27,32,33,36,37,40,43)
+# Rownames<-c("No. of compounds",
+#             "Age (years)",
+#   "Years of education",
+#   "Years of education",
+#   "Works in agriculture",
+#   "Number of persons"
+#   ,"Has electricity"
+#   ,"Has a cement floor"
+#   ,"Acres of agricultural land owned",
+#       "Shallow tubewell primary water source",
+#     "Stored water observed at home",
+#     "Reported treating water yesterday",
+#     "Distance (mins) to primary water source",
+#         "Adult men",
+#         "Adult women",
+#         "Children: 8-\\textless 15 years",
+#         "Children: 3-\\textless 8 years",
+#         "Children: 0-\\textless 3 years",
+#         "Owned",
+#         "Concrete slab",
+#         "Functional water seal",
+#         "Visible stool on slab or floor",
+#         "Owned a potty",
+#         "House",
+#         "Child's play area",
+#         "Has water",
+#         "Has soap",
+#         "Has water",
+#         "Has soap",
+#     "Household is food secure"
+#   )
+# 
+# tab<-table1_create(mu=balance.tab.mu_M, 
+#                    n=balance.tab.n_M, 
+#                    sd=balance.tab.sd_M, 
+#                    mean.ind=mean.ind,
+#                    Rownames=Rownames,
+#                    round=1)
+# tab
+# 
+# 
+# 
+# #Add in variable group labels
+# blank=rep("",12)
+# 
+# n.comp.f<-tab[1,]
+# tab<-tab[-1,]
+# 
+# table1_f=   rbind(
+#                c("\\textbf{Maternal}",blank,blank),
+#                tab[c(1:2),],
+#                c( "\\textbf{Paternal}",blank,blank),
+#                tab[c(3:4),],
+#                c("\\textbf{Household}",blank,blank),
+#                tab[c(5:8),],
+#                c("\\textbf{Drinking Water}",blank,blank),
+#                tab[c(9:12),],
+#                c("\\textbf{Sanitation}",blank,blank),
+#                c("Reported daily open defecation",blank,blank),
+#                tab[c(13:17),],
+#                c("Latrine",blank,blank),
+#                tab[c(18:22),],
+#                c("Human feces observed in the",blank,blank),
+#                tab[c(23:24),],
+#                c("\\textbf{Handwashing}",blank,blank),
+#                c("Within 6 steps of latrine",blank,blank),
+#                tab[c(25:26),],
+#                c("Within 6 steps of kitchen",blank,blank),
+#                tab[c(27:28),],
+#                c("\\textbf{Nutrition}",blank,blank),
+#                tab[c(29),])
+# 
+# rownames(table1_f)=NULL
+# 
+# table1_f
+# n.comp.f
+# 
+# n.comp.f[2]=paste(" (N=",n.comp.f[2],")",sep="")
+# n.comp.f[3]=paste(" (N=",n.comp.f[3],")",sep="")
+# n.comp.f[4]=paste(" (N=",n.comp.f[4],")",sep="")
+# n.comp.f[5]=paste(" (N=",n.comp.f[5],")",sep="")
+# n.comp.f<-n.comp.f[2:5]
+# colnames(n.comp.f)<-NULL
+# 
+# 
+# for(i in c(2:3,5:6,8:11,13:16,18,24,29:30,34,37,41)){
+#   table1_f[i,1]=paste("~~~",table1_f[i,1],sep="")
+# }
+# for(i in c(19:23,25:28,26:27,31,32,35:36,38:39)){
+#   table1_f[i,1]=paste("~~~~~",table1_f[i,1],sep="")
+# }
+# 
+# table1_f
+# 
+# #n.comp.f<-c("No. of compounds:")
+# 
+# 
+# setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Tables/")
+# save(n.comp.f, table1_f, file="EE-K-table1_f.RData")
+# 
+# 
+# #cleantable(n.comp.f,digits=0)
+# cleantable(table1_f,digits=0)
 
 
 #--------------------------------
@@ -278,6 +278,12 @@ cleantable(table1_f,digits=0)
 
 #load objects
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
+load("stool_res_unadj_M.Rdata")
+load("stool_res_adj_M.Rdata")
+load("stool_res_N_M.Rdata")
+load("stool_res_means.Rdata")
+
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Andrew/")
 load("stool_res_unadj_M.Rdata")
 load("stool_res_adj_M.Rdata")
 load("stool_res_N_M.Rdata")
@@ -386,8 +392,8 @@ tab2<-rbind(t(c("\\textbf{Ln myeloperoxidase (ng/ml)}",blank)),
             tab2[21:24,]
             )
 
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Tables/")
-save(tab2, file="EE-BD-table2.RData")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Tables/")
+save(tab2, file="EE-K-table2.RData")
 
 cleantable(tab2, 2)
 
@@ -430,8 +436,8 @@ tab3<-rbind(t(c("\\textbf{Ln myeloperoxidase (ng/ml)}",blank)),
             tab3[25:28,]
             )
 
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Tables/")
-save(tab3, file="EE-BD-table3.RData")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Tables/")
+save(tab3, file="EE-K-table3.RData")
 
 cleantable(tab3, 2)
 
@@ -469,8 +475,8 @@ tab4<-rbind(t(c("\\textbf{Ln myeloperoxidase (ng/ml)}",blank)),
             tab4[21:24,]
             )
 
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Tables/")
-save(tab4, file="EE-BD-table4.RData")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Tables/")
+save(tab4, file="EE-K-table4.RData")
 
 cleantable(tab4, 2)
 
@@ -538,8 +544,8 @@ s.table1_create<-function(mu, n, sd, mean.ind, vargroup, vargroup.row, Rownames,
 
 
 	 	 
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Tables/")
-load("EE-BD_s.table1.Rdata")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Tables/")
+load("EE-K_s.table1.Rdata")
 
 s.balance.tab.mu_M
 s.balance.tab.n_M
@@ -651,8 +657,8 @@ for(i in c(19:23,25:28,31,32,35:36,38:39)){
 }
 
 
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Tables/")
-save(s.n.comp.f, s.table1_f, file="EE-BD-s.table1_f.RData")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Tables/")
+save(s.n.comp.f, s.table1_f, file="EE-K-s.table1_f.RData")
 
 
 #cleantable(n.comp.f,digits=0)
@@ -679,7 +685,7 @@ cleantable(s.table1_f,digits=0)
 # at follow-up 1 
 #--------------------------------
 
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Andrew/")
 load("stool_ipcw_res.Rdata")
 load("urine_ipcw_res.Rdata")
 load("stool_res_adj_sex_age_M.Rdata")
@@ -774,8 +780,8 @@ s.tab2<-rbind(t(c("\\textbf{Ln myeloperoxidase (ng/ml)}",blank)),
             s.tab2[21:24,]
             )
 
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Tables/")
-save(s.tab2, file="EE-BD-s.table2.RData")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Tables/")
+save(s.tab2, file="EE-K-s.table2.RData")
 
 cleantable(s.tab2, 2)
 
@@ -821,8 +827,8 @@ s.tab3<-rbind(t(c("\\textbf{Ln myeloperoxidase (ng/ml)}",blank)),
             )
 
 
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Tables/")
-save(s.tab3, file="EE-BD-s.table3.RData")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Tables/")
+save(s.tab3, file="EE-K-s.table3.RData")
 
 cleantable(s.tab3, 2)
 
@@ -856,8 +862,8 @@ s.tab4<-rbind(t(c("\\textbf{Ln myeloperoxidase (ng/ml)}",blank)),
             s.tab4[21:24,]
             )
 
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Tables/")
-save(s.tab4, file="EE-BD-s.table4.RData")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Tables/")
+save(s.tab4, file="EE-K-s.table4.RData")
 
 cleantable(s.tab4, 2)
 
@@ -1062,7 +1068,7 @@ s.tab7<-s.tab7[,c(1,2,3,4,5,6,10,11,12)]
 # Supplementary Table 8: 
 #   L and M %s
 #--------------------------------   
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Andrew/")
 load("pre_recovery_res_M.Rdata")
 load("pre_recovery_ipcw_res_M.Rdata")
 
@@ -1092,8 +1098,8 @@ s.tab8<-rbind(t(c("\\textbf{Lactulose recovery (\\%) at child age 3 months}",bla
             s.tab8[21:24,]
             )
 
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Tables/")
-save(s.tab8, file="EE-BD-s.table8.RData")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Tables/")
+save(s.tab8, file="EE-K-s.table8.RData")
 
 cleantable(s.tab8, 2)
 
@@ -1123,7 +1129,7 @@ cleantable(s.tab8, 2)
 #--------------------------------
 
 #load objects
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Andrew/")
 load("telo_s.table1.Rdata")
 
 
@@ -1376,7 +1382,7 @@ for(i in c(19:23,25:28,31,32,35:36,38:39)){
 #n.comp.f<-c("No. of compounds:")
 
 
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Tables/")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Tables/")
 save(s.n.comp.f, s.table9_f, file="s.table9_f.RData")
 
 
@@ -1396,7 +1402,7 @@ cleantable(s.table9_f,digits=0)
 #--------------------------------
 
 #load objects
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Andrew/")
 load("urine_overall_means.Rdata")
 load("stool_overall_means.Rdata")
 
@@ -1468,7 +1474,7 @@ cleantable(tab,digits=0)
 # at follow-up 1 
 #--------------------------------
 
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Andrew/")
 load("urine_sens_res_N_M.Rdata")
 load("urine_sens_res_means.Rdata")
 load("urine_sens_res_unadj_M.Rdata")
@@ -1646,8 +1652,8 @@ sens.tab<-rbind(
 #             )
 
 
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Tables/")
-save(sens.tab, file="EE-BD-sens.table.RData")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Tables/")
+save(sens.tab, file="EE-K-sens.table.RData")
 
 cleantable(sens.tab, 2)
 
@@ -1660,7 +1666,7 @@ cleantable(sens.tab, 2)
 # Supplementary Table 12: 
 #   L and M %s sensitivity analysis
 #--------------------------------   
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Andrew/")
 load("pre_recovery_sens_res_M.Rdata")
 load("pre_recovery_ipcw_sens_res_M.Rdata")
 
@@ -1690,8 +1696,8 @@ sens.tab12<-rbind(t(c("\\textbf{Lactulose recovery (\\%) at child age 3 months}"
             sens.tab12[21:24,]
             )
 
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Tables/")
-save(sens.tab12, file="EE-BD-sens.table12.RData")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Tables/")
+save(sens.tab12, file="EE-K-sens.table12.RData")
 
 cleantable(sens.tab12, 2)
 
