@@ -53,6 +53,34 @@ d <- d %>%
                
 
 
+#--------------------------------
+# Fix andrew vars to match audrie
+#--------------------------------
+
+d$n_chickens[is.na(d$n_chickens)] <- 99
+d$n_dogs[is.na(d$n_dogs)] <- 99
+d$n_cows[is.na(d$n_cows)] <- 99
+d$n_goats[is.na(d$n_goats)] <- 99
+
+
+d$Nlt18[is.na(d$Nlt18)] <- 99
+d$Ncomp[is.na(d$Ncomp)] <- 99
+d$watmin[is.na(d$watmin)] <- 99
+
+d$asset_tv <-relevel(d$asset_tv, ref = "Missing/DK")
+d$elec <-relevel(d$elec, ref = "Has electricity")
+d$momedu <-relevel(d$momedu, ref = "")
+
+d$month1 <- factor(d$month1)
+d$month2 <- factor(d$month2)
+d$month3 <- factor(d$month3)
+d$staffid1 <- factor(d$staffid1)
+d$staffid2 <- factor(d$staffid2)
+d$staffid3 <- factor(d$staffid3)
+
+
+
+
 #Calculate average age across arms at followup time 1, 2, and 3
 #Survey 1
 #Tabulate overall N, gender, and age 
