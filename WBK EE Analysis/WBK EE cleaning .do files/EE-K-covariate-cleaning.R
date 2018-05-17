@@ -7,13 +7,13 @@ library(lubridate)
 #Child age and sex
 child<-read.csv("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew/raw CSV/washk_allchild_covariates.csv")
 head(child)
-child <- child %>% subset(., select=c(childid, sex, DOB, nulliparous)) %>% 
+child <- child %>% subset(., select=c(childid, hhid, sex, DOB, nulliparous)) %>% 
                    rename(birthord=nulliparous) %>% 
                    mutate(DOB=dmy(DOB),
                           sex=as.numeric(sex)-2)
 
 table(child$birthord)
-child$birthord <- relevel(child$birthord, ref="no")
+child$birthord <- relevel(factor(child$birthord), ref="no")
 saveRDS(child, file="C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew/WBK-EE-childDOB.rds")
 
 
