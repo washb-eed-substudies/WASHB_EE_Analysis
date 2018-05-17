@@ -102,6 +102,51 @@ outsheet using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cl
 
 
 
+use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Untouched/cleanedkenyaeestooldata/Compiled_Baseline_ELISA_AAT.dta", clear
+tostring childid, replace 
+outsheet using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew/raw CSV/washk_eebl_aat.csv", comma replace
+
+use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Untouched/cleanedkenyaeestooldata/Compiled_Baseline_ELISA_MPO.dta", clear
+tostring childid, replace 
+outsheet using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew/raw CSV/washk_eebl_mpo.csv", comma replace
+
+use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Untouched/cleanedkenyaeestooldata/Compiled_Baseline_ELISA_NEO.dta", clear
+tostring childid, replace 
+outsheet using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew/raw CSV/washk_eebl_neo.csv", comma replace
+
+
+use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Untouched/cleanedkenyaeestooldata/Compiled_Midline_ELISA_AAT.dta", clear
+tostring childid, replace 
+outsheet using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew/raw CSV/washk_eeml_aat.csv", comma replace
+
+use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Untouched/cleanedkenyaeestooldata/Compiled_Midline_ELISA_MPO.dta", clear
+tostring childid, replace 
+outsheet using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew/raw CSV/washk_eeml_mpo.csv", comma replace
+
+use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Untouched/cleanedkenyaeestooldata/Compiled_Midline_ELISA_NEO.dta", clear
+tostring childid, replace 
+outsheet using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew/raw CSV/washk_eeml_neo.csv", comma replace
+
+
+use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Untouched/cleanedkenyaeestooldata/Compiled_Endline_ELISA_AAT.dta", clear
+tostring childid, replace 
+outsheet using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew/raw CSV/washk_eeel_aat.csv", comma replace
+
+use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Untouched/cleanedkenyaeestooldata/Compiled_Endline_ELISA_MPO.dta", clear
+tostring childid, replace 
+outsheet using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew/raw CSV/washk_eeel_mpo.csv", comma replace
+
+use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Untouched/cleanedkenyaeestooldata/Compiled_Endline_ELISA_NEO.dta", clear
+tostring childid, replace 
+outsheet using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew/raw CSV/washk_eeel_neo.csv", comma replace
+
+
+use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Untouched/washb-kenya-ee-stool-lab-t1-t2-t3.dta", clear
+tostring childid, replace 
+outsheet using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew/raw CSV/washk_ee_stool.csv", comma replace
+
+
+
 
 
 
