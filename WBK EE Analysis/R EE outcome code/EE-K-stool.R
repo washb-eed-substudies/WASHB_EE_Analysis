@@ -14,6 +14,8 @@ rm(list=ls())
 library(tidyverse)
 library(foreign)
 library(washb)
+library(lubridate)
+
 
 #Load in blinded treatment information
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew")
@@ -29,13 +31,11 @@ dob <- readRDS("WBK-EE-childDOB.rds")
 outcomes<-read.csv("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew/raw CSV/washk_ee_stool.csv")
 head(outcomes)
 
-# #divide the reg value by 1000 to convert it to ug/ml 
-# outcomes$t2_reg<-outcomes$t2_reg/1000
-# 
-# #divide all the aat values by 1000000 to convert it to mg/g
-# outcomes$t1_aat<-outcomes$t1_aat/1000000
-# outcomes$t2_aat<-outcomes$t2_aat/1000000
-# outcomes$t3_aat<-outcomes$t3_aat/1000000
+
+
+#Stool collection dates and staffid
+load("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew/washk_ee_stool_survey.Rdata")
+
 
 #Rename outcomes:
 outcomes <- outcomes %>%
@@ -54,6 +54,8 @@ enrol <- readRDS("WBK-EE-covariates.rds")
 head(enrol)
 
 d <- left_join(outcomes, dob, by="childid")
+
+d <- left_join(d, stsurv, by="childid")
 
 d <- left_join(d, enrol, by="hhid")
 
@@ -79,12 +81,35 @@ d <- d %>%
 # TEMP fixes to diagnose
 ############################
 
+
+#Drop rows with no outcomes
+d <- d %>% filter(!is.na(aat1) | !is.na(aat2) | !is.na(aat3) | 
+                    !is.na(mpo1) | !is.na(mpo2) | !is.na(mpo3) | 
+                    !is.na(neo1) | !is.na(neo2) | !is.na(neo3))
+
+
 #drop outcomes not merged to treatment arm
+
+no_tr <- which(is.na(d$tr))
 
 table(is.na(d$tr))
 d$childid[is.na(d$tr)]
 
-d <- d[!is.na(d$tr),]
+
+
+#Drop children not in Audrie's dataset
+load("C:/Users/andre/Downloads/temp.Rdata")
+  flag <-which(!(d$childid %in% da$childid))
+ 
+dropped_rows <- d[c(no_tr,flag),]
+  
+d <- d[-c(no_tr,flag),]
+
+
+write.csv(dropped_rows, file = "C:/Users/andre/Downloads/WBK_stool_dropped_rows.csv")
+
+
+
 #XXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 
@@ -220,16 +245,16 @@ neo_t3_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=(.$neo3), id=
 
 # #Means and 95% CI's not stratified by arm
 overall_mn_by_round<-
-  d %>% subset(., select=c(dataid, childNo, block, neo1,mpo1,aat1,neo2,mpo2,aat2,neo3,mpo3,aat3)) %>%
-  gather(key, value, -dataid, -childNo, -block) %>%
+  d %>% subset(., select=c(childid, block, neo1,mpo1,aat1,neo2,mpo2,aat2,neo3,mpo3,aat3)) %>%
+  gather(key, value, -childid, -block) %>%
   mutate(biomarker = substr(key, 1,3)) %>%
   group_by(biomarker) %>%
   do(as.data.frame(washb_mean(Y=log(.$value), id=.$block, print = F))) %>%
   ungroup %>% as.data.frame
 
 overall_mn<-
-  d %>% subset(., select=c(dataid, childNo, block, neo1,mpo1,aat1,neo2,mpo2,aat2,neo3,mpo3,aat3)) %>%
-  gather(key, value, -dataid, -childNo, -block) %>%
+  d %>% subset(., select=c(childid, block, neo1,mpo1,aat1,neo2,mpo2,aat2,neo3,mpo3,aat3)) %>%
+  gather(key, value, -childid, -block) %>%
   group_by(key) %>%
   do(as.data.frame(washb_mean(Y=log(.$value), id=.$block, print = F))) %>%
   ungroup %>% as.data.frame
