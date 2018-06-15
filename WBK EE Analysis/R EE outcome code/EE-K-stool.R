@@ -6,7 +6,7 @@
 # andrew mertens (amertens@berkeley.edu)
 #
 # The stool-based biomarker outcomes for 
-# EED Bangladesh sub-study
+# EED Kenya sub-study
 #---------------------------------------
 
 
@@ -19,8 +19,8 @@ library(lubridate)
 
 #Load in blinded treatment information
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew")
-tr <- read.csv("raw CSV/washk_blindTR.csv")
-#tr <- read.csv("raw CSV/washk_TR.csv")
+#tr <- read.csv("raw CSV/washk_blindTR.csv")
+tr <- read.csv("raw CSV/washk_TR.csv")
 tr$tr <- factor(tr$tr, levels = c("Control",  "WSH", "Nutrition", "Nutrition + WSH"))
 head(tr)
 
@@ -62,6 +62,65 @@ d <- left_join(d, enrol, by="hhid")
 d <- left_join(d, tr, by="clusterid")
 
 
+
+#----------------------------------------
+# Drop childids with data problems
+#----------------------------------------
+
+
+# Load in id issues from Charles
+idprobs <- read.csv("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Untouched/Missing DOB or sex CA_AL.csv")
+idprobs
+idprobs <- idprobs %>% 
+           rename(sex2 = sex, DOB2 = DOB) %>% 
+           subset(., select = c(childid, sex2, DOB2, Action)) %>% 
+           mutate(sex2 = ifelse(sex2 == 1, 1, 0))
+
+
+#Merge into main data.frame
+d <- left_join(d, idprobs, by = c("childid")) 
+
+#Drop children with data issues
+d <- d %>% filter(Action=="keep" | is.na(Action))
+
+#Fill in sex and dob for children missing it in stool dataset
+d$sex[is.na(d$sex)] <- d$sex2[is.na(d$sex)] 
+d$DOB[is.na(d$DOB)] <- d$DOB2[is.na(d$DOB)]
+
+d <- d %>% subset(., select = -c(sex2, DOB2, Action))
+
+#Drop rows with no outcomes
+d <- d %>% filter(!is.na(aat1) | !is.na(aat2) | !is.na(aat3) | 
+                    !is.na(mpo1) | !is.na(mpo2) | !is.na(mpo3) | 
+                    !is.na(neo1) | !is.na(neo2) | !is.na(neo3))
+
+
+#drop outcomes not merged to treatment arm
+#Note- this child only does not merge to the blinded treatments
+# Child has a true treatment assignment
+no_tr <- which(is.na(d$tr))
+d$childid[no_tr]
+d <- d[!is.na(d$tr),]
+
+
+# table(is.na(d$tr))
+# d$childid[is.na(d$tr)]
+# 
+# #Drop children not in Audrie's dataset
+# load("C:/Users/andre/Downloads/temp.Rdata")
+#   flag <-which(!(d$childid %in% da$childid))
+#  
+# dropped_rows <- d[c(no_tr,flag),]
+#   
+# d <- d[-c(no_tr,flag),]
+# 
+# 
+# write.csv(dropped_rows, file = "C:/Users/andre/Downloads/WBK_stool_dropped_rows.csv")
+
+
+
+
+
 #Calculate child age and month of the year at each measurement
 d <- d %>% 
         mutate(aged1= stool_bl_date-DOB,
@@ -74,86 +133,6 @@ d <- d %>%
                month2= month(d$stool_ml_date),
                month3= month(d$stool_el_date))
                
-
-
-
-############################
-# TEMP fixes to diagnose
-############################
-
-
-#Drop rows with no outcomes
-d <- d %>% filter(!is.na(aat1) | !is.na(aat2) | !is.na(aat3) | 
-                    !is.na(mpo1) | !is.na(mpo2) | !is.na(mpo3) | 
-                    !is.na(neo1) | !is.na(neo2) | !is.na(neo3))
-
-
-#drop outcomes not merged to treatment arm
-
-no_tr <- which(is.na(d$tr))
-
-table(is.na(d$tr))
-d$childid[is.na(d$tr)]
-
-
-
-#Drop children not in Audrie's dataset
-load("C:/Users/andre/Downloads/temp.Rdata")
-  flag <-which(!(d$childid %in% da$childid))
- 
-dropped_rows <- d[c(no_tr,flag),]
-  
-d <- d[-c(no_tr,flag),]
-
-
-write.csv(dropped_rows, file = "C:/Users/andre/Downloads/WBK_stool_dropped_rows.csv")
-
-
-
-#XXXXXXXXXXXXXXXXXXXXXXXXXXX
-
-
-
-# 
-# #table number of fully collected aliqouts by arm and year (May not match with the actually available
-# #outcomes due to mismarked aliquots)
-# head(d)
-# table(d$tr)
-# 
-# #aliqout time 1
-# t1s1<-d%>% subset(aliqout1_t1>1)%>%group_by(tr) %>%summarize(sample1=n()) 
-# t1s2<-d%>% subset(aliqout2_t1>1)%>%group_by(tr) %>%summarize(sample2=n()) 
-# t1s3<-d%>% subset(aliqout3_t1>1)%>%group_by(tr) %>%summarize(sample3=n()) 
-# t1s4<-d%>% subset(aliqout4_t1>1)%>%group_by(tr) %>%summarize(sample4=n()) 
-# t1s5<-d%>% subset(aliqout5_t1>1)%>%group_by(tr) %>%summarize(sample5=n()) 
-#  
-# aliquotN_t1<-cbind(t1s1,t1s2[,2],t1s3[,2],t1s4[,2],t1s5[,2])
-# 
-# 
-# #aliqout time 2
-# t2s1<-d%>% subset(aliqout1_t2>1)%>%group_by(tr) %>%summarize(sample1=n()) 
-# t2s2<-d%>% subset(aliqout2_t2>1)%>%group_by(tr) %>%summarize(sample2=n()) 
-# t2s3<-d%>% subset(aliqout3_t2>1)%>%group_by(tr) %>%summarize(sample3=n()) 
-# t2s4<-d%>% subset(aliqout4_t2>1)%>%group_by(tr) %>%summarize(sample4=n()) 
-# t2s5<-d%>% subset(aliqout5_t2>1)%>%group_by(tr) %>%summarize(sample5=n()) 
-#  
-# aliquotN_t2<-cbind(t2s1,t2s2[,2],t2s3[,2],t2s4[,2],t2s5[,2])
-# aliquotN_t2
-# 
-# #aliqout time 3
-# t3s1<-d%>% subset(aliqout1_t3>1)%>%group_by(tr) %>%summarize(sample1=n()) 
-# t3s2<-d%>% subset(aliqout2_t3>1)%>%group_by(tr) %>%summarize(sample2=n()) 
-# t3s3<-d%>% subset(aliqout3_t3>1)%>%group_by(tr) %>%summarize(sample3=n()) 
-# t3s4<-d%>% subset(aliqout4_t3>1)%>%group_by(tr) %>%summarize(sample4=n()) 
-# t3s5<-d%>% subset(aliqout5_t3>1)%>%group_by(tr) %>%summarize(sample5=n()) 
-# 
-# aliquotN_t3<-cbind(t3s1,t3s2[,2],t3s3[,2],t3s4[,2],t3s5[,2])
-# 
-# 
-# aliquotN_t1
-# aliquotN_t2
-# aliquotN_t3
-
 
 
 

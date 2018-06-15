@@ -1,11 +1,11 @@
 
 #---------------------------------------
-# EE-BD-urine.R
+# EE-K-urine-sensitivity.R
 #
 # andrew mertens (amertens@berkeley.edu)
 #
 # The urine-based biomarker outcomes for 
-# EED Bangladesh sub-study- sensitivity analysis
+# EED Kenya sub-study- sensitivity analysis
 # of dropping leaky and contaminated samples
 #---------------------------------------
 

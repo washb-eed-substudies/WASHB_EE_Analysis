@@ -27,13 +27,8 @@ library(lattice)
 
 
 #Temp use WBB stool results
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
-load("stool_res_N_M.Rdata")
-load("stool_res_unadj_M.Rdata")
-load("stool_res_adj_M.Rdata")
-load("stool_res_means.Rdata")
-
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Andrew/")
+
 load("stool_res_N_M.Rdata")
 load("stool_res_unadj_M.Rdata")
 load("stool_res_adj_M.Rdata")
@@ -55,7 +50,6 @@ rownames(neo_t3_adj_M) <- rownames(neo_t2_adj_M) <- rownames(neo_t1_adj_M) <- ro
 rownames(lac_t3_adj_M) <- rownames(lac_t2_adj_M) <- rownames(lac_t1_adj_M) <- rownames(lac_t1_unadj_M)
 rownames(man_t3_adj_M) <- rownames(man_t2_adj_M) <- rownames(man_t1_adj_M) <- rownames(man_t1_unadj_M)
 rownames(lm_t3_adj_M) <- rownames(lm_t2_adj_M) <- rownames(lm_t1_adj_M) <- rownames(lm_t1_unadj_M)
-rownames(reg1b_t2_adj_M) <- rownames(reg1b_t2_unadj_M)
 
 #-----------------------------------
 # Adjusted difference processing
@@ -73,7 +67,6 @@ aat_N2<-cbind("AAT","T2", rownames(aat_t2_mn), as.data.frame(aat_t2_mn)) %>% `ro
 neo_N2<-cbind("NEO","T2", rownames(neo_t2_mn), as.data.frame(neo_t2_mn)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
 mpo_N2<-cbind("MPO","T2", rownames(mpo_t2_mn), as.data.frame(mpo_t2_mn)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
 lm_N2<-cbind("LM","T2", rownames(lm_t2_mn), as.data.frame(lm_t2_mn)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
-reg_N2<-cbind("REG","T2", rownames(reg1b2_t2_mn), as.data.frame(reg1b2_t2_mn)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
 l_N2<-cbind("Lact","T2", rownames(lac_t2_mn), as.data.frame(lac_t2_mn)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
 m_N2<-cbind("Mann","T2", rownames(man_t2_mn), as.data.frame(man_t2_mn)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
 
@@ -103,7 +96,6 @@ aat_dif2<-cbind("AAT","T2", rownames(aat_t2_unadj_M), as.data.frame(aat_t2_unadj
 neo_dif2<-cbind("NEO","T2", rownames(neo_t2_unadj_M), as.data.frame(neo_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
 mpo_dif2<-cbind("MPO","T2", rownames(mpo_t2_unadj_M), as.data.frame(mpo_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
 lm_dif2<-cbind("LM","T2", rownames(lm_t2_unadj_M), as.data.frame(lm_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-reg_dif2<-cbind("REG","T2", rownames(reg1b_t2_unadj_M), as.data.frame(reg1b_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
 l_dif2<-cbind("Lact","T2", rownames(lac_t2_unadj_M), as.data.frame(lac_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
 m_dif2<-cbind("Mann","T2", rownames(man_t2_unadj_M), as.data.frame(man_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
 
@@ -133,7 +125,6 @@ mpo_dif2,
 l_dif2,
 m_dif2,
 lm_dif2,
-reg_dif2,
 aat_dif3,
 neo_dif3,
 mpo_dif3,
@@ -165,7 +156,7 @@ dif_df<-dif_df[,c(1:6,9)]
  dif_df[,7]<-as.numeric(sprintf("%1.3f",dif_df[,7]))
 
 #Add comparison group for colors
-dif_df$comp.TR<-rep(c("WSH","N","N+WSH"),19)
+dif_df$comp.TR<-rep(c("WSH","N","N+WSH"),18)
 
 
 #Formated comparison for x-axis printing
@@ -182,7 +173,6 @@ MPO<-dif_df[dif_df$Location=="MPO",]
 Lact<-dif_df[dif_df$Location=="Lact",]
 Mann<-dif_df[dif_df$Location=="Mann",]
 LM<-dif_df[dif_df$Location=="LM",]
-REG<-dif_df[dif_df$Location=="REG",]
 
 seq(min(AAT$lower.ci),max(AAT$upper.ci),by=diff(range(min(AAT$lower.ci),max(AAT$upper.ci)))/10)
 c(min(AAT$lower.ci),max(AAT$upper.ci))
@@ -191,7 +181,6 @@ c(min(MPO$lower.ci),max(MPO$upper.ci))
 c(min(Lact$lower.ci),max(Lact$upper.ci))
 c(min(Mann$lower.ci),max(Mann$upper.ci))
 c(min(LM$lower.ci),max(LM$upper.ci))
-c(min(REG$lower.ci),max(REG$upper.ci))
 
 
 
@@ -296,9 +285,9 @@ MidPts <- barplot(1:n, names.arg=NA,col=NA,
 	#text(x=MidPts,y=d$upper.ci, labels=d$Pval,pos=3,cex=1,col=cols,font=1)
 
 	  # X-axis labels
-  mtext(c("3 month\ndifference",
-          "14 month\ndifference",
-          "28 month\ndifference"),
+  mtext(c("6 month\ndifference",
+          "17 month\ndifference",
+          "22 month\ndifference"),
         side=1,line=2,at=MidPts,col="black",cex=0.8,las=1)
   box()
 }

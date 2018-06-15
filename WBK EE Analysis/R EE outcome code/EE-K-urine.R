@@ -19,8 +19,8 @@ library(lubridate)
 
 #Load in blinded treatment information
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew")
-tr <- read.csv("raw CSV/washk_blindTR.csv")
-#tr <- read.csv("raw CSV/washk_TR.csv")
+#tr <- read.csv("raw CSV/washk_blindTR.csv")
+tr <- read.csv("raw CSV/washk_TR.csv")
 tr$tr <- factor(tr$tr, levels = c("Control",  "WSH", "Nutrition", "Nutrition + WSH"))
 head(tr)
 
@@ -473,7 +473,7 @@ perm3_N_M<-d %>% group_by(tr) %>% subset(!is.na(per.lact.rec_t3)) %>% summarize(
 #Means and 95% CI's for mean by arm plots
 perl1_mn<-perl2_mn<-perl3_mn<-perm1_mn<-perm2_mn<-perm3_mn<-NULL
 perl1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$per.lact.rec_t1), id=.$block, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-perl2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$per.lact.rec_t2), id=.$block, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+perl2_mn<-d  %>% subset(!is.infinite(per.lact.rec_t2) & !is.na(per.lact.rec_t2)) %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$per.lact.rec_t2), id=.$block, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
 perl3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$per.lact.rec_t3), id=.$block, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
 
 perm1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=log(.$per.mann.rec_t1), id=.$block, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
@@ -544,6 +544,7 @@ rownames(perm1_adj_M)<-rownames(perm2_adj_M)<-rownames(perm3_adj_M)<-c("Control 
 
 
 
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Andrew/")
 
 save(
 perl1_N_M,

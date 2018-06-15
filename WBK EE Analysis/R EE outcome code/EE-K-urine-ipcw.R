@@ -18,76 +18,431 @@ library(washb)
 
 
 
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/")
-load("washb-bangladesh-tr.Rdata")
-d$clusterid<-as.numeric(d$clusterid)
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew")
+tr <- read.csv("raw CSV/washk_TR.csv")
+tr$tr <- factor(tr$tr, levels = c("Control",  "WSH", "Nutrition", "Nutrition + WSH"))
+head(tr)
+
+dob <- readRDS("WBK-EE-childDOB.rds")
+#use main trial DOB and sex
+dob <- dob %>% subset(., select = -c(sex, DOB))
+
+lm <- readRDS("WBK-EE-LM-outcomes.rds")
+head(lm)
+
+#Load in main trial enrollment data for ipcw analysis
+#enrol<-read.csv("C:/Users/andre/Dropbox/washb_Kenya_primary_outcomes_Andrew/Data-selected/clean/washb-kenya-enrol.csv",stringsAsFactors = TRUE)
+enrol<-read.dta("C:/Users/andre/Dropbox/washb_Kenya_primary_outcomes_Andrew/Data-selected/clean/washb-kenya-enrol.dta")
+head(enrol)
+
+d <- left_join(lm, dob, by=c("childid","hhid"))
+
 dim(d)
-treatment<-d
-# levels(treatment$tr)
-# treatment$tr <- factor(treatment$tr,levels=c("Control","WSH","Nutrition","Nutrition + WSH"))
-# levels(treatment$tr)
-#Load in enrollment data for adjusted analysis
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Temp/")
-enrol<-read.csv("washb-bangladesh-enrol+animals.csv",stringsAsFactors = TRUE)
-dim(enrol)
-
-#Load in urine survey and ipcw datasets
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew")
-urine<-read.csv("BD-EE-urine.csv")
-ipcw<-read.csv("BD-EE-ipcw.csv", stringsAsFactors = T) %>% select(-c(tr,block))
-
-#Load in L/M outcomes
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew")
-outcomes<-read.dta("washb-BD-EE-urine-outcomes-stata12.dta")
-outcomes$childid<-as.numeric(outcomes$childid)
-load("urine_volume.Rdata")
-
-#Load in urine survey data
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew/")
-urine<-read.csv("BD-EE-urine.csv")
-dim(urine)
-
-#Drop and merge fixed urine volumes
-urine<-urine %>% subset(select=-c(urineVol_t1,urineVol_t2,urineVol_t3))
-urine<-merge(urine, urineVol, by=c("dataid", "childNo"))
-
-
-
-dim(urine)
-dim(outcomes)
-urine<-left_join(urine,outcomes, by="childid")
-dim(urine)
-
-
-
-
-
-#Merge in urine outcomes
-urine_outcomes<-subset(urine, select=c(dataid,childNo, 
-                                       staffid1, staffid2, staffid3, 
-                                       month1, month2, month3, 
-                                       aged1, aged2,aged3,
-                                       LMvol_t1,LMvol_t2,LMvol_t3,
-                                       urineVol_t1, urineVol_t2, urineVol_t3,
-                                       Lact1, Lact2, Lact3, 
-                                       Mann1, Mann2, Mann3))
-dim(urine_outcomes)
-d<-merge(ipcw, urine_outcomes, by=c("dataid", "childNo"), all.x=T, all.y=F)
+d <- left_join(enrol, d, by="childid")
 dim(d)
+
+
+#Calculate child age and month of the year at each measurement
+d <- d %>% 
+        mutate(aged1= urine_bl_date-DOB,
+               aged2= urine_ml_date-DOB,
+               aged3= urine_el_date-DOB,
+               agem1= as.numeric(aged1/30.25), 
+               agem2= as.numeric(aged2/30.25), 
+               agem3= as.numeric(aged3/30.25),
+               month1= month(d$urine_bl_date),
+               month2= month(d$urine_ml_date),
+               month3= month(d$urine_el_date))
+
+
+
 
 #Single urine outcome not matched to main trial data
-anti_join(urine_outcomes, ipcw, by=c("dataid", "childNo")) %>% subset(select=c(dataid, childNo))
+#anti_join(urine_outcomes, ipcw, by=c("dataid", "childNo")) %>% subset(select=c(dataid, childNo))
 
-#Merge treatment information 
-dim(d)
-d<-left_join(d,treatment, by="clusterid")
-dim(d)
-table(d$tr)
 
 
 #Subset to EED arms
 d<-subset(d, tr=="Control" | tr=="WSH" | tr=="Nutrition" | tr=="Nutrition + WSH")
 dim(d)
+
+
+
+
+#------------------
+# Rename covariates
+#------------------
+
+d <- d %>%
+   rename(elec = electricity,
+          hfiacat = HHS,
+          asset_radio = radio, 
+          asset_tv = television, 
+          asset_mobile = mobile, 
+          asset_clock = clock, 
+          asset_bike = bicycle, 
+          asset_moto = motorcycle, 
+          asset_stove = stove,  
+          n_cows = cow, 
+          n_goats = goat,
+          n_chickens = chicken, 
+          n_dogs = dog, 
+          watmin = dminwat)
+
+
+#------------------
+# Covariate cleaning
+#------------------
+
+# Set factor variables
+d$asset_tv <- factor(d$asset_tv)
+d$elec <- factor(d$elec)
+d$momedu <- factor(d$momedu)
+
+d$asset_tv <-relevel(d$asset_tv, ref = "0")
+d$elec <-relevel(d$elec, ref = "0")
+d$momedu <-relevel(d$momedu, ref = "Incomplete Primary")
+
+d$month1 <- factor(d$month1)
+d$month2 <- factor(d$month2)
+d$month3 <- factor(d$month3)
+d$staffid1 <- factor(d$staffid1)
+d$staffid2 <- factor(d$staffid2)
+d$staffid3 <- factor(d$staffid3)
+
+
+#Make vectors of adjustment variable names
+Wvars<-c("sex", "birthord",  "momage", "momedu",  "Ncomp", "Nlt18", "elec","roof",
+         "momheight",
+         "asset_radio", "asset_tv", "asset_mobile", "asset_clock", "asset_bike", "asset_moto", "asset_stove",  
+         "n_cows", "n_goats","n_chickens", "n_dogs", "watmin", "hfiacat")
+
+#Add in time varying covariates:
+Wvars1<-c("aged1", "month1", "staffid1") 
+Wvars2<-c("aged2", "month2", "staffid2") 
+Wvars3<-c("aged3", "month3", "staffid3") 
+
+
+
+#subset time-constant W adjustment set
+W<- subset(d, select=Wvars)
+
+
+#Add in time-varying covariates
+W1<- cbind(W, subset(d, select=Wvars1))
+W2<- cbind(W, subset(d, select=Wvars2))
+W3<- cbind(W, subset(d, select=Wvars3))
+
+
+#Set time-varying covariates as factors
+W1$month1<-as.factor(W1$month1)
+W2$month2<-as.factor(W2$month2)
+W3$month3<-as.factor(W3$month3)
+W1$staffid1<-factor(W1$staffid1)
+W2$staffid2<-factor(W2$staffid2)
+W3$staffid3<-factor(W3$staffid3)
+
+
+
+#Tabulate missingness
+for(i in 1:ncol(W)){
+  print(colnames(W)[i])
+  print(table(is.na(W[,i])))
+}
+
+
+#Print means for continious, Ns for factors
+for(i in 1:ncol(W)){
+  print(colnames(W)[i])
+  if(class(W[,i])=="factor"){
+    print(table(W[,i]))
+  }else{print(mean(W[,i], na.rm=T))}
+}
+
+
+
+for(i in 1:ncol(W3)){
+  print(colnames(W3)[i])
+  if(class(W3[,i])=="factor"){
+    print(table(W3[,i]))
+  }else{print(mean(W3[,i], na.rm=T))}
+}
+
+
+
+############################
+#Set up ipcw analysis
+############################
+
+
+#Set contrasts:
+contrasts <- list(c("Control","WSH"), c("Control","Nutrition"), c("Control","Nutrition + WSH"), c("WSH","Nutrition + WSH"), c("Nutrition","Nutrition + WSH"))
+
+
+
+
+#Create indicators for missingness
+d$Lact1.miss<-ifelse(is.na(d$Lact1),0,1)
+d$Lact2.miss<-ifelse(is.na(d$Lact2),0,1)
+d$Lact3.miss<-ifelse(is.na(d$Lact3),0,1)
+
+d$Mann1.miss<-ifelse(is.na(d$Mann1),0,1)
+d$Mann2.miss<-ifelse(is.na(d$Mann2),0,1)
+d$Mann3.miss<-ifelse(is.na(d$Mann3),0,1)
+
+d$LM1.miss<-ifelse(is.na(d$LM1),0,1)
+d$LM2.miss<-ifelse(is.na(d$LM2),0,1)
+d$LM3.miss<-ifelse(is.na(d$LM3),0,1)
+
+
+
+table(d$Lact1.miss)
+table(d$Lact2.miss)
+table(d$Lact3.miss)
+
+table(d$Mann1.miss)
+table(d$Mann2.miss)
+table(d$Mann3.miss)
+
+table(d$LM1.miss)
+table(d$LM2.miss)
+table(d$LM3.miss)
+
+table(d$Lact1.miss)
+table(d$Lact2.miss)
+table(d$Lact3.miss)
+
+
+mean(d$Lact1.miss, na.rm=T)
+
+
+# set missing outcomes to an arbitrary, non-missing value. In this case use 9
+d$Lact1Delta <- d$Lact1
+d$Lact1Delta[d$Lact1.miss==0] <- exp(9)
+
+d$Lact2Delta <- d$Lact2
+d$Lact2Delta[d$Lact2.miss==0] <- exp(9)
+
+d$Lact3Delta <- d$Lact3
+d$Lact3Delta[d$Lact3.miss==0] <- exp(9)
+
+d$Mann1Delta <- d$Mann1
+d$Mann1Delta[d$Mann1.miss==0] <- exp(9)
+
+d$Mann2Delta <- d$Mann2
+d$Mann2Delta[d$Mann2.miss==0] <- exp(9)
+
+d$Mann3Delta <- d$Mann3
+d$Mann3Delta[d$Mann3.miss==0] <- exp(9)
+
+d$LM1Delta <- d$LM1
+d$LM1Delta[d$LM1.miss==0] <- exp(9)
+
+d$LM2Delta <- d$LM2
+d$LM2Delta[d$LM2.miss==0] <- exp(9)
+
+d$LM3Delta <- d$LM3
+d$LM3Delta[d$LM3.miss==0] <- exp(9)
+
+
+
+
+#Order for replication:
+d<-d[order(d$block,d$clusterid,d$childid),]
+  
+#Run the unadjusted ipcw analysis
+
+#dataframes of urine biomarkers and missingness:
+Y<-d %>% select(Lact1Delta,Mann1Delta,LM1Delta,
+                Lact2Delta,Mann2Delta,LM2Delta,
+                Lact3Delta,Mann3Delta,LM3Delta)
+miss<-d %>% select(Lact1.miss,Mann1.miss,LM1.miss,
+                Lact2.miss,Mann2.miss,LM2.miss,
+                Lact3.miss,Mann3.miss,LM3.miss)
+
+#Set contrasts:
+contrasts <- list(c("Control","WSH"), c("Control","Nutrition"), c("Control","Nutrition + WSH"), c("WSH","Nutrition + WSH"), c("Nutrition","Nutrition + WSH"))
+
+
+
+
+#Run the adjusted ipcw analysis
+res_adj<-list(lact_t1_adj=matrix(0,5,5), mann_t1_adj=matrix(0,5,5), lm_t1_adj=matrix(0,5,5), 
+                lact_t2_adj=matrix(0,5,5), mann_t2_adj=matrix(0,5,5), lm_t2_adj=matrix(0,5,5),  
+                lact_t3_adj=matrix(0,5,5), mann_t3_adj=matrix(0,5,5), lm_t3_adj=matrix(0,5,5))
+
+ Wlist <- list(W1,W1,W1,W2,W2,W2,W3,W3,W3)
+
+
+for(i in 1:ncol(Y)){
+  for(j in 1:5){
+    #note the log transformation of the outcome prior to running GLM model:
+    temp<-washb_tmle(Y=log(Y[,i]), Delta=miss[,i], tr=d$tr, W=Wlist[[i]], id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], Q.SL.library = c("SL.glm"), seed=12345, print=T)
+    cat(i," : ",j, "\n")
+    res_adj[[i]][j,]<-(t(unlist(temp$estimates$ATE)))
+    colnames(res_adj[[i]])<-c("psi","var.psi","ci.l","ci.u", "Pval")
+    rownames(res_adj[[i]])<-c(c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH"))
+  }
+}
+
+mean(Y$Lact1Delta)
+dim(Y)
+table(is.na(Y$Lact1Delta))
+
+#Extract estimates
+l1_adj_ipcw_M<-res_adj[[1]]
+l2_adj_ipcw_M<-res_adj[[4]]
+l3_adj_ipcw_M<-res_adj[[7]]
+
+m1_adj_ipcw_M<-res_adj[[2]]
+m2_adj_ipcw_M<-res_adj[[5]]
+m3_adj_ipcw_M<-res_adj[[8]]
+
+lmr1_adj_ipcw_M<-res_adj[[3]]
+lmr2_adj_ipcw_M<-res_adj[[6]]
+lmr3_adj_ipcw_M<-res_adj[[9]]
+
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Andrew/")
+save(
+l1_adj_ipcw_M,
+l2_adj_ipcw_M,
+l3_adj_ipcw_M,
+m1_adj_ipcw_M,
+m2_adj_ipcw_M,
+m3_adj_ipcw_M,
+lmr1_adj_ipcw_M,
+lmr2_adj_ipcw_M,
+lmr3_adj_ipcw_M,
+file="urine_ipcw_res.Rdata")
+
+
+
+
+#--------------------------------
+# Percent L and M recovery
+# (for supplimentary table)
+#--------------------------------
+
+#Create indicators for missingness
+d$perl1.miss<-ifelse(is.na(d$per.lact.rec_t1),0,1)
+d$perl2.miss<-ifelse(is.na(d$per.lact.rec_t2),0,1)
+d$perl3.miss<-ifelse(is.na(d$per.lact.rec_t3),0,1)
+
+d$perm1.miss<-ifelse(is.na(d$per.mann.rec_t1),0,1)
+d$perm2.miss<-ifelse(is.na(d$per.mann.rec_t2),0,1)
+d$perm3.miss<-ifelse(is.na(d$per.mann.rec_t3),0,1)
+
+# set missing outcomes to an arbitrary, non-missing value. In this case use 9
+d$perl1Delta <- d$per.lact.rec_t1
+d$perl1Delta[d$perl1.miss==0] <- (9)
+
+d$perl2Delta <- d$per.lact.rec_t2
+d$perl2Delta[d$perl2.miss==0] <- (9)
+
+d$perl3Delta <- d$per.lact.rec_t3
+d$perl3Delta[d$perl3.miss==0] <- (9)
+
+d$perm1Delta <- d$per.mann.rec_t1
+d$perm1Delta[d$perm1.miss==0] <- (9)
+
+d$perm2Delta <- d$per.mann.rec_t2
+d$perm2Delta[d$perm2.miss==0] <- (9)
+
+d$perm3Delta <- d$per.mann.rec_t3
+d$perm3Delta[d$perm3.miss==0] <- (9)
+
+perY<-d %>% select(perl1Delta,perm1Delta,
+                perl2Delta,perm2Delta,
+                perl3Delta,perm3Delta)
+per.miss<-d %>% select(perl1.miss,perm1.miss,
+                perl2.miss,perm2.miss,
+                perl3.miss,perm3.miss)
+
+res_per<-list(perl_t1_adj=matrix(0,5,5), perm_t1_adj=matrix(0,5,5), 
+                perl_t2_adj=matrix(0,5,5), perm_t2_adj=matrix(0,5,5), 
+                perl_t3_adj=matrix(0,5,5), perm_t3_adj=matrix(0,5,5))
+
+
+perWlist <- list(W1,W1,W2,W2,W3,W3)
+
+
+for(i in 1:ncol(perY)){
+  for(j in 1:5){
+    temp<-washb_tmle(Y=(perY[,i]), Delta=per.miss[,i], tr=d$tr, W=perWlist[[i]], id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], Q.SL.library = c("SL.glm"), seed=12345, print=T)
+    cat(i," : ",j, "\n")
+    res_per[[i]][j,]<-(t(unlist(temp$estimates$ATE)))
+    colnames(res_per[[i]])<-c("psi","var.psi","ci.l","ci.u", "Pval")
+    rownames(res_per[[i]])<-c(c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH"))
+  }
+}
+
+
+
+#Extract estimates
+perl1_adj_ipcw_M<-res_per[[1]]
+perl2_adj_ipcw_M<-res_per[[3]]
+perl3_adj_ipcw_M<-res_per[[5]]
+
+perm1_adj_ipcw_M<-res_per[[2]]
+perm2_adj_ipcw_M<-res_per[[4]]
+perm3_adj_ipcw_M<-res_per[[6]]
+
+
+save(perl1_adj_ipcw_M,
+     perl2_adj_ipcw_M,
+     perl3_adj_ipcw_M,
+     perm1_adj_ipcw_M,
+     perm2_adj_ipcw_M,
+     perm3_adj_ipcw_M,
+     file="pre_recovery_ipcw_res_M.Rdata"
+     )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -327,401 +682,3 @@ W1$month1 <- relevel(W1$month1, ref="1")
 W1$staffid1 <- relevel(W1$staffid1, ref="missing")
 W1 <- droplevels(W1)
 
-
-
-#------------------
-#Generate LM ratio
-#------------------
-
-#Destring urine and LM volume
-d$urineVol_t1<-as.numeric(d$urineVol_t1)
-d$urineVol_t2<-as.numeric(d$urineVol_t2)
-d$urineVol_t3<-as.numeric(d$urineVol_t3)
-d$LMvol_t1<-as.numeric(d$LMvol_t1)
-d$LMvol_t2<-as.numeric(d$LMvol_t2)
-d$LMvol_t3<-as.numeric(d$LMvol_t3)
-
-#To calculate total lactulose dosed (mg) or total mannitol dosed (mg):
- #The children ingest a solution of 250 mg/ml lactulose and 50 mg/ml of mannitol in a dose of 2 ml/kg of weight up to 20 ml maximum.
- #Q9 of the EE urine form is the total volume of LM solution ingested (in ml). For example, a child who ingested 20 ml of LM solution (the maximum dose), would have ingested 1000 mg of mannitol and 5000 mg of lactulose. The 1000 mg and 5000 mg would then be used in the above formula as the "total mannitol dosed (mg) or total lactulose dosed (mg)".
- mean(d$LMvol_t1, na.rm=T)
- mean(d$urineVol_t1, na.rm=T)/1000
-
-d$lact.dose_t1<-d$LMvol_t1*250
-d$lact.dose_t2<-d$LMvol_t2*250
-d$lact.dose_t3<-d$LMvol_t3*250
-d$mann.dose_t1<-d$LMvol_t1*50
-d$mann.dose_t2<-d$LMvol_t2*50
-d$mann.dose_t3<-d$LMvol_t3*50
-
-mean(d$lact.dose_t1, na.rm=T)
-mean(d$mann.dose_t1, na.rm=T)
-
-
-#% lactulose recovery = (urine concentration lactulose (mg/L) * urine volume (L) * 100 / total lactulose dosed (mg))
-d$per.lact.rec_t1<-d$Lact1*(d$urineVol_t1/1000)*100/d$lact.dose_t1
-d$per.lact.rec_t2<-d$Lact2*(d$urineVol_t2/1000)*100/d$lact.dose_t2
-d$per.lact.rec_t3<-d$Lact3*(d$urineVol_t3/1000)*100/d$lact.dose_t3
-mean(d$per.lact.rec_t1, na.rm=T)
-
-#% mannitol recovery = (urine concentration mannitol (mg/L) * urine volume (L) * 100 / total mannitol dosed (mg))
-d$per.mann.rec_t1<-d$Mann1*(d$urineVol_t1/1000)*100/d$mann.dose_t1
-d$per.mann.rec_t2<-d$Mann2*(d$urineVol_t2/1000)*100/d$mann.dose_t2
-d$per.mann.rec_t3<-d$Mann3*(d$urineVol_t3/1000)*100/d$mann.dose_t3
-
-
-#LM ratio
-d$LM1<-d$per.lact.rec_t1/d$per.mann.rec_t1
-d$LM2<-d$per.lact.rec_t2/d$per.mann.rec_t2
-d$LM3<-d$per.lact.rec_t3/d$per.mann.rec_t3
-mean(d$LM1, na.rm=T)
-
-#We also need to report Lactulose recovery and Mannitol recovery in mmol/L (as indicated on our table shells).
-    #mmol/L of Lactulose = ??g/ml * 1000 ml/L * 1 mg/1000??g * 1g/1000mg * 1mol/342.296g * 1000mmol/1 mol
-#The above simplifies to (??g/ml) * (1 / 342.296) = mmol/L
-    #mmol/L of Mannitol = ??g/ml * 1000 ml/L * 1 mg/1000??g * 1g/1000mg * 1mol/182.172g * 1000mmol/1 mol
-#The above simplifies to (??g/ml) * (1 / 182.172) = mmol/L
-mean(d$Lact1, na.rm=T)
-mean(d$LMvol_t1, na.rm=T)
-mean(d$Mann1, na.rm=T)
-
-d$lact.rec.MMOL_t1<-(d$Lact1/1000)*(1/342.296)
-d$lact.rec.MMOL_t2<-(d$Lact2/1000)*(1/342.296)
-d$lact.rec.MMOL_t3<-(d$Lact3/1000)*(1/342.296)
-d$mann.rec.MMOL_t1<-(d$Mann1/1000)*(1/182.172)
-d$mann.rec.MMOL_t2<-(d$Mann2/1000)*(1/182.172)
-d$mann.rec.MMOL_t3<-(d$Mann3/1000)*(1/182.172)
-mean(d$lact.rec.MMOL_t1, na.rm=T)
-
-############################
-#Calculate outcomes:
-############################
-
-d$Lact1<-d$Lact1*(1/342.296)
-d$Lact2<-d$Lact2*(1/342.296)
-d$Lact3<-d$Lact3*(1/342.296)
-
-d$Mann1<-d$Mann1*(1/182.172)
-d$Mann2<-d$Mann2*(1/182.172)
-d$Mann3<-d$Mann3*(1/182.172)
-
-
-
-mean(log(d$Lact1), na.rm=T)
-mean(log(d$Lact2), na.rm=T)
-mean(log(d$Lact3), na.rm=T)
-
-mean(log(d$Mann1), na.rm=T)
-mean(log(d$Mann2), na.rm=T)
-mean(log(d$Mann3), na.rm=T)
-
-
-
-############################
-#Set up ipcw analysis
-############################
-
-
-
-
-#Create indicators for missingness
-d$Lact1.miss<-ifelse(is.na(d$Lact1),0,1)
-d$Lact2.miss<-ifelse(is.na(d$Lact2),0,1)
-d$Lact3.miss<-ifelse(is.na(d$Lact3),0,1)
-
-d$Mann1.miss<-ifelse(is.na(d$Mann1),0,1)
-d$Mann2.miss<-ifelse(is.na(d$Mann2),0,1)
-d$Mann3.miss<-ifelse(is.na(d$Mann3),0,1)
-
-d$LM1.miss<-ifelse(is.na(d$LM1),0,1)
-d$LM2.miss<-ifelse(is.na(d$LM2),0,1)
-d$LM3.miss<-ifelse(is.na(d$LM3),0,1)
-
-
-
-table(d$Lact1.miss)
-table(d$Lact2.miss)
-table(d$Lact3.miss)
-
-table(d$Mann1.miss)
-table(d$Mann2.miss)
-table(d$Mann3.miss)
-
-table(d$LM1.miss)
-table(d$LM2.miss)
-table(d$LM3.miss)
-
-table(d$Lact1.miss)
-table(d$Lact2.miss)
-table(d$Lact3.miss)
-
-
-mean(d$Lact1.miss, na.rm=T)
-
-
-# set missing outcomes to an arbitrary, non-missing value. In this case use 9
-d$Lact1Delta <- d$Lact1
-d$Lact1Delta[d$Lact1.miss==0] <- exp(9)
-
-d$Lact2Delta <- d$Lact2
-d$Lact2Delta[d$Lact2.miss==0] <- exp(9)
-
-d$Lact3Delta <- d$Lact3
-d$Lact3Delta[d$Lact3.miss==0] <- exp(9)
-
-d$Mann1Delta <- d$Mann1
-d$Mann1Delta[d$Mann1.miss==0] <- exp(9)
-
-d$Mann2Delta <- d$Mann2
-d$Mann2Delta[d$Mann2.miss==0] <- exp(9)
-
-d$Mann3Delta <- d$Mann3
-d$Mann3Delta[d$Mann3.miss==0] <- exp(9)
-
-d$LM1Delta <- d$LM1
-d$LM1Delta[d$LM1.miss==0] <- exp(9)
-
-d$LM2Delta <- d$LM2
-d$LM2Delta[d$LM2.miss==0] <- exp(9)
-
-d$LM3Delta <- d$LM3
-d$LM3Delta[d$LM3.miss==0] <- exp(9)
-
-mean(log(d$Lact1Delta), na.rm=T)
-
-
-
-#Order for replication:
-d<-d[order(d$block,d$clusterid,d$dataid),]
-  
-#Run the unadjusted ipcw analysis
-
-#dataframes of urine biomarkers and missingness:
-Y<-d %>% select(Lact1Delta,Mann1Delta,LM1Delta,
-                Lact2Delta,Mann2Delta,LM2Delta,
-                Lact3Delta,Mann3Delta,LM3Delta)
-miss<-d %>% select(Lact1.miss,Mann1.miss,LM1.miss,
-                Lact2.miss,Mann2.miss,LM2.miss,
-                Lact3.miss,Mann3.miss,LM3.miss)
-
-#Set contrasts:
-contrasts <- list(c("Control","WSH"), c("Control","Nutrition"), c("Control","Nutrition + WSH"), c("WSH","Nutrition + WSH"), c("Nutrition","Nutrition + WSH"))
-
-
-#Create empty matrix to hold the glm results:
-lact_t1_unadj<-mann_t1_unadj<-lm_t1_unadj<-matrix(0, nrow=5, ncol=5)
-lact_t2_unadj<-mann_t2_unadj<-lm_t2_unadj<-matrix(0, nrow=5, ncol=5)
-lact_t3_unadj<-mann_t3_unadj<-lm_t3_unadj<-matrix(0, nrow=5, ncol=5)
-
-res_unadj<-list(lact_t1_unadj=lact_t1_unadj, mann_t1_unadj=mann_t1_unadj, lm_t1_unadj=lm_t1_unadj, 
-                lact_t2_unadj=lact_t2_unadj, mann_t2_unadj=mann_t2_unadj, lm_t2_unadj=lm_t2_unadj, 
-                lact_t3_unadj=lact_t3_unadj, mann_t3_unadj=mann_t3_unadj, lm_t3_unadj=lm_t3_unadj)
-
-
-
-# # #Unadjusted glm models
-# for(i in 1:ncol(Y)){
-#   for(j in 1:5){
-#     #note the log transformation of the outcome prior to running GLM model:
-#     temp<-washb_tmle(Y=log(Y[,i]), Delta=miss[,i], tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], Q.SL.library = c("SL.glm"), seed=12345, print=T)
-#     cat(i," : ",j, "\n")
-#     res_unadj[[i]][j,]<-(t(unlist(temp$estimates$ATE)))
-#     colnames(res_unadj[[i]])<-c("psi","var.psi","ci.l","ci.u", "Pval")
-#     rownames(res_unadj[[i]])<-c(c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH"))
-#   }
-# }
-# 
-# 
-# 
-# #Extract estimates
-# l1_unadj_ipcw_M<-res_unadj[[1]]
-# l2_unadj_ipcw_M<-res_unadj[[4]]
-# l3_unadj_ipcw_M<-res_unadj[[7]]
-# 
-# m1_unadj_ipcw_M<-res_unadj[[2]]
-# m2_unadj_ipcw_M<-res_unadj[[5]]
-# m3_unadj_ipcw_M<-res_unadj[[8]]
-# 
-# lmr1_unadj_ipcw_M<-res_unadj[[3]]
-# lmr2_unadj_ipcw_M<-res_unadj[[6]]
-# lmr3_unadj_ipcw_M<-res_unadj[[9]]
-# 
-
-
-#Run the adjusted ipcw analysis
-res_adj<-list(lact_t1_adj=matrix(0,5,5), mann_t1_adj=matrix(0,5,5), lm_t1_adj=matrix(0,5,5), 
-                lact_t2_adj=matrix(0,5,5), mann_t2_adj=matrix(0,5,5), lm_t2_adj=matrix(0,5,5),  
-                lact_t3_adj=matrix(0,5,5), mann_t3_adj=matrix(0,5,5), lm_t3_adj=matrix(0,5,5))
-
- Wlist <- list(W1,W1,W1,W2,W2,W2,W3,W3,W3)
-
-# i<-7
-# j <- 4
-# 
-# #here we do adjusted
-# W=Wlist[[i]]
-# # W <- W[(d$tr=="Control" | d$tr=="Nutrition + WSH") & !is.na(d$tr),]
-# # table(W$staffid1)
-# 
-# mean(log(Y[d$tr=="Control",i]), na.rm=T)
-# mean(miss[d$tr=="Control",i], na.rm=T)
-# mean(log(Y[d$tr=="WSH",i]), na.rm=T)
-# mean(miss[d$tr=="WSH",i], na.rm=T)
-# temp<-washb_tmle(Y=log(Y[,i]), Delta=miss[,i], tr=d$tr, W=Wlist[[i]], id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], Q.SL.library = c("SL.glm"), seed=12345, print=T)
-# 
-
-for(i in 1:ncol(Y)){
-  for(j in 1:5){
-    #note the log transformation of the outcome prior to running GLM model:
-    temp<-washb_tmle(Y=log(Y[,i]), Delta=miss[,i], tr=d$tr, W=Wlist[[i]], id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], Q.SL.library = c("SL.glm"), seed=12345, print=T)
-    cat(i," : ",j, "\n")
-    res_adj[[i]][j,]<-(t(unlist(temp$estimates$ATE)))
-    colnames(res_adj[[i]])<-c("psi","var.psi","ci.l","ci.u", "Pval")
-    rownames(res_adj[[i]])<-c(c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH"))
-  }
-}
-
-mean(Y$Lact1Delta)
-dim(Y)
-table(is.na(Y$Lact1Delta))
-
-#Extract estimates
-l1_adj_ipcw_M<-res_adj[[1]]
-l2_adj_ipcw_M<-res_adj[[4]]
-l3_adj_ipcw_M<-res_adj[[7]]
-
-m1_adj_ipcw_M<-res_adj[[2]]
-m2_adj_ipcw_M<-res_adj[[5]]
-m3_adj_ipcw_M<-res_adj[[8]]
-
-lmr1_adj_ipcw_M<-res_adj[[3]]
-lmr2_adj_ipcw_M<-res_adj[[6]]
-lmr3_adj_ipcw_M<-res_adj[[9]]
-
-mean(miss$Lact2.miss)
-mean(log(Y$Lact2Delta))
-
-temp<-washb_tmle(Y=log(Y$Lact2Delta), Delta=miss$Lact2.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[1]], Q.SL.library = c("SL.glm"), seed=12345, print=T)
-
-mean(log(Y$Lact2Delta))
-mean(miss$Lact2.miss)
-mean(d$block)
-
-
-dim(W)
-table(is.na(W))
-
-#Where is walls?
-
-for(i in 1:ncol(W)){
-  cat(colnames(W)[i],":\n")
-  print(mean(W[,i],na.rm=T))
-}
-
-for(i in 1:ncol(W)){
-  if(class(W[,i])=="factor"){
-  cat(colnames(W)[i],":\n")
-  print(table(W[,i]))
-  }
-}
-
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
-save(l1_unadj_ipcw_M,
-l2_unadj_ipcw_M,
-l3_unadj_ipcw_M,
-m1_unadj_ipcw_M,
-m2_unadj_ipcw_M,
-m3_unadj_ipcw_M,
-lmr1_unadj_ipcw_M,
-lmr2_unadj_ipcw_M,
-lmr3_unadj_ipcw_M,
-l1_adj_ipcw_M,
-l2_adj_ipcw_M,
-l3_adj_ipcw_M,
-m1_adj_ipcw_M,
-m2_adj_ipcw_M,
-m3_adj_ipcw_M,
-lmr1_adj_ipcw_M,
-lmr2_adj_ipcw_M,
-lmr3_adj_ipcw_M,
-file="urine_ipcw_res.Rdata")
-
-
-#--------------------------------
-# Percent L and M recovery
-# (for supplimentary table)
-#--------------------------------
-
-#Create indicators for missingness
-d$perl1.miss<-ifelse(is.na(d$per.lact.rec_t1),0,1)
-d$perl2.miss<-ifelse(is.na(d$per.lact.rec_t2),0,1)
-d$perl3.miss<-ifelse(is.na(d$per.lact.rec_t3),0,1)
-
-d$perm1.miss<-ifelse(is.na(d$per.mann.rec_t1),0,1)
-d$perm2.miss<-ifelse(is.na(d$per.mann.rec_t2),0,1)
-d$perm3.miss<-ifelse(is.na(d$per.mann.rec_t3),0,1)
-
-# set missing outcomes to an arbitrary, non-missing value. In this case use 9
-d$perl1Delta <- d$per.lact.rec_t1
-d$perl1Delta[d$perl1.miss==0] <- (9)
-
-d$perl2Delta <- d$per.lact.rec_t2
-d$perl2Delta[d$perl2.miss==0] <- (9)
-
-d$perl3Delta <- d$per.lact.rec_t3
-d$perl3Delta[d$perl3.miss==0] <- (9)
-
-d$perm1Delta <- d$per.mann.rec_t1
-d$perm1Delta[d$perm1.miss==0] <- (9)
-
-d$perm2Delta <- d$per.mann.rec_t2
-d$perm2Delta[d$perm2.miss==0] <- (9)
-
-d$perm3Delta <- d$per.mann.rec_t3
-d$perm3Delta[d$perm3.miss==0] <- (9)
-
-perY<-d %>% select(perl1Delta,perm1Delta,
-                perl2Delta,perm2Delta,
-                perl3Delta,perm3Delta)
-per.miss<-d %>% select(perl1.miss,perm1.miss,
-                perl2.miss,perm2.miss,
-                perl3.miss,perm3.miss)
-
-res_per<-list(perl_t1_adj=matrix(0,5,5), perm_t1_adj=matrix(0,5,5), 
-                perl_t2_adj=matrix(0,5,5), perm_t2_adj=matrix(0,5,5), 
-                perl_t3_adj=matrix(0,5,5), perm_t3_adj=matrix(0,5,5))
-
-
-perWlist <- list(W1,W1,W2,W2,W3,W3)
-
-
-for(i in 1:ncol(perY)){
-  for(j in 1:5){
-    temp<-washb_tmle(Y=(perY[,i]), Delta=per.miss[,i], tr=d$tr, W=perWlist[[i]], id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], Q.SL.library = c("SL.glm"), seed=12345, print=T)
-    cat(i," : ",j, "\n")
-    res_per[[i]][j,]<-(t(unlist(temp$estimates$ATE)))
-    colnames(res_per[[i]])<-c("psi","var.psi","ci.l","ci.u", "Pval")
-    rownames(res_per[[i]])<-c(c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH"))
-  }
-}
-
-
-
-#Extract estimates
-perl1_adj_ipcw_M<-res_per[[1]]
-perl2_adj_ipcw_M<-res_per[[3]]
-perl3_adj_ipcw_M<-res_per[[5]]
-
-perm1_adj_ipcw_M<-res_per[[2]]
-perm2_adj_ipcw_M<-res_per[[4]]
-perm3_adj_ipcw_M<-res_per[[6]]
-
-
-save(perl1_adj_ipcw_M,
-     perl2_adj_ipcw_M,
-     perl3_adj_ipcw_M,
-     perm1_adj_ipcw_M,
-     perm2_adj_ipcw_M,
-     perm3_adj_ipcw_M,
-     file="pre_recovery_ipcw_res_M.Rdata"
-     )

@@ -26,14 +26,12 @@ library(lattice)
 #---------------------------------------
 
 
-#Temp use WBB stool results
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Andrew/")
 load("stool_res_N_M.Rdata")
 load("stool_res_unadj_M.Rdata")
 load("stool_res_adj_M.Rdata")
 load("stool_res_means.Rdata")
 
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Andrew/")
 load("urine_res_N_M.Rdata")
 load("urine_res_unadj_M.Rdata")
 load("urine_res_adj_M.Rdata")
@@ -53,7 +51,6 @@ rownames(neo_t3_adj_M) <- rownames(neo_t2_adj_M) <- rownames(neo_t1_adj_M) <- ro
 rownames(lac_t3_adj_M) <- rownames(lac_t2_adj_M) <- rownames(lac_t1_adj_M) <- rownames(lac_t1_unadj_M)
 rownames(man_t3_adj_M) <- rownames(man_t2_adj_M) <- rownames(man_t1_adj_M) <- rownames(man_t1_unadj_M)
 rownames(lm_t3_adj_M) <- rownames(lm_t2_adj_M) <- rownames(lm_t1_adj_M) <- rownames(lm_t1_unadj_M)
-rownames(reg1b_t2_adj_M) <- rownames(reg1b_t2_unadj_M)
 
 #-----------------------------------
 # Adjusted difference processing
@@ -71,7 +68,6 @@ aat_N2<-cbind("AAT","T2", rownames(aat_t2_mn), as.data.frame(aat_t2_mn)) %>% `ro
 neo_N2<-cbind("NEO","T2", rownames(neo_t2_mn), as.data.frame(neo_t2_mn)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
 mpo_N2<-cbind("MPO","T2", rownames(mpo_t2_mn), as.data.frame(mpo_t2_mn)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
 lm_N2<-cbind("LM","T2", rownames(lm_t2_mn), as.data.frame(lm_t2_mn)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
-reg_N2<-cbind("REG","T2", rownames(reg1b2_t2_mn), as.data.frame(reg1b2_t2_mn)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
 l_N2<-cbind("Lact","T2", rownames(lac_t2_mn), as.data.frame(lac_t2_mn)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
 m_N2<-cbind("Mann","T2", rownames(man_t2_mn), as.data.frame(man_t2_mn)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6")) 
 
@@ -101,7 +97,6 @@ aat_dif2<-cbind("AAT","T2", rownames(aat_t2_unadj_M), as.data.frame(aat_t2_unadj
 neo_dif2<-cbind("NEO","T2", rownames(neo_t2_unadj_M), as.data.frame(neo_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
 mpo_dif2<-cbind("MPO","T2", rownames(mpo_t2_unadj_M), as.data.frame(mpo_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
 lm_dif2<-cbind("LM","T2", rownames(lm_t2_unadj_M), as.data.frame(lm_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
-reg_dif2<-cbind("REG","T2", rownames(reg1b_t2_unadj_M), as.data.frame(reg1b_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
 l_dif2<-cbind("Lact","T2", rownames(lac_t2_unadj_M), as.data.frame(lac_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
 m_dif2<-cbind("Mann","T2", rownames(man_t2_unadj_M), as.data.frame(man_t2_unadj_M)) %>% `rownames<-`(NULL) %>% setNames(., c("1","2","3","4","5","6","7","8","9")) 
 
@@ -130,7 +125,6 @@ mpo_dif2,
 l_dif2,
 m_dif2,
 lm_dif2,
-reg_dif2,
 aat_dif3,
 neo_dif3,
 mpo_dif3,
@@ -184,7 +178,6 @@ mpo_N2,
 l_N2,
 m_N2,
 lm_N2,
-reg_N2,
 aat_N3,
 neo_N3,
 mpo_N3,
@@ -228,7 +221,6 @@ MPO<-N_df[N_df$Location=="MPO",]
 Lact<-N_df[N_df$Location=="Lact",]
 Mann<-N_df[N_df$Location=="Mann",]
 LM<-N_df[N_df$Location=="LM",]
-REG<-N_df[N_df$Location=="REG",]
 
 seq(min(AAT$lower.ci),max(AAT$upper.ci),by=diff(range(min(AAT$lower.ci),max(AAT$upper.ci)))/10)
 c(min(AAT$lower.ci),max(AAT$upper.ci))
@@ -237,7 +229,6 @@ c(min(MPO$lower.ci),max(MPO$upper.ci))
 c(min(Lact$lower.ci),max(Lact$upper.ci))
 c(min(Mann$lower.ci),max(Mann$upper.ci))
 c(min(LM$lower.ci),max(LM$upper.ci))
-c(min(REG$lower.ci),max(REG$upper.ci))
 
 
 
@@ -288,14 +279,14 @@ long.plot<-function(d, yrange=NULL,  cols=cols, tickspace=0.2){
   op <- par(mar=c(3,3,2,0)+0.1)
   
 if(is.null(yrange)){
-    if((d$Location=="AAT")[1]){yrange<-c(-1.5,-0.5)
-    ytics <- seq(-1.5,-0.5,by=0.1)
+    if((d$Location=="AAT")[1]){yrange<-c(-2,0)
+    ytics <- seq(-2,0,by=0.2)
     title<-"Ln alpha 1-antitrypsin (mg/g)"}
-  if((d$Location=="NEO")[1]){yrange<-c(6,8)
-    ytics <- seq(6,8,by=.2)
+  if((d$Location=="NEO")[1]){yrange<-c(5,9)
+    ytics <- seq(5,9,by=.4)
     title<-"Ln neopterin (nmol/L)"}
-  if((d$Location=="MPO")[1]){yrange<-c(7.25,9.75)
-    ytics <- seq(7,10,by=.25)
+  if((d$Location=="MPO")[1]){yrange<-c(5,9)
+    ytics <- seq(5,9,by=.4)
     title<-"Ln myeloperoxidase (ng/ml)"}
   if((d$Location=="Lact")[1]){yrange<-c(-3,-1)
     ytics <- seq(-3,-1,by=0.2)
@@ -338,13 +329,12 @@ MidPts <- barplot(1:n, names.arg=NA,col=NA,
 	#text(x=MidPts,y=d$upper.ci, labels=d$Pval,pos=3,cex=1,col=cols,font=1)
 
 	  # X-axis labels
-  mtext(c("3 month\nmean",
-          "14 month\nmean",
-          "28 month\nmean"),
+  mtext(c("6 month\nmean",
+          "17 month\nmean",
+          "22 month\nmean"),
         side=1,line=2,at=MidPts,col="black",cex=0.8,las=1)
   box()
 }
-
 
 #Legend plot
 legendplot<-function(legend=T, cex=1, x=0.1, y=0.8){

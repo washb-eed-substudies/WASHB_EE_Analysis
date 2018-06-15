@@ -277,12 +277,6 @@ setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Andrew/"
 #--------------------------------
 
 #load objects
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
-load("stool_res_unadj_M.Rdata")
-load("stool_res_adj_M.Rdata")
-load("stool_res_N_M.Rdata")
-load("stool_res_means.Rdata")
-
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Andrew/")
 load("stool_res_unadj_M.Rdata")
 load("stool_res_adj_M.Rdata")
@@ -308,7 +302,7 @@ mpo_t3_unadj_M
 neo_t1_unadj_M
 neo_t2_unadj_M
 neo_t3_unadj_M
-reg1b_t2_unadj_M
+
 
 
  
@@ -410,7 +404,6 @@ tab3<-rbind(
   glm_print(mpo_t2_N_M, mpo_t2_mn, mpo_t2_unadj_M),
   glm_print(aat_t2_N_M, aat_t2_mn, aat_t2_unadj_M),
   glm_print(neo_t2_N_M, neo_t2_mn, neo_t2_unadj_M),
-  glm_print(reg1b_t2_N_M, reg1b2_t2_mn, reg1b_t2_unadj_M),
   glm_print(lac_t2_N_M, lac_t2_mn, lac_t2_unadj_M),
   glm_print(man_t2_N_M, man_t2_mn, man_t2_unadj_M),
   glm_print(lm_t2_N_M, lm_t2_mn, lm_t2_unadj_M)
@@ -426,14 +419,12 @@ tab3<-rbind(t(c("\\textbf{Ln myeloperoxidase (ng/ml)}",blank)),
             tab3[5:8,],
             t(c("\\textbf{Ln neopterin (nmol/L)}",blank)),
             tab3[9:12,],
-            t(c("\\textbf{Ln regenerating gene 1$\\beta$ ($\\mu$g/ml)}",blank)),
-            tab3[13:16,],
             t(c("\\textbf{Ln lactulose (mmol/L)}",blank)),
-            tab3[17:20,],
+            tab3[13:16,],
             t(c("\\textbf{Ln mannitol (mmol/L)l}",blank)),
-            tab3[21:24,],
+            tab3[17:20,],
             t(c("\\textbf{Ln L:M ratio}",blank)),
-            tab3[25:28,]
+            tab3[21:24,]
             )
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Tables/")
