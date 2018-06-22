@@ -458,5 +458,5 @@ EED.plot <- ggplot(data=ee,aes(x=time,y=group,fill=ptest.s)) +
         axis.text.x = element_text(angle = 45, hjust = 1))
 
 ggsave(filename="C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Figures/heatmap-all-outcomes.png",
-       plot = EED.plot, device='png',width=8,height=8)
+       plot = EED.plot, device='png',width=8,height=7)
 
