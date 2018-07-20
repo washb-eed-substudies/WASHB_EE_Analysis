@@ -99,6 +99,14 @@ tab2[2]/(tab2[1]+tab2[2])*100
 tab3
 tab3[2]/(tab3[1]+tab3[2])*100
 
+#43% of children at age 3 months, 34% of children at age 14 months, and 23%[AL1]  of children at age 28 months experienced at least one episode of urine loss
+
+#Proportion with at least one contaminated sample
+round(prop.table(table(rowSums(data.frame(d$bl_contaminated2hr, d$bl_contaminated5hr), na.rm=T) > 0))*100,2)
+round(prop.table(table(rowSums(data.frame(d$ml_contaminated2hr, d$ml_contaminated5hr), na.rm=T) > 0))*100,2)
+round(prop.table(table(rowSums(data.frame(d$el_contaminated2hr, d$el_contaminated5hr), na.rm=T) > 0))*100,2)
+
+#1387
 
 #Drop out contaminated samples by setting outcomes to 0 if either 2hr or
 #5hr experienced contamination

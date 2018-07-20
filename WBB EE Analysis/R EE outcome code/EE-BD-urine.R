@@ -297,6 +297,12 @@ d$Mann1<-d$Mann1*(1/182.172)
 d$Mann2<-d$Mann2*(1/182.172)
 d$Mann3<-d$Mann3*(1/182.172)
 
+#------------------
+# Save tbe urine 
+# analysis dataset
+#------------------
+
+save(d, file="C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew/urine_analysis_df.Rdata")
 
 #------------------
 #N's and geometric means

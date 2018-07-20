@@ -17,6 +17,13 @@ library(tidyverse)
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/")
 
+
+#Load the urine analysis dataset to compare the IDs of children with outcome data
+# and children with volume data
+load("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew/urine_analysis_df.Rdata")
+
+
+#Load the urine volume data
 bl2hr.long<-read.dta("Baseline/Baseline_Urine_2hr_CLEANED_30Sept14_stata12.dta")
 bl5hr.long<-read.dta("Baseline/Baseline_Urine_5hr_CLEANED_30Sept14_stata12.dta")
 ml2hr.long<-read.dta("Midline/Urine_2hr_Midline_Cleaned_MatchedwEnrollment_27Jan16_stata12.dta")
@@ -24,14 +31,16 @@ ml5hr.long<-read.dta("Midline/Urine_5hr_Midline_Cleaned_MatchedwEnrollment_27Jan
 el2hr.long<-read.dta("Endline/EE_Endline_Urine_2hr_CLEANED_data_28July2016_stata12.dta")
 el5hr.long<-read.dta("Endline/EE_Endline_Urine_5hr_CLEANED_data_28July2016_stata12.dta")
 
-table(bl2hr.long$q17_hour2 >1 &  bl2hr.long$q18_hour2==1)
-table(bl5hr.long$q17_hour5 >1 &  bl5hr.long$q18_hour5==1)
+table(bl2hr.long$q17_hour2 >1 |  bl2hr.long$q18_hour2==1)
+table(bl5hr.long$q17_hour5 >1 |  bl5hr.long$q18_hour5==1)
 
 #Criteria for exclusion due to leakage or contamination
   # q17_hour2 >1 (urine episodes where urine leakage occurred during 0-2 hours)
   # q18_hour2 =1 (urine episodes where stool contamination occurred during 0-2 hours)
   # q17_hour5 >1 (urine episodes where urine leakage occurred during 2-5 hours)
   # q18_hour5 =1 (urine episodes where stool contamination occurred during 2-5 hours)
+
+
 
 
 bl2hr<-bl2hr.long %>%
@@ -43,7 +52,7 @@ blcont2hr<-bl2hr.long %>%
       mutate(bl_contaminated2hr=as.numeric(q17_hour2 >1 |  q18_hour2==1)) %>%
       select(dataid, childno, episodeno, bl_contaminated2hr) %>%
       spread(episodeno, bl_contaminated2hr, fill=NA, sep="_h2_") %>%
-      mutate(bl_contaminated2hr= rowSums(.[3:7], na.rm=T)) %>%
+      mutate(bl_contaminated2hr= rowSums(.[3:ncol(.)], na.rm=T)) %>%
       select(dataid, childno, bl_contaminated2hr)
 
 bl2hr<-merge(bl2hr, blcont2hr, by=c("dataid","childno") ,all.x=F, all.y=F) #%>% 
@@ -63,7 +72,7 @@ blcont5hr<-bl5hr.long %>%
       mutate(bl_contaminated5hr=as.numeric(q17_hour5 >1 |  q18_hour5==1)) %>%
       select(dataid, childno, episodeno, bl_contaminated5hr) %>%
       spread(episodeno, bl_contaminated5hr, fill=NA, sep="_h5_") %>%
-      mutate(bl_contaminated5hr= rowSums(.[3:11], na.rm=T)) %>%
+      mutate(bl_contaminated5hr= rowSums(.[3:ncol(.)], na.rm=T)) %>%
       select(dataid, childno, bl_contaminated5hr)
 
 bl5hr<-merge(bl5hr, blcont5hr, by=c("dataid","childno") ,all.x=T, all.y=T) #%>% 
@@ -81,7 +90,7 @@ mlcont2hr<-ml2hr.long %>%
       mutate(ml_contaminated2hr=as.numeric(q17_hour2 >1 |  q18_hour2==1)) %>%
       select(dataid, childno, episodeno, ml_contaminated2hr) %>%
       spread(episodeno, ml_contaminated2hr, fill=NA, sep="_h2_") %>%
-      mutate(ml_contaminated2hr= rowSums(.[3:5], na.rm=T)) %>%
+      mutate(ml_contaminated2hr= rowSums(.[3:ncol(.)], na.rm=T)) %>%
       select(dataid, childno, ml_contaminated2hr)
 
 ml2hr<-merge(ml2hr, mlcont2hr, by=c("dataid","childno") ,all.x=T, all.y=T) #%>% 
@@ -100,7 +109,7 @@ mlcont5hr<-ml5hr.long %>%
       mutate(ml_contaminated5hr=as.numeric(q17_hour5 >1 |  q18_hour5==1)) %>%
       select(dataid, childno, episodeno, ml_contaminated5hr) %>%
       spread(episodeno, ml_contaminated5hr, fill=NA, sep="_h5_") %>%
-      mutate(ml_contaminated5hr= rowSums(.[3:7], na.rm=T)) %>%
+      mutate(ml_contaminated5hr= rowSums(.[3:ncol(.)], na.rm=T)) %>%
       select(dataid, childno, ml_contaminated5hr)
 
 ml5hr<-merge(ml5hr, mlcont5hr, by=c("dataid","childno") ,all.x=T, all.y=T) #%>% 
@@ -119,7 +128,7 @@ elcont2hr<-el2hr.long %>%
       mutate(el_contaminated2hr=as.numeric(q17_hour2 >1 |  q18_hour2==1)) %>%
       select(dataid, childNo, EpisodeNo, el_contaminated2hr) %>%
       spread(EpisodeNo, el_contaminated2hr, fill=NA, sep="_h2_") %>%
-      mutate(el_contaminated2hr= rowSums(.[3:5], na.rm=T)) %>%
+      mutate(el_contaminated2hr= rowSums(.[3:ncol(.)], na.rm=T)) %>%
       select(dataid, childNo, el_contaminated2hr)
 
 el2hr<-merge(el2hr, elcont2hr, by=c("dataid","childNo") ,all.x=T, all.y=T) #%>% 
@@ -138,7 +147,7 @@ elcont5hr<-el5hr.long %>%
       mutate(el_contaminated5hr=as.numeric(q17_hour5 >1 |  q18_hour5==1)) %>%
       select(dataid, childNo, EpisodeNo, el_contaminated5hr) %>%
       spread(EpisodeNo, el_contaminated5hr, fill=NA, sep="_h5_") %>%
-      mutate(el_contaminated5hr= rowSums(.[3:10], na.rm=T)) %>%
+      mutate(el_contaminated5hr= rowSums(.[3:ncol(.)], na.rm=T)) %>%
       select(dataid, childNo, el_contaminated5hr)
 
 el5hr<-merge(el5hr, elcont5hr, by=c("dataid","childNo") ,all.x=T, all.y=T) #%>% 
@@ -153,7 +162,12 @@ dim(bl2hr)
 dim(bl5hr)
 bl<-merge(bl2hr, bl5hr, by=c("dataid", "childno"), all.x = T, all.y = T)
 dim(bl)
-tab1<-table(bl$bl_contaminated2hr>0 | bl$bl_contaminated5hr>0)
+
+#Replace missing
+bl$bl_contaminated2hr[is.na(bl$bl_contaminated2hr)] <- 0
+bl$bl_contaminated5hr[is.na(bl$bl_contaminated5hr)] <- 0
+
+tab1<-table(bl$bl_contaminated2hr>0 | bl$bl_contaminated5hr>0 )
 tab1
 tab1[2]/(tab1[1]+tab1[2])*100
 
@@ -161,7 +175,12 @@ dim(ml2hr)
 dim(ml5hr)
 ml<-merge(ml2hr, ml5hr, by=c("dataid", "childno"), all.x = T, all.y=T)
 dim(ml)
-tab2<-table(bl$bl_contaminated2hr>0 | bl$bl_contaminated5hr>0)
+
+#Replace missing
+ml$ml_contaminated2hr[is.na(ml$ml_contaminated2hr)] <- 0
+ml$ml_contaminated5hr[is.na(ml$ml_contaminated5hr)] <- 0
+
+tab2<-table(ml$ml_contaminated2hr>0 | ml$ml_contaminated5hr>0)
 tab2
 tab2[2]/(tab2[1]+tab2[2])*100
 
@@ -169,9 +188,18 @@ dim(el2hr)
 dim(el5hr)
 el<-merge(el2hr, el5hr, by=c("dataid", "childNo"), all.x = T, all.y=T)
 dim(el)
-tab3<-table(bl$bl_contaminated2hr>0 | bl$bl_contaminated5hr>0)
+
+#Replace missing
+el$el_contaminated2hr[is.na(el$el_contaminated2hr)] <- 0
+el$el_contaminated5hr[is.na(el$el_contaminated5hr)] <- 0
+
+tab3<-table(el$el_contaminated2hr>0 | el$el_contaminated5hr>0)
 tab3
 tab3[2]/(tab3[1]+tab3[2])*100
+
+
+
+
 
 
 #Drop contaminates
