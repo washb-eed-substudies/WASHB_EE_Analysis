@@ -86,6 +86,65 @@ d<-left_join(d,treatment, by="clusterid")
 dim(d)
 table(d$tr)
 
+d$childid[d$childid %in% c(204001, 128052,  18052,  61062,  61031)]
+d$childid[d$dataid %in% c(20400, 12805,  1805,  6106,  6103)]
+
+
+#Impute time varying covariates
+
+#calculate overall median:
+month1_median1 <-    median(d$month1, na.rm = T)
+month1_median2 <-    median(d$month2, na.rm = T)
+month1_median3 <-    median(d$month3, na.rm = T)
+
+#use clusterid to impute median month where possible
+table(d$month1)
+table(is.na(d$month1))
+d$month1[is.na(d$month1)] <-  ave(d$month1, d$clusterid, FUN=function(x) median(x, na.rm = T))[is.na(d$month1)] 
+d$month1 <- ceiling(d$month1)
+table(d$month1)
+table(is.na(d$month1))
+
+d$month2[is.na(d$month2)] <-  ave(d$month2, d$clusterid, FUN=function(x) median(x, na.rm = T))[is.na(d$month2)] 
+d$month2 <- ceiling(d$month2)
+
+d$month3[is.na(d$month3)] <-  ave(d$month3, d$clusterid, FUN=function(x) median(x, na.rm = T))[is.na(d$month3)] 
+d$month3 <- ceiling(d$month3)
+
+
+#impute month with overall median for those observations not in a cluster measured in the EED subsample
+d$month1[is.na(d$month1)] <-  month1_median1
+d$month2[is.na(d$month2)] <-  month1_median2
+d$month3[is.na(d$month3)] <-  month1_median3
+table(d$month1)
+
+
+table(d$month1)
+table(d$month2)
+table(d$month3)
+
+d <- d %>% mutate(monsoon1 = ifelse(month1 > 4 & month1 < 11, "1", "0"),
+                  monsoon2 = ifelse(month2 > 4 & month2 < 11, "1", "0"),
+                  monsoon3 = ifelse(month3 > 4 & month3 < 11, "1", "0"),
+                  monsoon1 = ifelse(is.na(month1),"missing", monsoon1),
+                  monsoon2 = ifelse(is.na(month2),"missing", monsoon2),
+                  monsoon3 = ifelse(is.na(month3),"missing", monsoon3),
+                  monsoon1 = factor(monsoon1),
+                  monsoon2 = factor(monsoon2),
+                  monsoon3 = factor(monsoon3))
+table(d$monsoon1)
+table(d$monsoon2)
+table(d$monsoon3)
+table(d$monsoon1, d$tr)
+table(d$monsoon2, d$tr)
+table(d$monsoon3, d$tr)
+
+
+#impute child age with overall median
+d$aged1[is.na(d$aged1)] <- 84
+d$aged2[is.na(d$aged2)] <- 428
+d$aged3[is.na(d$aged3)] <- 857
+
 
 
 
@@ -224,6 +283,16 @@ d$walls<-factor(d$walls)
 
 #Re-subset W so new re-leveled factors are included
 W<- subset(d, select=Wvars)
+
+#Add in time-varying covariates
+Wvars1<-c("aged1", "monsoon1") 
+Wvars2<-c("aged2", "monsoon2") 
+Wvars3<-c("aged3", "monsoon3") 
+W1<- cbind(W, subset(d, select=Wvars1))
+W2<- cbind(W, subset(d, select=Wvars2))
+W3<- cbind(W, subset(d, select=Wvars3))
+
+
 
 
 #Drop out contaminated samples by setting outcomes to 0 if either 2hr or
@@ -431,33 +500,6 @@ res_unadj<-list(lact_t1_unadj=lact_t1_unadj, mann_t1_unadj=mann_t1_unadj, lm_t1_
 
 
 
-#Unadjusted glm models
-for(i in 1:ncol(Y)){
-  for(j in 1:5){
-    #note the log transformation of the outcome prior to running GLM model:
-    temp<-washb_tmle(Y=log(Y[,i]), Delta=miss[,i], tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], Q.SL.library = c("SL.glm"), seed=12345, print=T)
-    cat(i," : ",j, "\n")
-    res_unadj[[i]][j,]<-(t(unlist(temp$estimates$ATE)))
-    colnames(res_unadj[[i]])<-c("psi","var.psi","ci.l","ci.u", "Pval")
-    rownames(res_unadj[[i]])<-c(c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH"))
-  }
-}
-
-
-
-#Extract estimates
-sens_l1_unadj_ipcw_M<-res_unadj[[1]]
-sens_l2_unadj_ipcw_M<-res_unadj[[4]]
-sens_l3_unadj_ipcw_M<-res_unadj[[7]]
-
-sens_m1_unadj_ipcw_M<-res_unadj[[2]]
-sens_m2_unadj_ipcw_M<-res_unadj[[5]]
-sens_m3_unadj_ipcw_M<-res_unadj[[8]]
-
-sens_lmr1_unadj_ipcw_M<-res_unadj[[3]]
-sens_lmr2_unadj_ipcw_M<-res_unadj[[6]]
-sens_lmr3_unadj_ipcw_M<-res_unadj[[9]]
-
 
 
 #Run the adjusted ipcw analysis
@@ -466,10 +508,12 @@ res_adj<-list(lact_t1_adj=matrix(0,5,5), mann_t1_adj=matrix(0,5,5), lm_t1_adj=ma
                 lact_t3_adj=matrix(0,5,5), mann_t3_adj=matrix(0,5,5), lm_t3_adj=matrix(0,5,5))
 
 
+Wlist <- list(W1, W1, W1, W2, W2, W2, W3, W3, W3)
+
 for(i in 1:ncol(Y)){
   for(j in 1:5){
     #note the log transformation of the outcome prior to running GLM model:
-    temp<-washb_tmle(Y=log(Y[,i]), Delta=miss[,i], tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], Q.SL.library = c("SL.glm"), seed=12345, print=T)
+    temp<-washb_tmle(Y=log(Y[,i]), Delta=miss[,i], tr=d$tr, W=Wlist[[i]], id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], Q.SL.library = c("SL.glm"), seed=12345, print=T)
     cat(i," : ",j, "\n")
     res_adj[[i]][j,]<-(t(unlist(temp$estimates$ATE)))
     colnames(res_adj[[i]])<-c("psi","var.psi","ci.l","ci.u", "Pval")
@@ -494,20 +538,7 @@ sens_lmr1_adj_ipcw_M<-res_adj[[3]]
 sens_lmr2_adj_ipcw_M<-res_adj[[6]]
 sens_lmr3_adj_ipcw_M<-res_adj[[9]]
 
-mean(miss$Lact2.miss)
-mean(log(Y$Lact2Delta))
 
-temp<-washb_tmle(Y=log(Y$Lact2Delta), Delta=miss$Lact2.miss, tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[1]], Q.SL.library = c("SL.glm"), seed=12345, print=T)
-
-mean(log(Y$Lact2Delta))
-mean(miss$Lact2.miss)
-mean(d$block)
-
-
-dim(W)
-table(is.na(W))
-
-#Where is walls?
 
 for(i in 1:ncol(W)){
   cat(colnames(W)[i],":\n")
@@ -522,15 +553,7 @@ for(i in 1:ncol(W)){
 }
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
-save(sens_l1_unadj_ipcw_M,
-sens_l2_unadj_ipcw_M,
-sens_l3_unadj_ipcw_M,
-sens_m1_unadj_ipcw_M,
-sens_m2_unadj_ipcw_M,
-sens_m3_unadj_ipcw_M,
-sens_lmr1_unadj_ipcw_M,
-sens_lmr2_unadj_ipcw_M,
-sens_lmr3_unadj_ipcw_M,
+save(
 sens_l1_adj_ipcw_M,
 sens_l2_adj_ipcw_M,
 sens_l3_adj_ipcw_M,
@@ -590,9 +613,12 @@ res_sens_per<-list(sens_perl_t1_adj=matrix(0,5,5), sens_perm_t1_adj=matrix(0,5,5
                 sens_perl_t3_adj=matrix(0,5,5), sens_perm_t3_adj=matrix(0,5,5))
 
 
+Wlist_rec <- list(W1, W1, W2, W2, W3, W3)
+
+
 for(i in 1:ncol(sens_perY)){
   for(j in 1:5){
-    temp<-washb_tmle(Y=(sens_perY[,i]), Delta=sens_per.miss[,i], tr=d$tr, W=W, id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], Q.SL.library = c("SL.glm"), seed=12345, print=T)
+    temp<-washb_tmle(Y=(sens_perY[,i]), Delta=sens_per.miss[,i], tr=d$tr, W=Wlist_rec[[i]], id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], Q.SL.library = c("SL.glm"), seed=12345, print=T)
     cat(i," : ",j, "\n")
     res_sens_per[[i]][j,]<-(t(unlist(temp$estimates$ATE)))
     colnames(res_sens_per[[i]])<-c("psi","var.psi","ci.l","ci.u", "Pval")
@@ -620,3 +646,53 @@ save(sens_perl1_adj_ipcw_M,
      sens_perm3_adj_ipcw_M,
      file="pre_recovery_ipcw_sens_res_M.Rdata"
      )
+
+
+
+sens_lrec1_adj_ipcw_M<-res_sens_per[[1]]
+sens_lrec2_adj_ipcw_M<-res_sens_per[[3]]
+sens_lrec3_adj_ipcw_M<-res_sens_per[[5]]
+
+sens_mrec1_adj_ipcw_M<-res_sens_per[[2]]
+sens_mrec2_adj_ipcw_M<-res_sens_per[[4]]
+sens_mrec3_adj_ipcw_M<-res_sens_per[[6]]
+
+
+save(sens_lrec1_adj_ipcw_M,
+     sens_lrec2_adj_ipcw_M,
+     sens_lrec3_adj_ipcw_M,
+     sens_mrec1_adj_ipcw_M,
+     sens_mrec2_adj_ipcw_M,
+     sens_mrec3_adj_ipcw_M,
+     file="pre_recovery_ipcw_sens_res2_M.Rdata"
+     )
+
+
+
+
+d %>% filter(!is.na(per.lact.rec_t2)) %>% group_by(tr) %>% summarize(N=n(), exp(mean(log(per.lact.rec_t2), na.rm=T)), mean(sens_perl2Delta), mean(sens_perl2.miss))
+
+mean(d$per.lact.rec_t2, na.rm=T)
+mean(d$sens_perl2Delta, na.rm=T)
+mean(sens_perY[[3]])
+
+
+
+   i<-6
+   j<-1
+    temp<-washb_tmle(Y=(sens_perY[,i]), Delta=sens_per.miss[,i], tr=d$tr, W=Wlist_rec[[i]], id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], Q.SL.library = c("SL.glm"), seed=12345, print=T)
+temp
+
+Wsub <- W2[!is.na(d$per.lact.rec_t2),]
+Wsub %>% mutate_all(funs(as.numeric(.))) %>% summarize_all(funs(mean(., na.rm = TRUE)))
+
+
+table(Wsub$monsoon2)
+
+
+table(Wsub$birthord)
+table(Wsub$asset_radio)
+
+
+mean(sens_perY[,i])
+

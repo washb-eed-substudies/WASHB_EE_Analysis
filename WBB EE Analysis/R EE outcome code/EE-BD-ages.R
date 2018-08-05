@@ -41,12 +41,12 @@ colnames(outcomes.urine)
 
 colnames(stool)
 stool <- stool %>%
-      subset(select=c(childid,clusterid,agem1,agem2,agem3,sex)) %>%
+      subset(select=c(childid, dataid, childNo,clusterid,agem1,agem2,agem3,sex)) %>%
       rename(st.agem1=agem1,st.agem2=agem2,st.agem3=agem3, st.sex=sex)
 
 colnames(urine)
 urine <- urine %>%
-      subset(select=c(childid,agem1,agem2,agem3,sex)) %>%
+      subset(select=c(childid, dataid, childNo,agem1,agem2,agem3,sex)) %>%
       rename(ur.agem1=agem1,ur.agem2=agem2,ur.agem3=agem3, ur.sex=sex)
 
 
@@ -57,7 +57,7 @@ outcomes<-merge(outcomes.stool, outcomes.urine, by=c("childid"), all.x =T, all.y
 dim(outcomes)
 
 
-surveys<-merge(stool, urine, by=c("childid"), all.x =T, all.y =T)
+surveys<-merge(stool, urine, by=c("childid","dataid","childNo"), all.x =T, all.y =T)
 
 #Merge L/M outcomes
 dim(surveys)
@@ -102,6 +102,11 @@ table(!(is.na(d$t3_neo)))
 
 test<-d%>% subset(!is.na(d$Lact1)|!is.na(d$Mann1)|!is.na(d$t1_aat)|!is.na(d$t1_mpo)|!is.na(d$t1_neo)) 
 dim(test)
+
+#Save dataset of all children with either outcome (all children in EED substudy) at baseline
+child <- d %>% filter(!is.na(d$Lact1)|!is.na(d$t1_aat)|!is.na(d$t1_mpo)|!is.na(d$t1_neo)) %>% subset(., select=c(childid,dataid, clusterid, childNo, tr))
+save(child, file="C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew/child_df.Rdata")
+
 
 #Calculate average age across arms at followup time 1, 2, and 3
 #Survey 1

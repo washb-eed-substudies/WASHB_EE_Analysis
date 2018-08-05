@@ -586,7 +586,7 @@ duplicates list dataid childNo
 label data "BD EE urine dataset, created by BD-EE-dm-urine.do"
 saveold "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew/BD-EE-urine.dta", replace version(12)
 outsheet using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew/BD-EE-urine.csv", comma replace
-clear
+*clear
 
 
 

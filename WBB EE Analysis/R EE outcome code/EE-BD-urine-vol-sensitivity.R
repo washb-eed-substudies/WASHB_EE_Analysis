@@ -167,9 +167,7 @@ dim(bl)
 bl$bl_contaminated2hr[is.na(bl$bl_contaminated2hr)] <- 0
 bl$bl_contaminated5hr[is.na(bl$bl_contaminated5hr)] <- 0
 
-tab1<-table(bl$bl_contaminated2hr>0 | bl$bl_contaminated5hr>0 )
-tab1
-tab1[2]/(tab1[1]+tab1[2])*100
+
 
 dim(ml2hr)
 dim(ml5hr)
@@ -180,9 +178,6 @@ dim(ml)
 ml$ml_contaminated2hr[is.na(ml$ml_contaminated2hr)] <- 0
 ml$ml_contaminated5hr[is.na(ml$ml_contaminated5hr)] <- 0
 
-tab2<-table(ml$ml_contaminated2hr>0 | ml$ml_contaminated5hr>0)
-tab2
-tab2[2]/(tab2[1]+tab2[2])*100
 
 dim(el2hr)
 dim(el5hr)
@@ -193,13 +188,53 @@ dim(el)
 el$el_contaminated2hr[is.na(el$el_contaminated2hr)] <- 0
 el$el_contaminated5hr[is.na(el$el_contaminated5hr)] <- 0
 
+
+#Check for kids with urine volumn but no outcomes
+d <- d %>% rename(childno=childNo) 
+
+bl2 <- bl %>% mutate(childno=as.numeric(childno), dataid=as.numeric(dataid))
+miss_bl <- anti_join(bl2, d %>% filter(!is.na(Lact1)), by=c("dataid", "childno"))
+dim(miss_bl)
+
+ml2 <- ml %>% mutate(childno=as.numeric(childno), dataid=as.numeric(dataid))
+miss_ml <- anti_join(ml2, d %>% filter(!is.na(Lact2)), by=c("dataid", "childno"))
+dim(miss_ml)
+
+el2 <- el %>% rename(childno=childNo) %>% mutate(childno=as.numeric(childno), dataid=as.numeric(dataid))
+miss_el <- anti_join(el2, d %>% filter(!is.na(Lact3)), by=c("dataid", "childno"))
+dim(miss_el)
+
+#Drop kids with no outcome information
+dim(bl)
+dim(ml)
+dim(el)
+bl <- semi_join(bl2, d %>% filter(!is.na(Lact1)), by=c("dataid", "childno"))
+ml <- semi_join(ml2, d %>% filter(!is.na(Lact2)), by=c("dataid", "childno"))
+el <- semi_join(el2, d %>% filter(!is.na(Lact3)), by=c("dataid", "childno"))
+dim(bl)
+table(!is.na(d$Lact1))
+dim(ml)
+table(!is.na(d$Lact2))
+dim(el)
+table(!is.na(d$Lact3))
+
+
+#Tabulate level of contamination
+tab1<-table(bl$bl_contaminated2hr>0 | bl$bl_contaminated5hr>0 )
+tab1
+tab1[2]/(tab1[1]+tab1[2])*100
+
+tab2<-table(ml$ml_contaminated2hr>0 | ml$ml_contaminated5hr>0)
+tab2
+tab2[2]/(tab2[1]+tab2[2])*100
+
 tab3<-table(el$el_contaminated2hr>0 | el$el_contaminated5hr>0)
 tab3
 tab3[2]/(tab3[1]+tab3[2])*100
 
 
-
-
+#Audrie's numbers:
+#45% of children at age 3 months, 36% of children at age 14 months, and 24%
 
 
 #Drop contaminates
@@ -234,6 +269,8 @@ colnames(ml)[2:3]<-c("childNo","urineVol_t2")
 colnames(el)[3]<-"urineVol_t3"
       
 urineVol<-merge(bl, ml, by=c("dataid", "childNo"), all.x = T, all.y=T)
+
+colnames(el)[2]<-"childNo"
 urineVol<-merge(urineVol, el, by=c("dataid", "childNo"), all.x = T, all.y=T)
 head(urineVol)
 

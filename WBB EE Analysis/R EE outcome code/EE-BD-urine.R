@@ -229,6 +229,9 @@ mean(d$per.lact.rec_t1, na.rm=T)
 mean(d$per.lact.rec_t2, na.rm=T)
 mean(d$per.lact.rec_t3, na.rm=T)
 
+summary(d$per.lact.rec_t3)
+
+
 table(d$lact.dose_t1==0)
 table(d$lact.dose_t2==0)
 table(d$lact.dose_t3==0)
@@ -365,6 +368,31 @@ overall_mn<-
 colnames(overall_mn)[1]<-"biomarker"
 urine_overall_mn <- rbind(overall_mn_by_round, overall_mn)
 urine_overall_mn
+
+
+
+
+
+
+
+
+#geometric mean function
+gm_mean = function(x, na.rm=TRUE){
+  exp(sum(log(x[x > 0]), na.rm=na.rm) / length(x))
+}
+
+gm_mean(d$Lact1)
+gm_mean(d$per.lact.rec_t1)
+
+gm_mean(d$per.lact.rec_t1[d$tr=="Control"])
+
+
+  d %>% subset(., select=c(dataid, childNo, block.x, Lact1,Mann1,LM1,Lact2,Mann2,LM2,Lact3,Mann3,LM3,per.mann.rec_t1,per.mann.rec_t2,per.mann.rec_t3, per.lact.rec_t1, per.lact.rec_t2, per.lact.rec_t3)) %>%
+  gather(key, value, -dataid, -childNo, -block.x) %>%
+  group_by(key) %>% 
+  do(as.data.frame(gm_mean(.$value))) %>% 
+  ungroup %>% as.data.frame
+
 
 
 
@@ -839,15 +867,42 @@ save(d, file="urine_figure_data.Rdata")
 # (for supplimentary table)
 #--------------------------------
 
+#  library(EnvStats)
+# # d <- read.csv( "C:/Users/andre/Downloads/MyData.csv")
+# # 
+# #geometric mean function
+# gm_mean = function(x, na.rm=TRUE){
+#   exp(sum(log(x[x > 0]), na.rm=na.rm) / length(x[!is.na(x)]))
+# }
+# 
+# d <- d[d$tr=="Control",]
+# 
+# gm_mean(d$per.lact.rec_t1[d$tr=="Control"])
+# 
+# gm_mean(d$per.lact.rec_t1)
+# exp(mean(log(d$per.lact.rec_t1),na.rm=T))
+# geoMean(d$per.lact.rec_t1,na.rm=T)
+# 
+# geoSD(d$per.lact.rec_t1,na.rm=T)
+# exp(sd(log(d$per.lact.rec_t1),na.rm=T))
+# # 
+# # gm_mean(d$per.lact.rec_t1[d$tr=="Control"])
+# # exp(mean(log(d$per.lact.rec_t1[d$tr=="Control"]),na.rm=T))
+# # 
+# # geoSD(d$per.lact.rec_t1)
+# # 
+# # write.csv(d, file = "C:/Users/andre/Downloads/MyData.csv")
+
+
+
 #N's and geometric means
-perl1_N_M<-d %>% group_by(tr) %>% subset(!is.na(per.mann.rec_t1)) %>% summarize(N=n(), mean= exp(mean(log(per.mann.rec_t1), na.rm=T)))   
-perl2_N_M<-d %>% group_by(tr) %>% subset(!is.na(per.mann.rec_t2)) %>% summarize(N=n(), mean= exp(mean(log(per.mann.rec_t2), na.rm=T)))  
-perl3_N_M<-d %>% group_by(tr) %>% subset(!is.na(per.mann.rec_t3)) %>% summarize(N=n(), mean= exp(mean(log(per.mann.rec_t3), na.rm=T)))   
+perl1_N_M<-d %>% group_by(tr) %>% subset(!is.na(per.lact.rec_t1)) %>% summarize(N=n(), mean= exp(mean(log(per.lact.rec_t1), na.rm=T)), sd= exp(sd(log(per.lact.rec_t1), na.rm=T)))  
+perl2_N_M<-d %>% group_by(tr) %>% subset(!is.na(per.lact.rec_t2)) %>% summarize(N=n(), mean= exp(mean(log(per.lact.rec_t2), na.rm=T)), sd= exp(sd(log(per.lact.rec_t2), na.rm=T)))  
+perl3_N_M<-d %>% group_by(tr) %>% subset(!is.na(per.lact.rec_t3)) %>% summarize(N=n(), mean= exp(mean(log(per.lact.rec_t3), na.rm=T)), sd= exp(sd(log(per.lact.rec_t3), na.rm=T)))  
 
-perm1_N_M<-d %>% group_by(tr) %>% subset(!is.na(per.lact.rec_t1)) %>% summarize(N=n(), mean= exp(mean(log(per.lact.rec_t1), na.rm=T)))  
-perm2_N_M<-d %>% group_by(tr) %>% subset(!is.na(per.lact.rec_t2)) %>% summarize(N=n(), mean= exp(mean(log(per.lact.rec_t2), na.rm=T))) 
-perm3_N_M<-d %>% group_by(tr) %>% subset(!is.na(per.lact.rec_t3)) %>% summarize(N=n(), mean= exp(mean(log(per.lact.rec_t3), na.rm=T)))
-
+perm1_N_M<-d %>% group_by(tr) %>% subset(!is.na(per.mann.rec_t1)) %>% summarize(N=n(), mean= exp(mean(log(per.mann.rec_t1), na.rm=T)), sd= exp(sd(log(per.mann.rec_t1), na.rm=T)))   
+perm2_N_M<-d %>% group_by(tr) %>% subset(!is.na(per.mann.rec_t2)) %>% summarize(N=n(), mean= exp(mean(log(per.mann.rec_t2), na.rm=T)), sd= exp(sd(log(per.mann.rec_t2), na.rm=T)))  
+perm3_N_M<-d %>% group_by(tr) %>% subset(!is.na(per.mann.rec_t3)) %>% summarize(N=n(), mean= exp(mean(log(per.mann.rec_t3), na.rm=T)), sd= exp(sd(log(per.mann.rec_t3), na.rm=T)))  
 
 
 
@@ -944,5 +999,57 @@ perl1_adj_sex_age_M,perl2_adj_sex_age_M,perl3_adj_sex_age_M,
 perm1_adj_sex_age_M,perm2_adj_sex_age_M,perm3_adj_sex_age_M,
 perl1_adj_M,perl2_adj_M,perl3_adj_M,
 perm1_adj_M,perm2_adj_M,perm3_adj_M,
-     file="pre_recovery_res_M.Rdata")
+     file="C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/pre_recovery_res_M.Rdata")
 
+
+
+lac_t1_N_rec_M <- perl1_N_M
+lac_t2_N_rec_M <- perl2_N_M
+lac_t3_N_rec_M <- perl3_N_M
+
+man_t1_N_rec_M <- perm1_N_M
+man_t2_N_rec_M <- perm2_N_M
+man_t3_N_rec_M <- perm3_N_M
+
+lac_t1_unadj_rec_M <- perl1_unadj_M 
+lac_t2_unadj_rec_M <- perl2_unadj_M
+lac_t3_unadj_rec_M <- perl3_unadj_M
+
+man_t1_unadj_rec_M <- perm1_unadj_M
+man_t2_unadj_rec_M <- perm2_unadj_M
+man_t3_unadj_rec_M <- perm3_unadj_M
+
+lac_t1_adj_rec_M <- perl1_adj_M
+lac_t2_adj_rec_M <- perl2_adj_M
+lac_t3_adj_rec_M <- perl3_adj_M
+
+man_t1_adj_rec_M <- perm1_adj_M
+man_t2_adj_rec_M <- perm2_adj_M
+man_t3_adj_rec_M <- perm3_adj_M
+
+
+save(
+lac_t1_N_rec_M,
+lac_t2_N_rec_M,
+lac_t3_N_rec_M,
+
+man_t1_N_rec_M,
+man_t2_N_rec_M,
+man_t3_N_rec_M,
+
+lac_t1_unadj_rec_M,
+lac_t2_unadj_rec_M,
+lac_t3_unadj_rec_M,
+
+man_t1_unadj_rec_M,
+man_t2_unadj_rec_M,
+man_t3_unadj_rec_M,
+
+lac_t1_adj_rec_M,
+lac_t2_adj_rec_M,
+lac_t3_adj_rec_M,
+
+man_t1_adj_rec_M,
+man_t2_adj_rec_M,
+man_t3_adj_rec_M,
+file="C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/pre_recovery_res2_M.Rdata")

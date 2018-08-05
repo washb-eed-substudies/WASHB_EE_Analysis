@@ -81,15 +81,11 @@ dim(d)
 table(is.na(d$svydate)) 
 
 
+
 #Tablulate amount of contamination at each round
 tab1<-table(d$bl_contaminated2hr>0 | d$bl_contaminated5hr>0)
 tab2<-table(d$ml_contaminated2hr>0 | d$ml_contaminated5hr>0)
 tab3<-table(d$el_contaminated2hr>0 | d$el_contaminated5hr>0)
-
-
-tab1<-table((d$bl_contaminated2hr>0 & !is.na(d$bl_contaminated2hr)) | (d$bl_contaminated5hr>0 & !is.na(d$bl_contaminated5hr)))
-tab2<-table((d$ml_contaminated2hr>0 & !is.na(d$ml_contaminated2hr)) | (d$ml_contaminated5hr>0 & !is.na(d$ml_contaminated5hr)))
-tab3<-table((d$el_contaminated2hr>0 & !is.na(d$el_contaminated2hr)) | (d$el_contaminated5hr>0 & !is.na(d$el_contaminated5hr)))
 
 
 tab1
@@ -99,18 +95,19 @@ tab2[2]/(tab2[1]+tab2[2])*100
 tab3
 tab3[2]/(tab3[1]+tab3[2])*100
 
+
 #43% of children at age 3 months, 34% of children at age 14 months, and 23%[AL1]  of children at age 28 months experienced at least one episode of urine loss
 
-#Proportion with at least one contaminated sample
-round(prop.table(table(rowSums(data.frame(d$bl_contaminated2hr, d$bl_contaminated5hr), na.rm=T) > 0))*100,2)
-round(prop.table(table(rowSums(data.frame(d$ml_contaminated2hr, d$ml_contaminated5hr), na.rm=T) > 0))*100,2)
-round(prop.table(table(rowSums(data.frame(d$el_contaminated2hr, d$el_contaminated5hr), na.rm=T) > 0))*100,2)
 
-#1387
+
 
 #Drop out contaminated samples by setting outcomes to 0 if either 2hr or
 #5hr experienced contamination
+
+table(is.na(d$Lact1))
 d$Lact1[d$bl_contaminated2hr>0 | d$bl_contaminated5hr>0]<-NA
+table(is.na(d$Lact1))
+
 d$Mann1[d$bl_contaminated2hr>0 | d$bl_contaminated5hr>0]<-NA
 
 d$Lact2[d$ml_contaminated2hr>0 | d$ml_contaminated5hr>0]<-NA
@@ -851,13 +848,13 @@ save(sens_lac_t1_adj_M, sens_man_t1_adj_M, sens_lm_t1_adj_M,
 #--------------------------------
 
 
-sens_perl1_N_M<-d %>% group_by(tr) %>% subset(!is.na(sens_per.mann.rec_t1)) %>% summarize(N=n(), mean= mean((sens_per.mann.rec_t1), na.rm=T))   
-sens_perl2_N_M<-d %>% group_by(tr) %>% subset(!is.na(sens_per.mann.rec_t2)) %>% summarize(N=n(), mean= mean((sens_per.mann.rec_t2), na.rm=T))   
-sens_perl3_N_M<-d %>% group_by(tr) %>% subset(!is.na(sens_per.mann.rec_t3)) %>% summarize(N=n(), mean= mean((sens_per.mann.rec_t3), na.rm=T))   
+sens_perm1_N_M<-d %>% group_by(tr) %>% subset(!is.na(sens_per.mann.rec_t1)) %>% summarize(N=n(), mean= exp(mean(log(sens_per.mann.rec_t1), na.rm=T)), sd= exp(sd(log(sens_per.mann.rec_t1), na.rm=T)))   
+sens_perm2_N_M<-d %>% group_by(tr) %>% subset(!is.na(sens_per.mann.rec_t2)) %>% summarize(N=n(), mean= exp(mean(log(sens_per.mann.rec_t2), na.rm=T)), sd= exp(sd(log(sens_per.mann.rec_t2), na.rm=T)))   
+sens_perm3_N_M<-d %>% group_by(tr) %>% subset(!is.na(sens_per.mann.rec_t3)) %>% summarize(N=n(), mean= exp(mean(log(sens_per.mann.rec_t3), na.rm=T)), sd= exp(sd(log(sens_per.mann.rec_t3), na.rm=T)))   
 
-sens_perm1_N_M<-d %>% group_by(tr) %>% subset(!is.na(sens_per.lact.rec_t1)) %>% summarize(N=n(), mean= mean((sens_per.lact.rec_t1), na.rm=T))   
-sens_perm2_N_M<-d %>% group_by(tr) %>% subset(!is.na(sens_per.lact.rec_t2)) %>% summarize(N=n(), mean= mean((sens_per.lact.rec_t2), na.rm=T))   
-sens_perm3_N_M<-d %>% group_by(tr) %>% subset(!is.na(sens_per.lact.rec_t3)) %>% summarize(N=n(), mean= mean((sens_per.lact.rec_t3), na.rm=T))   
+sens_perl1_N_M<-d %>% group_by(tr) %>% subset(!is.na(sens_per.lact.rec_t1)) %>% summarize(N=n(), mean= exp(mean(log(sens_per.lact.rec_t1), na.rm=T)), sd= exp(sd(log(sens_per.lact.rec_t1), na.rm=T)))   
+sens_perl2_N_M<-d %>% group_by(tr) %>% subset(!is.na(sens_per.lact.rec_t2)) %>% summarize(N=n(), mean= exp(mean(log(sens_per.lact.rec_t2), na.rm=T)), sd= exp(sd(log(sens_per.lact.rec_t2), na.rm=T)))  
+sens_perl3_N_M<-d %>% group_by(tr) %>% subset(!is.na(sens_per.lact.rec_t3)) %>% summarize(N=n(), mean= exp(mean(log(sens_per.lact.rec_t3), na.rm=T)), sd= exp(sd(log(sens_per.lact.rec_t3), na.rm=T)))   
 
 
 #Means and 95% CI's for mean by arm plots
@@ -938,8 +935,60 @@ sens_perl1_adj_sex_age_M,sens_perl2_adj_sex_age_M,sens_perl3_adj_sex_age_M,
 sens_perm1_adj_sex_age_M,sens_perm2_adj_sex_age_M,sens_perm3_adj_sex_age_M,
 sens_perl1_adj_M,sens_perl2_adj_M,sens_perl3_adj_M,
 sens_perm1_adj_M,sens_perm2_adj_M,sens_perm3_adj_M,
-     file="pre_recovery_sens_res_M.Rdata")
+     file="C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/pre_recovery_sens_res_M.Rdata")
 
 
 
 
+sens_lac_t1_N_M <- sens_perl1_N_M
+sens_lac_t2_N_M <- sens_perl2_N_M
+sens_lac_t3_N_M <- sens_perl3_N_M
+
+sens_man_t1_N_M <- sens_perm1_N_M
+sens_man_t2_N_M <- sens_perm2_N_M
+sens_man_t3_N_M <- sens_perm3_N_M
+
+sens_lac_t1_unadj_M <- sens_perl1_unadj_M
+sens_lac_t2_unadj_M <- sens_perl2_unadj_M
+sens_lac_t3_unadj_M <- sens_perl3_unadj_M
+
+sens_man_t1_unadj_M <- sens_perm1_unadj_M
+sens_man_t2_unadj_M <- sens_perm2_unadj_M
+sens_man_t3_unadj_M <- sens_perm3_unadj_M
+
+sens_lac_t1_adj_M <- sens_perl1_adj_M
+sens_lac_t2_adj_M <- sens_perl2_adj_M
+sens_lac_t3_adj_M <- sens_perl3_adj_M
+
+sens_man_t1_adj_M <- sens_perm1_adj_M
+sens_man_t2_adj_M <- sens_perm2_adj_M
+sens_man_t3_adj_M <- sens_perm3_adj_M
+
+
+
+save(
+sens_lac_t1_N_M,
+sens_lac_t2_N_M,
+sens_lac_t3_N_M,
+
+sens_man_t1_N_M,
+sens_man_t2_N_M, 
+sens_man_t3_N_M,
+
+sens_lac_t1_unadj_M,
+sens_lac_t2_unadj_M,
+sens_lac_t3_unadj_M,
+
+sens_man_t1_unadj_M,
+sens_man_t2_unadj_M, 
+sens_man_t3_unadj_M,
+
+sens_lac_t1_adj_M, 
+sens_lac_t2_adj_M,
+sens_lac_t3_adj_M,
+     file="C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/pre_recovery_sens_res2_M.Rdata")
+
+
+sens_man_t1_adj_M,
+sens_man_t2_adj_M,
+sens_man_t3_adj_M

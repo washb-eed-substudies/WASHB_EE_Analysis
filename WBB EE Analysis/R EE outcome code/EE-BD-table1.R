@@ -80,8 +80,10 @@ dim(d)
 #test that all rows are matched to enrollment data
 table(is.na(d$svydate)) 
 
+
 #Generate table 1
 colnames(d)
+
 
 #Drop twins so HH characteristics aren't duplicates
 d<-subset(d, childNo!=2)

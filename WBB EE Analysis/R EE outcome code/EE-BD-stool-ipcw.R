@@ -177,8 +177,6 @@ Wvars<-c('sex', 'birthord',
          'n_cows', 'n_goats', 'n_chickens')
 
 
-df<-d
-save(df, file="C:/Users/andre/Downloads/temp_a.Rdata")
 
 #subset time-constant W adjustment set
 W<- subset(d, select=Wvars)
@@ -390,22 +388,8 @@ d$reg1b2Delta[d$reg1b2.miss==0] <- exp(9)
 #Order for replication:
 d<-d[order(d$block,d$clusterid,d$dataid),]
   
-#Run the unadjusted ipcw analysis
+#Run the adjusted ipcw analysis
 
-
-#Create empty matrix to hold the glm results:
-neo_t1_unadj<-mpo_t1_unadj<-aat_t1_unadj<-matrix(0, nrow=5, ncol=5)
-neo_t2_unadj<-mpo_t2_unadj<-aat_t2_unadj<-reg1b_t2_unadj<-matrix(0, nrow=5, ncol=5)
-neo_t3_unadj<-mpo_t3_unadj<-aat_t3_unadj<-matrix(0, nrow=5, ncol=5)
-
-res_unadj<-list(neo_t1_unadj=neo_t1_unadj, mpo_t1_unadj=mpo_t1_unadj, aat_t1_unadj=aat_t1_unadj, 
-                neo_t2_unadj=neo_t2_unadj, mpo_t2_unadj=mpo_t2_unadj, aat_t2_unadj=aat_t2_unadj, reg1b_t2_unadj=reg1b_t2_unadj, 
-                neo_t3_unadj=neo_t3_unadj, mpo_t3_unadj=mpo_t3_unadj, aat_t3_unadj=aat_t3_unadj)
-
-
-
-
-#Unadjusted glm models
 
 #dataframe of stool biomarkers:
 Y<-d %>% select(neo1Delta,mpo1Delta,aat1Delta,neo2Delta,mpo2Delta,aat2Delta,reg1b2Delta,neo3Delta,mpo3Delta,aat3Delta)
@@ -416,36 +400,6 @@ miss<-d %>% select(neo1.miss,mpo1.miss,aat1.miss,neo2.miss,mpo2.miss,aat2.miss,r
 
 #Set contrasts:
 contrasts <- list(c("Control","WSH"), c("Control","Nutrition"), c("Control","Nutrition + WSH"), c("WSH","Nutrition + WSH"), c("Nutrition","Nutrition + WSH"))
-
-
-
-for(i in 1:10){
-  for(j in 1:5){
-    #note the log transformation of the outcome prior to running GLM model:
-    temp<-washb_tmle(Y=log(Y[,i]), Delta=miss[,i], tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], Q.SL.library = c("SL.glm"), seed=12345, print=T)
-    cat(i," : ",j, "\n")
-    res_unadj[[i]][j,]<-(t(unlist(temp$estimates$ATE)))
-    colnames(res_unadj[[i]])<-c("psi","var.psi","ci.l","ci.u", "Pval")
-    rownames(res_unadj[[i]])<-c(c("Control v WSH", "Control v Nutrition", "Control v Nutrition + WSH", "WSH v Nutrition + WSH", "Nutrition v Nutrition + WSH"))
-  }
-}
-
-#Extract estimates
-
-neo_t1_unadj_ipcw_M<-res_unadj[[1]]
-neo_t2_unadj_ipcw_M<-res_unadj[[4]]
-neo_t3_unadj_ipcw_M<-res_unadj[[8]]
-
-mpo_t1_unadj_ipcw_M<-res_unadj[[2]]
-mpo_t2_unadj_ipcw_M<-res_unadj[[5]]
-mpo_t3_unadj_ipcw_M<-res_unadj[[9]]
-
-aat_t1_unadj_ipcw_M<-res_unadj[[3]]
-aat_t2_unadj_ipcw_M<-res_unadj[[6]]
-aat_t3_unadj_ipcw_M<-res_unadj[[10]]
-
-reg_t2_unadj_ipcw_M<-res_unadj[[7]]
-
 
 
 
@@ -514,16 +468,7 @@ reg_t2_adj_ipcw_M<-res_adj[[7]]
 
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
-save(aat_t1_unadj_ipcw_M,
-aat_t2_unadj_ipcw_M,
-aat_t3_unadj_ipcw_M,
-mpo_t1_unadj_ipcw_M,
-mpo_t2_unadj_ipcw_M,
-mpo_t3_unadj_ipcw_M,
-neo_t1_unadj_ipcw_M,
-neo_t2_unadj_ipcw_M,
-neo_t3_unadj_ipcw_M,
-reg_t2_unadj_ipcw_M,
+save(
 aat_t1_adj_ipcw_M,
 aat_t2_adj_ipcw_M,
 aat_t3_adj_ipcw_M,

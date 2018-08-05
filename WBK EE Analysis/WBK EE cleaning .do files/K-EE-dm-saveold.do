@@ -146,7 +146,13 @@ tostring childid, replace
 outsheet using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew/raw CSV/washk_ee_stool.csv", comma replace
 
 
+use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/Baseline/EE_Baseline_FFQ_Raw_data_13Sep2017.dta", clear
+tostring dataid, replace 
+outsheet using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/Baseline/EE_Baseline_FFQ_Raw_data.csv", comma replace
 
+use "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Audrie/FFQ.dta", clear
+tostring dataid, replace 
+outsheet using "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Aud_FFQ.csv", comma replace
 
 
 

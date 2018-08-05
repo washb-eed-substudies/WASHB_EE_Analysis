@@ -662,5 +662,41 @@ save(perl1_adj_ipcw_M,
      perm1_adj_ipcw_M,
      perm2_adj_ipcw_M,
      perm3_adj_ipcw_M,
-     file="pre_recovery_ipcw_res_M.Rdata"
+     file="C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/pre_recovery_ipcw_res_M.Rdata"
      )
+
+
+
+
+lrec1_adj_ipcw_M<-res_per[[1]]
+lrec2_adj_ipcw_M<-res_per[[3]]
+lrec3_adj_ipcw_M<-res_per[[5]]
+
+mrec1_adj_ipcw_M<-res_per[[2]]
+mrec2_adj_ipcw_M<-res_per[[4]]
+mrec3_adj_ipcw_M<-res_per[[6]]
+
+
+save(lrec1_adj_ipcw_M,
+     lrec2_adj_ipcw_M,
+     lrec3_adj_ipcw_M,
+     mrec1_adj_ipcw_M,
+     mrec2_adj_ipcw_M,
+     mrec3_adj_ipcw_M,
+     file="C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/pre_recovery_ipcw_res2_M.Rdata"
+     )
+
+
+
+mean(perY$perl2Delta)
+
+table(is.na(d$per.lact.rec_t2))
+
+d %>% group_by(tr) %>% summarize(N=n(), exp(mean(log(per.lact.rec_t1), na.rm=T)), mean(perl1Delta), mean(perl1.miss))
+
+d %>% group_by(tr) %>% summarize(N=n(), exp(mean(log(per.lact.rec_t2), na.rm=T)), mean(perl2Delta), mean(perl2.miss))
+
+d %>% filter(!is.na(per.lact.rec_t2)) %>% group_by(tr) %>% summarize(N=n(), exp(mean(log(per.lact.rec_t2), na.rm=T)), mean(perl2Delta), mean(perl2.miss))
+
+
+
