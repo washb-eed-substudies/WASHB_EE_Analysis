@@ -47,7 +47,10 @@ ur <- ur %>% rename(
                 ur_month3= month3,
                 ur_monsoon1= monsoon1,
                 ur_monsoon2= monsoon2,
-                ur_monsoon3= monsoon3)
+                ur_monsoon3= monsoon3,
+                ur_aged1= aged1,
+                ur_aged2= aged2,
+                ur_aged3= aged3)
 
 
 #find and subset kids with stool and not urine, and vice versa
@@ -64,25 +67,25 @@ dim(ur_only)
 #subset to stool specific data
 colnames(st)
 
-st <- st %>% select(dataid,childNo, st_staffid1, st_date1,             
+st <- st %>% subset(., select=c(dataid,childNo, st_staffid1, st_date1,             
                 st_agem1,   st_month1, st_staffid2, st_date2, st_agem2, st_month2, st_staffid3, st_date3,                           
                 st_agem3, st_month3, aat1, aat2, 
                 aat3, mpo1, mpo2, mpo3, neo1,              
                 neo2, neo3, reg1b2,
                 st_aged1, st_aged2, st_aged3,
-               st_monsoon1, st_monsoon2, st_monsoon3) 
+               st_monsoon1, st_monsoon2, st_monsoon3))
 
 #Drop unneeded variables and rename variables in common with stool dataset
 ur <- ur %>% subset(., select = -c(consent1,nonconsent_reason1,h2aliqout1_t1,h2aliqout2_t1,h2aliqout3_t1,
                                     h2aliqout4_t1,h2aliqout5_t1,h2aliqout6_t1,h5aliqout7_t1,h5aliqout8_t1,h5aliqout9_t1,h5aliqout10_t1,h5aliqout11_t1,h5aliqout12_t1,
-                                    preLMaliqout13_t1,preLMaliqout14_t1,preLMaliqout15_t1,preLMaliqout16_t1,preLMaliqout17_t1,preLMaliqout18_t1,preLMnonconsent_reason1,aged1,
+                                    preLMaliqout13_t1,preLMaliqout14_t1,preLMaliqout15_t1,preLMaliqout16_t1,preLMaliqout17_t1,preLMaliqout18_t1,preLMnonconsent_reason1,
                                     agey1,consent2,nonconsent_reason2,h2aliqout1_t2,h2aliqout2_t2,
                                     h2aliqout3_t2,h2aliqout4_t2,h2aliqout5_t2,h2aliqout6_t2,h5aliqout7_t2,h5aliqout8_t2,h5aliqout9_t2,h5aliqout10_t2,h5aliqout11_t2,
                                     h5aliqout12_t2,preLMaliqout13_t2,preLMaliqout14_t2,preLMaliqout15_t2,preLMaliqout16_t2,preLMaliqout17_t2,preLMaliqout18_t2,preLMnonconsent_reason2,
-                                    aged2,agey2,consent3,nonconsent_reason3,h2aliqout1_t3,
+                                    agey2,consent3,nonconsent_reason3,h2aliqout1_t3,
                                     h2aliqout2_t3,h2aliqout3_t3,h2aliqout4_t3,h2aliqout5_t3,h2aliqout6_t3,h5aliqout7_t3,h5aliqout8_t3,h5aliqout9_t3,h5aliqout10_t3,
                                     h5aliqout11_t3,h5aliqout12_t3,preLMaliqout13_t3,preLMaliqout14_t3,preLMaliqout15_t3,preLMaliqout16_t3,preLMaliqout17_t3,preLMaliqout18_t3,preLMnonconsent_reason3,
-                                    aged3,agey3,clusterid.y,block.y,union,fracode,svydate,
+                                    agey3,clusterid.y,block.y,union,fracode,svydate,
                                    
                                     Nhh,momeduy,dadeduy,dadagri,landacre,hfias))
 st_only <- st_only %>% subset(., select = -c(tubewell,storewat,treatwat,odmen,odwom,odch815,odch38,odchu3,latown,latslab,latseal,

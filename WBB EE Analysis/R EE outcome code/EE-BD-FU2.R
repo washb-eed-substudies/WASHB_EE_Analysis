@@ -18,25 +18,35 @@ mother <- read.xlsx("EE_Endline_Mother_Saliva_FU2.xlsx", 1)
 
 
 #Saliva survey
-c_survey<- read.csv("Endline_child_Salimetrics_raw_data_28Dec15.csv")
-m_survey<- read.csv("EE_Endline_Mother Salimetrics_raw_data_08Dec15.csv")
-
-
-head(child)
-head(mother)
-head(c_survey)
-head(m_survey)
+# c_survey<- read.csv("Endline_child_Salimetrics_raw_data_28Dec15.csv")
+# m_survey<- read.csv("EE_Endline_Mother Salimetrics_raw_data_08Dec15.csv")
+# 
+# 
+# head(child)
+# head(mother)
+# head(c_survey)
+# head(m_survey)
 
 #Load primary EED dataset
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew/")
 d <- read.csv("EE-BD_fulldata.csv")
 
+#Use urine age if stool age is missing
+# d$st_aged1[is.na(d$st_aged1)] <- d$ur_aged1[is.na(d$st_aged1)]
+# d$st_aged2[is.na(d$st_aged2)] <- d$ur_aged2[is.na(d$st_aged2)]
+# d$st_aged3[is.na(d$st_aged3)] <- d$ur_aged3[is.na(d$st_aged3)]
+
+
 #Load anthropometry outcomes and only keep ID and outcome variables
 anthro<-read.csv("BD-EE-anthro.csv")
-anthro <- anthro %>% subset(select=c(dataid, childNo,
+anthro <- anthro %>% rename(an_aged1= aged1, an_aged2= aged2, an_aged3= aged3,
+                            an_month1=month1, an_month2=month2, an_month3=month3) %>%
+                      subset(select=c(dataid, childNo,
                                      laz1,	waz1,	whz1,	hcz1,
                                      laz2,	waz2,	whz2,	hcz2,
-                                     laz3,	waz3,	whz3,	hcz3))
+                                     laz3,	waz3,	whz3,	hcz3,
+                                     an_aged1, an_aged2, an_aged3,
+                                     an_month1, an_month2, an_month3))
 
 #Merge in anthro measures
  d<-left_join(d, anthro, by=c("dataid","childNo"))
@@ -156,6 +166,8 @@ anthro <- anthro %>% subset(select=c(dataid, childNo,
 d <- left_join(d, child, by=c("dataid","childNo"))
 d <- left_join(d, mother, by=c("dataid"))
 
+d[d$dataid=="13607",]
+d$aat3[d$dataid=="13607"]
 
 #Summary statistics on FU2
 
@@ -194,6 +206,12 @@ summary_res
 # n_occur[n_occur$Freq > 1,]
 
 
+#Order data to replicate SL
+d <- d[order(d$dataid,d$childNo, d$svy),]
+
+d$tr <- as.character(d$tr)
+d$tr[d$tr=="Nutrition"] <- "N"
+d$tr[d$tr=="Nutrition + WSH"] <- "N + WSH"
 
 #Create mother and child FU2 analysis datasets
 dc <- d %>% filter(!is.na(cFU2) & cFU2!="Inconclusive")
@@ -205,7 +223,7 @@ Yc <- dc %>% subset(., select=c(Lact1,Mann1,LM1,Lact2,Mann2,LM2,Lact3,Mann3,LM3,
 Ym <- dm %>% subset(., select=c(Lact1,Mann1,LM1,Lact2,Mann2,LM2,Lact3,Mann3,LM3, neo1,mpo1,aat1,neo2,mpo2,aat2,reg1b2,neo3,mpo3,aat3))
 
 #Set contrasts:
-contrasts <- list(c("Control","WSH"), c("Control","Nutrition"), c("Control","Nutrition + WSH"), c("WSH","Nutrition + WSH"), c("Nutrition","Nutrition + WSH"))
+contrasts <- list(c("Control","WSH"), c("Control","N"), c("Control","N + WSH"), c("WSH","N + WSH"), c("N","N + WSH"))
 
 
 #-------------------------------------------------------
@@ -216,15 +234,16 @@ contrasts <- list(c("Control","WSH"), c("Control","Nutrition"), c("Control","Nut
 res_childFU2_EM_unadj <- list()
 res_motherFU2_EM_unadj <- list()
 
+i<-2
 #Unadjusted glm models -FU2 as an EM
 for(i in 1:ncol(Yc)){
   for(j in 1:5){
     #note the log transformation of the outcome prior to running GLM model:
-    temp <- washb_glm(Y=log(Yc[,i]), tr=dc$tr, W=data.frame(cFU2=dc$cFU2), V="cFU2", id=dc$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)
+    temp <- washb_glm(Y=log(Yc[,i]), tr=dc$tr, W=data.frame(cFU2=dc$cFU2), V="cFU2", id=dc$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=T)
     #Get interaction p-val
     pval<-temp$fit$`Pr(>|z|)`[nrow(temp$fit)]
     temp <- data.frame(contrast= paste0(contrasts[[j]][1]," v ",contrasts[[j]][2]), temp$lincom, int_pval=pval)
-    colnames(temp)<-c("Contrast","Subgroup","RD","Std. Error","ci.l","ci.u", "z value", "Pval", "InteractionPval")
+    colnames(temp)<-c("Contrast","Subgroup","Unadj. diff.","Std. Error","ci.l","ci.u", "z value", "Pval", "InteractionPval")
     if(j==1){
       res_childFU2_EM_unadj[[i]] <- temp
     }else{
@@ -239,11 +258,11 @@ names(res_childFU2_EM_unadj) <- colnames(Yc)
 for(i in 1:ncol(Ym)){
   for(j in 1:5){
     #note the log transformation of the outcome prior to running GLM model:
-    temp <- washb_glm(Y=log(Ym[,i]), tr=dm$tr, W=data.frame(mFU2=dm$mFU2), V="mFU2", id=dm$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=F)
+    temp <- washb_glm(Y=log(Ym[,i]), tr=dm$tr, W=data.frame(mFU2=dm$mFU2), V="mFU2", id=dm$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=T)
     #Get interaction p-val
     pval<-temp$fit$`Pr(>|z|)`[nrow(temp$fit)]
     temp <- data.frame(contrast= paste0(contrasts[[j]][1]," v ",contrasts[[j]][2]), temp$lincom, int_pval=pval)
-    colnames(temp)<-c("Contrast","Subgroup","RD","Std. Error","ci.l","ci.u", "z value", "Pval", "InteractionPval")
+    colnames(temp)<-c("Contrast","Subgroup","Unadj. diff.","Std. Error","ci.l","ci.u", "z value", "Pval", "InteractionPval")
     if(j==1){
       res_motherFU2_EM_unadj[[i]] <- temp
     }else{
@@ -263,7 +282,8 @@ names(res_motherFU2_EM_unadj) <- colnames(Ym)
 
 
 #Make vectors of adjustment variable names
-Wvars<-c('sex', 'birthord',
+Wvars<-c('tr', #Include treatment 
+         'sex', 'birthord',
          'momage', 'momheight','momedu','hfiacat',
          'Nlt18','Ncomp','watmin',
          'walls', 'floor',
@@ -282,29 +302,24 @@ for(i in 1:ncol(d)){
   }
 }
 
-#Order data to replicate SL
-d <- d[order(d$dataid,d$childNo, d$svy),]
+
 
 #Clean covariates
 d$sex<-as.factor(d$sex)
 d$sex=relevel(d$sex,ref="0")
 
 
-#Set birthorder to 1, >=2, or missing
-class(d$birthord)
-d$birthord[d$birthord>1]<-"2+"
-d$birthord[is.na(d$birthord)]<-"missing"
-d$birthord<-factor(d$birthord)
 
 
 
 #Truncate unrealistic levels of n_chickens to 60
-table(d$n_chickens)
-d$n_chickens[d$n_chickens>60]<-60
-table(d$n_chickens)
-
+d$n_cows[is.na(d$n_cows)] <- 0
+d$n_goats[is.na(d$n_goats)] <- 0
+d$n_chickens[is.na(d$n_chickens)] <- 0
 
 #Relevel all factors
+d$tr <- factor(d$tr)
+
 d$momedu=relevel(factor(d$momedu),ref="No education")
 d$hfiacat=relevel(factor(d$hfiacat),ref="Food Secure")
     d$hfiacat<-addNA(d$hfiacat)
@@ -332,11 +347,8 @@ d$asset_chair<-factor(d$asset_chair)
     d$asset_chair<-addNA(d$asset_chair)
     levels(d$asset_chair)<-c("No chair","Chair","Missing")
     d$asset_chair=relevel(d$asset_chair,ref="No chair")
-d$asset_clock[is.na(d$asset_clock)]<-99
-    d$asset_clock<-factor(d$asset_clock)
-    d$asset_clock<-addNA(d$asset_clock)
-    levels(d$asset_clock)<-c("No clock","Clock","Missing", "Missing")
-    d$asset_clock=relevel(d$asset_clock,ref="No clock")
+
+    
 d$asset_khat<-factor(d$asset_khat)
     d$asset_khat<-addNA(d$asset_khat)
     levels(d$asset_khat)<-c("No khat","Khat","Missing")
@@ -399,10 +411,49 @@ dm <- dm %>% mutate(monsoon1 = ifelse(st_month1 > 4 & st_month1 < 11, "1", "0"),
                   monsoon2 = factor(monsoon2),
                   monsoon3 = factor(monsoon3))
 
+dc <- dc %>% mutate(ur_monsoon1 = ifelse(ur_month1 > 4 & ur_month1 < 11, "1", "0"),
+                  ur_monsoon2 = ifelse(ur_month2 > 4 & ur_month2 < 11, "1", "0"),
+                  ur_monsoon3 = ifelse(ur_month3 > 4 & ur_month3 < 11, "1", "0"),
+                  ur_monsoon1 = ifelse(is.na(ur_month1),"missing", ur_monsoon1),
+                  ur_monsoon2 = ifelse(is.na(ur_month2),"missing", ur_monsoon2),
+                  ur_monsoon3 = ifelse(is.na(ur_month3),"missing", ur_monsoon3),
+                  ur_monsoon1 = factor(ur_monsoon1),
+                  ur_monsoon2 = factor(ur_monsoon2),
+                  ur_monsoon3 = factor(ur_monsoon3))
+dm <- dm %>% mutate(ur_monsoon1 = ifelse(ur_month1 > 4 & ur_month1 < 11, "1", "0"),
+                  ur_monsoon2 = ifelse(ur_month2 > 4 & ur_month2 < 11, "1", "0"),
+                  ur_monsoon3 = ifelse(ur_month3 > 4 & ur_month3 < 11, "1", "0"),
+                  ur_monsoon1 = ifelse(is.na(ur_month1),"missing", ur_monsoon1),
+                  ur_monsoon2 = ifelse(is.na(ur_month2),"missing", ur_monsoon2),
+                  ur_monsoon3 = ifelse(is.na(ur_month3),"missing", ur_monsoon3),
+                  ur_monsoon1 = factor(ur_monsoon1),
+                  ur_monsoon2 = factor(ur_monsoon2),
+                  ur_monsoon3 = factor(ur_monsoon3))
+
+dc <- dc %>% mutate(an_monsoon1 = ifelse(an_month1 > 4 & an_month1 < 11, "1", "0"),
+                  an_monsoon2 = ifelse(an_month2 > 4 & an_month2 < 11, "1", "0"),
+                  an_monsoon3 = ifelse(an_month3 > 4 & an_month3 < 11, "1", "0"),
+                  an_monsoon1 = ifelse(is.na(an_month1),"missing", an_monsoon1),
+                  an_monsoon2 = ifelse(is.na(an_month2),"missing", an_monsoon2),
+                  an_monsoon3 = ifelse(is.na(an_month3),"missing", an_monsoon3),
+                  an_monsoon1 = factor(an_monsoon1),
+                  an_monsoon2 = factor(an_monsoon2),
+                  an_monsoon3 = factor(an_monsoon3))
+dm <- dm %>% mutate(an_monsoon1 = ifelse(an_month1 > 4 & an_month1 < 11, "1", "0"),
+                  an_monsoon2 = ifelse(an_month2 > 4 & an_month2 < 11, "1", "0"),
+                  an_monsoon3 = ifelse(an_month3 > 4 & an_month3 < 11, "1", "0"),
+                  an_monsoon1 = ifelse(is.na(an_month1),"missing", an_monsoon1),
+                  an_monsoon2 = ifelse(is.na(an_month2),"missing", an_monsoon2),
+                  an_monsoon3 = ifelse(is.na(an_month3),"missing", an_monsoon3),
+                  an_monsoon1 = factor(an_monsoon1),
+                  an_monsoon2 = factor(an_monsoon2),
+                  an_monsoon3 = factor(an_monsoon3))
+
 
 Wvars1<-c("st_aged1", "monsoon1") 
 Wvars2<-c("st_aged2", "monsoon2") 
 Wvars3<-c("st_aged3", "monsoon3") 
+
 
 cW1<- cbind(Wc, subset(dc, select=Wvars1))
 cW2<- cbind(Wc, subset(dc, select=Wvars2))
@@ -412,11 +463,35 @@ mW1<- cbind(Wm, subset(dm, select=Wvars1))
 mW2<- cbind(Wm, subset(dm, select=Wvars2))
 mW3<- cbind(Wm, subset(dm, select=Wvars3))
 
+ur_Wvars1<-c("ur_aged1", "ur_monsoon1") 
+ur_Wvars2<-c("ur_aged2", "ur_monsoon2") 
+ur_Wvars3<-c("ur_aged3", "ur_monsoon3") 
+
+ur_cW1<- cbind(Wc, subset(dc, select=ur_Wvars1))
+ur_cW2<- cbind(Wc, subset(dc, select=ur_Wvars2))
+ur_cW3<- cbind(Wc, subset(dc, select=ur_Wvars3))
+
+ur_mW1<- cbind(Wm, subset(dm, select=ur_Wvars1))
+ur_mW2<- cbind(Wm, subset(dm, select=ur_Wvars2))
+ur_mW3<- cbind(Wm, subset(dm, select=ur_Wvars3))
+
+an_Wvars1<-c("an_aged1", "an_monsoon1") 
+an_Wvars2<-c("an_aged2", "an_monsoon2") 
+an_Wvars3<-c("an_aged3", "an_monsoon3") 
+
+an_cW1<- cbind(Wc, subset(dc, select=an_Wvars1))
+an_cW2<- cbind(Wc, subset(dc, select=an_Wvars2))
+an_cW3<- cbind(Wc, subset(dc, select=an_Wvars3))
+
+an_mW1<- cbind(Wm, subset(dm, select=an_Wvars1))
+an_mW2<- cbind(Wm, subset(dm, select=an_Wvars2))
+an_mW3<- cbind(Wm, subset(dm, select=an_Wvars3))
+
 
 #Create lists of adjustment covariates
-cWlist <- list(cW1,cW1,cW1,cW2,cW2,cW2,cW3,cW3,cW3,
+cWlist <- list(ur_cW1,ur_cW1,ur_cW1,ur_cW2,ur_cW2,ur_cW2,ur_cW3,ur_cW3,ur_cW3,
                cW1,cW1,cW1,cW2,cW2,cW2,cW2,cW3,cW3,cW3)
-mWlist <- list(mW1,mW1,mW1,mW2,mW2,mW2,mW3,mW3,mW3,
+mWlist <- list(ur_mW1,ur_mW1,ur_mW1,ur_mW2,ur_mW2,ur_mW2,ur_mW3,ur_mW3,ur_mW3,
                mW1,mW1,mW1,mW2,mW2,mW2,mW2,mW3,mW3,mW3)
 
 
@@ -426,31 +501,42 @@ mWlist <- list(mW1,mW1,mW1,mW2,mW2,mW2,mW3,mW3,mW3,
 # Associations with EED outcomes
 #-------------------------------------------------------
 
-library=c("SL.mean","SL.glm","SL.bayesglm","SL.gam","SL.glmnet")
-#library=c("SL.glm")
+library=c("SL.glm")
 
 #Set up SL library
 
 #Create empty matrix to hold the glm results:
 res_childFU2_RF_adj <- NULL
 res_motherFU2_RF_adj <- NULL
-
+#i<-11
 #TMLE models -FU2 as a RF
 for(i in  1:ncol(Yc)){
     #note the log transformation of the outcome prior to running TMLE model:
-    temp<-washb_tmle(Y=log(Yc[,i]), tr=dc$cFU2, W=cWlist[[i]], id=dc$block, pair=NULL, family="gaussian", contrast=c("Negative", "Positive"), print=F, Q.SL.library=library)
+      set.seed(12345)
+    temp<-washb_tmle(Y=log(Yc[,i]), tr=dc$cFU2, W=cWlist[[i]], id=dc$block, pair=NULL, family="gaussian", contrast=c("Positive","Negative"), print=F, Q.SL.library=library)
     temp<-(t(unlist(temp$estimates$ATE)))
     colnames(temp)<-c("ATE","variance","ci.l","ci.u", "Pvalue")
     res_childFU2_RF_adj <- rbind(res_childFU2_RF_adj , temp) 
 } 
 rownames(res_childFU2_RF_adj)<-colnames(Yc)
 
+table(is.na(log(Yc[,i])))
+table(is.na(dc$cFU2))
+table(is.na(dc$block))
+table(W$birthord[!is.na(log(Yc[,11]))])
 
+for(i in 1:ncol(W)){
+  cat("\n",colnames(W)[i]," ",i,"\n")
+  print(table(is.na(W[!is.na(log(Ym[,12]))&!is.na(dm$mFU2),i])))
+}
 
+dm$aat1[dm$dataid=="33701"]
 
+i<-12
 for(i in  1:ncol(Ym)){
     #note the log transformation of the outcome prior to running TMLE model:
-    temp<-washb_tmle(Y=log(Ym[,i]), tr=dm$mFU2, W=mWlist[[i]], id=dm$block, pair=NULL, family="gaussian", contrast=c("Negative", "Positive"), print=F, Q.SL.library=library)
+    set.seed(12345)
+    temp<-washb_tmle(Y=log(Ym[,i]), tr=dm$mFU2, W=mWlist[[i]], id=dm$block, pair=NULL, family="gaussian", contrast=c("Positive","Negative"), print=T, Q.SL.library=library)
     temp<-(t(unlist(temp$estimates$ATE)))
     colnames(temp)<-c("ATE","variance","ci.l","ci.u", "Pvalue")
     res_motherFU2_RF_adj <- rbind(res_motherFU2_RF_adj , temp) 
@@ -479,7 +565,15 @@ Ym_bin <- dm %>% subset(., select=c( stunt1, stunt2, stunt3, wast1, wast2, wast3
 
 
 
-    
+
+
+#Create lists of adjustment covariates
+cWlist_anthro <- list(an_cW1, an_cW2, an_cW3, an_cW1, an_cW2, an_cW3, an_cW1, an_cW2, an_cW3, an_cW1, an_cW2, an_cW3)
+mWlist_anthro <- list(an_mW1, an_mW2, an_mW3, an_mW1, an_mW2, an_mW3, an_mW1, an_mW2, an_mW3, an_mW1, an_mW2, an_mW3)
+
+cWlist_anthro_bin <- list(an_cW1, an_cW2, an_cW3, an_cW1, an_cW2, an_cW3, an_cW1, an_cW2, an_cW3, an_cW1, an_cW2, an_cW3, an_cW1, an_cW2, an_cW3, an_cW1, an_cW2, an_cW3)
+mWlist_anthro_bin <- list(an_mW1, an_mW2, an_mW3, an_mW1, an_mW2, an_mW3, an_mW1, an_mW2, an_mW3, an_mW1, an_mW2, an_mW3, an_mW1, an_mW2, an_mW3, an_mW1, an_mW2, an_mW3)
+
      
 
 
@@ -489,10 +583,11 @@ res_motherFU2_growthRF_cont <- NULL
 res_childFU2_growthRF_bin <- NULL
 res_motherFU2_growthRF_bin <- NULL
 
-#TMLE models -continious outcomes 
+#TMLE models -continuous outcomes 
 for(i in  1:ncol(Yc_cont)){
     #note the log transformation of the outcome prior to running TMLE model:
-    temp<-washb_tmle(Y=Yc_cont[,i], tr=dc$cFU2, W=cWlist[[i]], id=dc$block, pair=NULL, family="gaussian", contrast=c("Negative", "Positive"), print=F, Q.SL.library=library)
+        set.seed(12345)
+    temp<-washb_tmle(Y=Yc_cont[,i], tr=dc$cFU2, W=cWlist_anthro[[i]], id=dc$block, pair=NULL, family="gaussian", contrast=c("Positive","Negative"), print=F, Q.SL.library=library)
     temp<-(t(unlist(temp$estimates$ATE)))
     colnames(temp)<-c("ATE","variance","ci.l","ci.u", "Pvalue")
     res_childFU2_growthRF_cont <- rbind(res_childFU2_growthRF_cont , temp) 
@@ -502,7 +597,8 @@ rownames(res_childFU2_growthRF_cont)<-colnames(Yc_cont)
 
 for(i in  1:ncol(Ym_cont)){
     #note the log transformation of the outcome prior to running TMLE model:
-    temp<-washb_tmle(Y=Ym_cont[,i], tr=dm$mFU2, W=mWlist[[i]], id=dm$block, pair=NULL, family="gaussian", contrast=c("Negative", "Positive"), print=F, Q.SL.library=library)
+        set.seed(12345)
+    temp<-washb_tmle(Y=Ym_cont[,i], tr=dm$mFU2, W=mWlist_anthro[[i]], id=dm$block, pair=NULL, family="gaussian", contrast=c("Positive","Negative"), print=F, Q.SL.library=library)
     temp<-(t(unlist(temp$estimates$ATE)))
     colnames(temp)<-c("ATE","variance","ci.l","ci.u", "Pvalue")
     res_motherFU2_growthRF_cont <- rbind(res_motherFU2_growthRF_cont , temp) 
@@ -512,7 +608,8 @@ rownames(res_motherFU2_growthRF_cont) <- colnames(Ym_cont)
 #TMLE models -binary outcomes 
 for(i in  1:ncol(Yc_bin)){
     #note the log transformation of the outcome prior to running TMLE model:
-    temp<-washb_tmle(Y=Yc_bin[,i], tr=dc$cFU2, W=cWlist[[i]], id=dc$block, pair=NULL, family="binomial", contrast=c("Negative", "Positive"), print=F, Q.SL.library=library)
+        set.seed(12345)
+    temp<-washb_tmle(Y=Yc_bin[,i], tr=dc$cFU2, W=cWlist_anthro_bin[[i]], id=dc$block, pair=NULL, family="binomial", contrast=c("Positive","Negative"), print=F, Q.SL.library=library)
     temp<-(t(unlist(temp$estimates$RR)))
     colnames(temp)<-c("RR","ci.l","ci.u", "Pvalue", "logRR","logRR_var")
     res_childFU2_growthRF_bin <- rbind(res_childFU2_growthRF_bin , temp) 
@@ -522,7 +619,8 @@ rownames(res_childFU2_growthRF_bin)<-colnames(Yc_bin)
 
 for(i in  1:ncol(Ym_bin)){
     #note the log transformation of the outcome prior to running TMLE model:
-    temp<-washb_tmle(Y=Ym_bin[,i], tr=dm$mFU2, W=mWlist[[i]], id=dm$block, pair=NULL, family="binomial", contrast=c("Negative", "Positive"), print=F, Q.SL.library=library)
+        set.seed(12345)
+    temp<-washb_tmle(Y=Ym_bin[,i], tr=dm$mFU2, W=mWlist_anthro_bin[[i]], id=dm$block, pair=NULL, family="binomial", contrast=c("Positive","Negative"), print=F, Q.SL.library=library)
     temp<-(t(unlist(temp$estimates$RR)))
     colnames(temp)<-c("RR","ci.l","ci.u", "Pvalue", "logRR","logRR_var")
     res_motherFU2_growthRF_bin <- rbind(res_motherFU2_growthRF_bin , temp) 
@@ -546,8 +644,11 @@ resM$Outcome <- sapply(strsplit(rownames(resM), ".", fixed=T), `[`, 1)
 
 
 #Drop the non-control contrasts
-resC<- resC %>% filter(Contrast!="WSH v Nutrition + WSH" & Contrast!="Nutrition v Nutrition + WSH")
-resM<- resM %>% filter(Contrast!="WSH v Nutrition + WSH" & Contrast!="Nutrition v Nutrition + WSH")
+# resC<- resC %>% filter(Contrast!="WSH v Nutrition + WSH" & Contrast!="Nutrition v Nutrition + WSH")
+# resM<- resM %>% filter(Contrast!="WSH v Nutrition + WSH" & Contrast!="Nutrition v Nutrition + WSH")
+
+resC<- resC %>% filter(Contrast!="WSH v N + WSH" & Contrast!="N v N + WSH")
+resM<- resM %>% filter(Contrast!="WSH v N + WSH" & Contrast!="N v N + WSH")
 
 #Grab time of outcome
 resC$Round <- str_sub(resC$Outcome,-1,-1)
@@ -557,12 +658,29 @@ resM$Round <- str_sub(resM$Outcome,-1,-1)
 resC$biomarker = substr(resC$Outcome,1,nchar(resC$Outcome)-1)
 resM$biomarker = substr(resM$Outcome,1,nchar(resM$Outcome)-1)
 
-resC$biomarker <- factor(resC$biomarker, levels=c("Lact","Mann","LM","neo","mpo","aat","reg1b"))
-resM$biomarker <- factor(resM$biomarker, levels=c("Lact","Mann","LM","neo","mpo","aat","reg1b"))
+resC$biomarker[resC$biomarker=="aat"] <- "Alpha-1 antitrypsin"
+resC$biomarker[resC$biomarker=="mpo"] <- "Myeloperoxidase"
+resC$biomarker[resC$biomarker=="neo"] <- "Neopterin"
+resC$biomarker[resC$biomarker=="reg1b"] <- "Regenerating gene 1B"
+resC$biomarker[resC$biomarker=="Lact"] <- "Lactulose"
+resC$biomarker[resC$biomarker=="Mann"] <- "Mannitol"
+resC$biomarker[resC$biomarker=="LM"] <- "L/M ratio"
+
+resM$biomarker[resM$biomarker=="aat"] <- "Alpha-1 antitrypsin"
+resM$biomarker[resM$biomarker=="mpo"] <- "Myeloperoxidase"
+resM$biomarker[resM$biomarker=="neo"] <- "Neopterin"
+resM$biomarker[resM$biomarker=="reg1b"] <- "Regenerating gene 1B"
+resM$biomarker[resM$biomarker=="Lact"] <- "Lactulose"
+resM$biomarker[resM$biomarker=="Mann"] <- "Mannitol"
+resM$biomarker[resM$biomarker=="LM"] <- "L/M ratio"
+               
+
+resC$biomarker <- factor(resC$biomarker, levels=c("Lactulose","Mannitol","L/M ratio","Neopterin","Myeloperoxidase","Alpha-1 antitrypsin","Regenerating gene 1B"))
+resM$biomarker <- factor(resM$biomarker, levels=c("Lactulose","Mannitol","L/M ratio","Neopterin","Myeloperoxidase","Alpha-1 antitrypsin","Regenerating gene 1B"))
 
 #Create combination of intervention and EM variable
-resC$X <- paste0(gsub("Nutrition","N",sapply(strsplit(as.character(resC$Contrast), "v ", fixed=T), `[`, 2)), " FU2", resC$Subgroup)
-resM$X <- paste0(gsub("Nutrition","N",sapply(strsplit(as.character(resM$Contrast), "v ", fixed=T), `[`, 2)), " FU2", resM$Subgroup)
+resC$X <- paste0(gsub("Nutrition","N",sapply(strsplit(as.character(resC$Contrast), "v ", fixed=T), `[`, 2)), " FUT2", resC$Subgroup)
+resM$X <- paste0(gsub("Nutrition","N",sapply(strsplit(as.character(resM$Contrast), "v ", fixed=T), `[`, 2)), " FUT2", resM$Subgroup)
 
 resC$X <- gsub("Positive", "+", resC$X)
 resC$X <- gsub("Negative", "-", resC$X)
@@ -570,9 +688,16 @@ resM$X <- gsub("Positive", "+", resM$X)
 resM$X <- gsub("Negative", "-", resM$X)
 
 
+resC$Round[resC$Round=="1"] <- "Child Age 3 months"
+resC$Round[resC$Round=="2"] <- "Child Age 14 months"
+resC$Round[resC$Round=="3"] <- "Child Age 28 months"
 
+resM$Round[resM$Round=="1"] <- "Child Age 3 months"
+resM$Round[resM$Round=="2"] <- "Child Age 14 months"
+resM$Round[resM$Round=="3"] <- "Child Age 28 months"
 
-
+resC$Round <- factor(resC$Round, levels=c("Child Age 3 months", "Child Age 14 months", "Child Age 28 months"))
+resM$Round <- factor(resM$Round, levels=c("Child Age 3 months", "Child Age 14 months", "Child Age 28 months"))
 
 #-------------------------------------------------------
 # Results plots
@@ -594,10 +719,10 @@ tableau10 <- c("#1F77B4","#FF7F0E","#2CA02C","#D62728",
 
 
 C_plot_EM<- ggplot(resC, aes(x=X)) + 
-        geom_point(aes(y=RD, fill=Contrast, color=Contrast), size = 4) +
+        geom_point(aes(y=`Unadj. diff.`, fill=Contrast, color=Contrast), size = 4) +
         geom_linerange(aes(ymin=ci.l, ymax=ci.u, color=Contrast),
                        alpha=0.5, size = 3) +
-        labs(x = "Treatment contrast and FU2 status", y = "Average treatment effect") +
+        labs(x = "Treatment contrast and FUT2 status", y = "Average treatment effect") +
         geom_text(aes(x=X, y=ci.u+0.02, label=ifelse(resC$InteractionPval<0.05,"*",""))) + 
         geom_hline(yintercept = 0) +
         #coord_cartesian(ylim=range(yticks)) +
@@ -607,16 +732,17 @@ C_plot_EM<- ggplot(resC, aes(x=X)) +
         theme(strip.background = element_blank(),
           legend.position="none",
           strip.text.x = element_text(size=12),
-          axis.text.x = element_text(size=12, angle = 45, hjust = 1)) +
+          axis.text.x = element_text(size=12, angle = 45, hjust = 1), 
+          strip.text.y = element_text(angle = 0)) +
         facet_grid(biomarker~Round,) +
-        ggtitle("Child FU2 status")
+        ggtitle("Child FUT2 status")
 
 
 M_plot_EM<- ggplot(resM, aes(x=X)) + 
-        geom_point(aes(y=RD, fill=Contrast, color=Contrast), size = 4) +
+        geom_point(aes(y=`Unadj. diff.`, fill=Contrast, color=Contrast), size = 4) +
         geom_linerange(aes(ymin=ci.l, ymax=ci.u, color=Contrast),
                        alpha=0.5, size = 3) +
-        labs(x = "Treatment contrast and FU2 status", y = "Average treatment effect") +
+        labs(x = "Treatment contrast and FUT2 status", y = "Average treatment effect") +
         geom_text(aes(x=X, y=ci.u+0.02, label=ifelse(resM$InteractionPval<0.05,"*",""))) + 
         geom_hline(yintercept = 0) +
         #coord_cartesian(ylim=range(yticks)) +
@@ -626,27 +752,111 @@ M_plot_EM<- ggplot(resM, aes(x=X)) +
         theme(strip.background = element_blank(),
           legend.position="none",
           strip.text.x = element_text(size=12),
-          axis.text.x = element_text(size=12, angle = 45, hjust = 1)) +
-        facet_grid(biomarker~Round) +
-        ggtitle("Mother FU2 status")
+          axis.text.x = element_text(size=12, angle = 45, hjust = 1), 
+          strip.text.y = element_text(angle = 0)) +
+          facet_grid(biomarker~Round) +
+        ggtitle("Mother FUT2 status")
 
-plotdf <-data.frame(X= rownames(plotdf), res_childFU2_growthRF_cont)
-plotdf$outcome <- substr(plotdf$X, 1,3)
-C_plot_cont <- ggplot(plotdf, aes(x=X)) + 
-        geom_point(aes(y=ATE, fill=outcome, color=outcome), size = 4) +
-        geom_linerange(aes(ymin=ci.l, ymax=ci.u, color=outcome),
-                       alpha=0.5, size = 3) +
-        labs(x = "Continious growth outcome", y = "Average treatment effect") +
-        geom_hline(yintercept = 0) +
-        scale_fill_manual(values=rep(tableau10,4)) +
-        scale_colour_manual(values=rep(tableau10,4)) +
-        theme(strip.background = element_blank(),
-          legend.position="none",
-          strip.text.x = element_text(size=12),
-          axis.text.x = element_text(size=12, angle = 45, hjust = 1)) +
-        ggtitle("Child FU2 status effect on continious growth outcomes")
+# plotdf <-data.frame(X= rownames(plotdf), res_childFU2_growthRF_cont)
+# plotdf$outcome <- substr(plotdf$X, 1,3)
+# C_plot_cont <- ggplot(plotdf, aes(x=X)) + 
+#         geom_point(aes(y=ATE, fill=outcome, color=outcome), size = 4) +
+#         geom_linerange(aes(ymin=ci.l, ymax=ci.u, color=outcome),
+#                        alpha=0.5, size = 3) +
+#         labs(x = "Continuous growth outcome", y = "Average treatment effect") +
+#         geom_hline(yintercept = 0) +
+#         scale_fill_manual(values=rep(tableau10,4)) +
+#         scale_colour_manual(values=rep(tableau10,4)) +
+#         theme(strip.background = element_blank(),
+#           legend.position="none",
+#           strip.text.x = element_text(size=12),
+#           axis.text.x = element_text(size=12, angle = 45, hjust = 1)) +
+#         ggtitle("Child FU2 status effect on continuous growth outcomes")
 
 
+
+# Format results
+rownames(res_childFU2_RF_adj) <- rownames(res_motherFU2_RF_adj) <- c("Lactulose - T1",
+                                   "Mannitol - T1",
+                                   "L/M ratio - T1",
+                                   "Lactulose - T2",
+                                   "Mannitol - T2",
+                                   "L/M ratio - T2",
+                                   "Lactulose - T3",
+                                   "Mannitol - T3",
+                                   "L/M ratio - T3",
+                                   "Neopterin - T1",
+                                   "Myeloperoxidase - T1",
+                                   "Alpha-1 antitrypsin - T1",
+                                   "Neopterin - T2",
+                                   "Myeloperoxidase - T2",
+                                   "Alpha-1 antitrypsin - T2",
+                                   "Regenerating gene 1B - T2",
+                                   "Neopterin - T3",
+                                   "Myeloperoxidase - T3",
+                                   "Alpha-1 antitrypsin - T3"
+                                   )
+
+
+rownames(res_motherFU2_growthRF_bin) <- rownames(res_childFU2_growthRF_bin) <- c(
+                                         "Stunted - T1",
+                                         "Stunted - T2",
+                                         "Stunted - T3",
+                                         "Wasted - T1",
+                                         "Wasted - T2",
+                                         "Wasted - T3",
+                                         "Severe stunted - T1",
+                                         "Severe stunted - T2",
+                                         "Severe stunted - T3",
+                                         "Severe wasted - T1",
+                                         "Severe wasted - T2",
+                                         "Severe wasted - T3",
+                                         "Underweight - T1",
+                                         "Underweight - T2",
+                                         "Underweight - T3",
+                                         "Severe underweight - T1",
+                                         "Severe underweight - T2",
+                                         "Severe underweight - T3"
+                                         )
+
+
+rownames(res_motherFU2_growthRF_cont) <- rownames(res_childFU2_growthRF_cont) <- c(
+                                         "LAZ - T1",
+                                         "LAZ - T2",
+                                         "LAZ - T3",
+                                         "WHZ - T1",
+                                         "WHZ - T2",
+                                         "WHZ - T3",
+                                         "WAZ - T1",
+                                         "WAZ - T2",
+                                         "WAZ - T3",
+                                         "HCZ - T1",
+                                         "HCZ - T2",
+                                         "HCZ - T3"
+                                         )
+
+
+
+names(res_childFU2_EM_unadj) <- names(res_motherFU2_EM_unadj) <- c("Lactulose - T1",
+                                   "Mannitol - T1",
+                                   "L/M ratio - T1",
+                                   "Lactulose - T2",
+                                   "Mannitol - T2",
+                                   "L/M ratio - T2",
+                                   "Lactulose - T3",
+                                   "Mannitol - T3",
+                                   "L/M ratio - T3",
+                                   "Neopterin - T1",
+                                   "Myeloperoxidase - T1",
+                                   "Alpha-1 antitrypsin - T1",
+                                   "Neopterin - T2",
+                                   "Myeloperoxidase - T2",
+                                   "Alpha-1 antitrypsin - T2",
+                                   "Regenerating gene 1B - T2",
+                                   "Neopterin - T3",
+                                   "Myeloperoxidase - T3",
+                                   "Alpha-1 antitrypsin - T3"
+                                   )
 
 
 # Save results
