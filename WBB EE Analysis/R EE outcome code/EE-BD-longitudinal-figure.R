@@ -279,66 +279,66 @@ ulabplot <- function(title) {
 
 
 long.plot<-function(d, yrange=NULL,  cols=cols, tickspace=0.2, xlab=F){
-
+  
   op <- par(mar=c(3,3,2,0)+0.1)
   
-if(is.null(yrange)){
+  if(is.null(yrange)){
     if((d$Location=="AAT")[1]){yrange<-c(-1.5,-0.5)
     ytics <- seq(-1.5,-0.5,by=0.1)
     title<-"Ln alpha 1-antitrypsin (mg/g)"}
-  if((d$Location=="NEO")[1]){yrange<-c(6,8)
+    if((d$Location=="NEO")[1]){yrange<-c(6,8)
     ytics <- seq(6,8,by=.2)
     title<-"Ln neopterin (nmol/L)"}
-  if((d$Location=="MPO")[1]){yrange<-c(7.25,9.75)
-    ytics <- seq(7,10,by=.25)
+    if((d$Location=="MPO")[1]){yrange<-c(7, 10)
+    ytics <- seq(7, 10, by=.3)
     title<-"Ln myeloperoxidase (ng/ml)"}
-  if((d$Location=="Lact")[1]){yrange<-c(-1.8,0.2)
+    if((d$Location=="Lact")[1]){yrange<-c(-1.8,0.2)
     ytics <- seq(-1.8,0.2,by=0.2)
     title<-"Ln lactulose (mmol/L)"}
-  if((d$Location=="Mann")[1]){yrange<-c(0.2,2.3)
+    if((d$Location=="Mann")[1]){yrange<-c(0.2,2.3)
     ytics <- seq(0.2,2.2,by=.2)
     title<-"Ln mannitol (mmol/L)"}
-  if((d$Location=="LM")[1]){yrange<-c(-4,-2)
+    if((d$Location=="LM")[1]){yrange<-c(-4,-2)
     ytics <- seq(-4,-2,by=0.2)
     title<-"Ln L:M ratio"}
-  if((d$Location=="REG")[1]){yrange<-c(4.8,5.2)
+    if((d$Location=="REG")[1]){yrange<-c(4.8,5.2)
     ytics <- seq(4.8,5.2,by=.05)
     title<-""}
-}else{
-        seq(yrange[1],yrange[2],by=tickspace) #<----------Set the Y-axis range here
-}
-
+  }else{
+    seq(yrange[1],yrange[2],by=tickspace) #<----------Set the Y-axis range here
+  }
+  
   n<-3
-   # set up an empty plot
-MidPts <- barplot(1:n, names.arg=NA,col=NA,
-                  border=NA,
-	  	ylim= if(yrange[1]=="auto"){c(min(d$lower.ci),max(d$upper.ci))}else{c(range(yrange)[1],range(yrange)[2])},
-	  	ylab="",yaxt="n",
-      las=1,bty="n"
-	)
-	segments(x0=0,x1=max(MidPts+0.5),y0=ytics,lty=2,lwd=1,col="gray80")
-	#segments(x0=0,x1=max(MidPts+0.5),y0=0,lty=1,lwd=1,col="black")
-	axis(2,at=ytics,las=1)
-	mtext(title,side=3,line=0.25,col="gray20",cex=1)
-
-	
-	plotpoints<-rep(MidPts, each=4) + rep(c(-0.15,-0.05, 0.05, 0.15), 3)
-
-	# plot estimates
-	arrows(x0=plotpoints, y0=d$lower.ci, y1=d$upper.ci, col=tr.cols,lwd=2,length=0.05,angle=90,code=3)
-	  segments(x0=plotpoints[1:4],x1=plotpoints[5:8],y0=d$Dif[1:4],y1=d$Dif[5:8],col=alpha(tr.cols,.1), lwd=2)
+  # set up an empty plot
+  MidPts <- barplot(1:n, names.arg=NA,col=NA,
+                    border=NA,
+                    ylim= if(yrange[1]=="auto"){c(min(d$lower.ci),max(d$upper.ci))}else{c(range(yrange)[1],range(yrange)[2])},
+                    ylab="",yaxt="n",
+                    las=1,bty="n"
+  )
+  segments(x0=0,x1=max(MidPts+0.5),y0=ytics,lty=2,lwd=1,col="gray80")
+  #segments(x0=0,x1=max(MidPts+0.5),y0=0,lty=1,lwd=1,col="black")
+  axis(2,at=ytics,las=1)
+  mtext(title,side=3,line=0.25,col="gray20",cex=1)
+  
+  
+  plotpoints<-rep(MidPts, each=4) + rep(c(-0.15,-0.05, 0.05, 0.15), 3)
+  
+  # plot estimates
+  arrows(x0=plotpoints, y0=d$lower.ci, y1=d$upper.ci, col=tr.cols,lwd=2,length=0.05,angle=90,code=3)
+  segments(x0=plotpoints[1:4],x1=plotpoints[5:8],y0=d$Dif[1:4],y1=d$Dif[5:8],col=alpha(tr.cols,.1), lwd=2)
   segments(x0=plotpoints[5:8],x1=plotpoints[9:12],y0=d$Dif[5:8],y1=d$Dif[9:12],col=alpha(tr.cols,.1), lwd=2)
-	points(plotpoints,d$Dif,pch=21,cex=1.5,lwd=1,col=tr.cols,bg="white")
-	points(plotpoints,d$Dif,pch=21,cex=1.5,lwd=0,col=tr.cols,bg=alpha(tr.cols,alpha=0.5))
-	#text(x=MidPts,y=d$upper.ci, labels=d$Pval,pos=3,cex=1,col=cols,font=1)
-
-	  # X-axis labels
-	if(xlab){
+  points(plotpoints,d$Dif,pch=21,cex=1.5,lwd=1,col=tr.cols,bg="white")
+  points(plotpoints,d$Dif,pch=21,cex=1.5,lwd=0,col=tr.cols,bg=alpha(tr.cols,alpha=0.5))
+  #text(x=MidPts,y=d$upper.ci, labels=d$Pval,pos=3,cex=1,col=cols,font=1)
+  
+  # X-axis labels
+  if(xlab){
     mtext(c("3", "14", "28"),
           side=1,line=2,at=MidPts,col="black",cex=0.8,las=1)
     mtext("Child age, months",
-          side=1,line=3,at=MidPts[2],col="black",cex=0.8,las=1)
-	}
+          side=1,line=3.5,at=MidPts[2],col="black",cex=0.8,las=1)
+  }
   box()
 }
 
@@ -347,37 +347,37 @@ MidPts <- barplot(1:n, names.arg=NA,col=NA,
 legendplot<-function(legend=T, cex=1, x=0.1, y=0.8){
   
   if(legend==F){
-      op <- par(mar=c(3,1,2,0)+0.1)
-    	ulabplot("")
+    op <- par(mar=c(3,1,2,0)+0.1)
+    ulabplot("")
   }else{
-        op <- par(mar=c(3,1,2,0)+0.1)
-    	ulabplot("")
-    legend(x=x, y=y, c("Control","Water + Sanitation +\nHandwashing","Nutrition","Nutrition + Water +\nSanitation + Handwashing"), col = tr.cols, pt.bg=alpha(tr.cols,alpha=0.5),
-       text.col = tr.cols, lty = c(1, 1, 1), pch = c(21, 21, 21),
-       merge = TRUE, bg = "white", cex=cex,  box.col="white",
-       xjust=0.5,
-       yjust=0.5,
-       y.intersp=1.5)
+    op <- par(mar=c(3,1,2,0)+0.1)
+    ulabplot("")
+    legend(x=x, y=y, c("Control","Water + Sanitation + Handwashing","Nutrition","Nutrition + Water + Sanitation + Handwashing"), col = tr.cols, pt.bg=alpha(tr.cols,alpha=0.5),
+           text.col = tr.cols, lty = c(1, 1, 1), pch = c(21, 21, 21),
+           merge = TRUE, bg = "white", cex=cex,  box.col="white",
+           xjust=0.5,
+           yjust=0.5,
+           y.intersp=1,
+           ncol=2)
   }
 }
 
 
 
-# setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Figures")
-# pdf("EE-mean-longitudinal-plots.pdf",width=10,height=8.5, paper="USr")
-lo <- layout(mat=matrix(1:9,ncol=3,nrow=3,byrow=T),widths=c(1,1,0.6))
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Figures")
+pdf("EE-mean-longitudinal-plots.pdf",width=10,height=8.5, paper="USr")
+lo <- layout(mat=matrix(c(1:6,7,7),ncol=2,nrow=4,byrow=T),widths=c(1,1),heights=c(1,1,1,0.5))
+
 op <- par(mar=c(4,0,3,0)+0.1)
 
 long.plot(d<-N_df[N_df$Location=="AAT",])
 long.plot(d<-N_df[N_df$Location=="Lact",])
-legendplot(F,1)
 long.plot(d<-N_df[N_df$Location=="NEO",])
 long.plot(d<-N_df[N_df$Location=="Mann",])
-legendplot(x=0.5, y=.5, T, 1.3)
 long.plot(d<-N_df[N_df$Location=="MPO",], xlab=T)
 long.plot(d<-N_df[N_df$Location=="LM",], xlab=T)
-legendplot(F,1)
+legendplot(x=0.5, y=.5, T, 1.3)
 
- 
-# dev.off()
+dev.off()
+
 
