@@ -278,7 +278,7 @@ ulabplot <- function(title) {
 
 
 
-long.plot<-function(d, yrange=NULL,  cols=cols, tickspace=0.2){
+long.plot<-function(d, yrange=NULL,  cols=cols, tickspace=0.2, xlab=F){
 
   op <- par(mar=c(3,3,2,0)+0.1)
   
@@ -333,10 +333,12 @@ MidPts <- barplot(1:n, names.arg=NA,col=NA,
 	#text(x=MidPts,y=d$upper.ci, labels=d$Pval,pos=3,cex=1,col=cols,font=1)
 
 	  # X-axis labels
-  mtext(c("3 month\nmean",
-          "14 month\nmean",
-          "28 month\nmean"),
-        side=1,line=2,at=MidPts,col="black",cex=0.8,las=1)
+	if(xlab){
+    mtext(c("3", "14", "28"),
+          side=1,line=2,at=MidPts,col="black",cex=0.8,las=1)
+    mtext("Child age, months",
+          side=1,line=3,at=MidPts[2],col="black",cex=0.8,las=1)
+	}
   box()
 }
 
@@ -361,8 +363,8 @@ legendplot<-function(legend=T, cex=1, x=0.1, y=0.8){
 
 
 
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Figures")
-pdf("EE-mean-longitudinal-plots.pdf",width=10,height=8.5, paper="USr")
+# setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Figures")
+# pdf("EE-mean-longitudinal-plots.pdf",width=10,height=8.5, paper="USr")
 lo <- layout(mat=matrix(1:9,ncol=3,nrow=3,byrow=T),widths=c(1,1,0.6))
 op <- par(mar=c(4,0,3,0)+0.1)
 
@@ -372,10 +374,10 @@ legendplot(F,1)
 long.plot(d<-N_df[N_df$Location=="NEO",])
 long.plot(d<-N_df[N_df$Location=="Mann",])
 legendplot(x=0.5, y=.5, T, 1.3)
-long.plot(d<-N_df[N_df$Location=="MPO",])
-long.plot(d<-N_df[N_df$Location=="LM",])
+long.plot(d<-N_df[N_df$Location=="MPO",], xlab=T)
+long.plot(d<-N_df[N_df$Location=="LM",], xlab=T)
 legendplot(F,1)
 
  
-dev.off()
+# dev.off()
 
