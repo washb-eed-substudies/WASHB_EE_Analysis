@@ -80,7 +80,29 @@ main_anthro<-main_anthro %>%
   select(dataid, childid, clusterid, main_svy, anthrodate, month, dob, aged, agem, agey, laz, laz_x, lazminus2, lazminus3, waz, waz_x, wazminus2, wazminus3, whz, whz_x, whzminus2, whzminus3,  bmiz, bmiz_x, hcz, hcz_x)
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew")
-anthro<-read.csv("BD-EE-anthro.csv")
+telo<-read.csv("BD-EE-telo.csv")
+anthro<-read.csv("BD-EE-anthro.csv",stringsAsFactors = TRUE)
+
+#Merge treatment information 
+telo <- telo %>% subset(., select = c(dataid, childNo, clusterid))
+dim(telo)
+d<-left_join(telo,treatment, by="clusterid")
+dim(d)
+head(d)
+table(d$tr)
+table(is.na(d$tr))
+
+
+
+
+#Merge in anthropometry measures
+head(anthro)
+dim(d)
+dim(anthro)
+d<-left_join(d, anthro, by=c("dataid", "childNo"))
+dim(d)
+head(d)
+
 
 
 #Merge treatment information 
