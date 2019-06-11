@@ -1,4 +1,5 @@
 
+
 rm(list=ls())
 library(tidyverse)
 library(haven)
@@ -18,6 +19,10 @@ table(is.na(imm[,-1]))
 
 fulld <- read.csv("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew/EE-BD_fulldata.csv")
 colnames(fulld)
+
+
+fulld$n_chickens[fulld$childid=="52061"]
+52061  76011 124071 133041 147011 207081 406071
 
 #Subset to needed variables
 
@@ -40,18 +45,53 @@ d <- left_join(d, blind_tr, by=c("block", "clusterid"))
 dim(d)
 table(d$tr)
 
-#Load and merge in ages at blood collection from 
+#Load and merge in ages and dates at blood collection from 
 ages <- read.csv("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew/BD-EE-telo.csv")
-ages <- ages %>% subset(., select = c(dataid, childNo, aged2, agem2, aged3, agem3))
+ages <- ages %>% subset(., select = c(dataid, childNo, aged2, agem2, aged3, agem3, month2, month3))
 dim(d)
 d <- left_join(d, ages, by=c("dataid", "childNo"))
 dim(d)
 table(is.na(d$agem2))
 table(is.na(d$agem3))
 
-#NOTE
-#Need to get ages for childid 30061 and 433011
+#NOTE: TEMP
+#Need to get ages for childid 30061 and 433011 from Audrie
+da <- read.csv("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Audrie/bangladesh-dm-ee-anthro-diar-ee-med-plasma-blind-tr-enrol-covariates-lab.csv")
+da <- da %>% subset(., select = c(childid,agemth_bt2, agemth_bt3)) 
 
+dim(d)
+dim(da)
+d <- full_join(d, da, by="childid")
+dim(d)
+
+#Note: Audrie's ages have 1 less decimal place
+d$agem2 <- round(d$agem2, 5)
+d$agem3 <- round(d$agem3, 5)
+
+#Add ages for 2 IDs
+d$agem2[d$childid==30061] <- d$agemth_bt2[d$childid==30061]
+d$agem3[d$childid==30061] <- d$agemth_bt3[d$childid==30061]
+d$agem2[d$childid==433011] <- d$agemth_bt2[d$childid==433011]
+d$agem3[d$childid==433011] <- d$agemth_bt3[d$childid==433011]
+
+#Save data.frame
+save(d, file = c("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew/BD-EE-immune.Rdata"))
+
+
+#Compare ages between Andrew and Audrie
+df2 <- d %>% select(childid, agem2, agemth_bt2, agem3, agemth_bt3)
+head(df2)
+
+df2[df2$childid=="439021",]
+
+#Note: Audrie's ages have 1 less decimal place
+df2$agem2 <- round(df2$agem2, 5)
+df2$agem3 <- round(df2$agem3, 5)
+table(df2$agem2==df2$agemth_bt2)
+table(df2$agem3==df2$agemth_bt3)
+
+df3 <- df2[df2$agem2!=df2$agemth_bt2 | df2$agem3!=df2$agemth_bt3,]
+df3
 #load in names of Audrie's objects
 nm <- list.files(path="C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Audrie/")
 nm
@@ -80,7 +120,7 @@ load("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Audrie/im
 age_t2_blood_L[,-1] - age_t2_blood_M[,-1]
 age_t3_blood_L[,-1] - age_t3_blood_M[,-1]
 
-
+#Note: Audrie is not tabulating  N's and gender counts for only kids with ages/obs, but totals
 
 
 #------------------------------------------------------------------------------------------------
@@ -203,8 +243,6 @@ comp_sex$RD.x - comp_sex$RD.y
 #Adjusted GLM
 #------------------
 
-
-
 #Set birthorder to 1, >=2, or missing
 class(d$birthord)
 d$birthord[d$birthord>1]<-"2+"
@@ -223,27 +261,17 @@ Wvars<-c('sex', 'birthord',
          'n_cows', 'n_goats', 'n_chickens')
 
 
-#Add in time varying covariates:
 
-d <- d %>% mutate(monsoon1 = ifelse(month1 > 4 & month1 < 11, "1", "0"),
-                  monsoon2 = ifelse(month2 > 4 & month2 < 11, "1", "0"),
+#Add in time varying covariates:
+d <- d %>% mutate(monsoon2 = ifelse(month2 > 4 & month2 < 11, "1", "0"),
                   monsoon3 = ifelse(month3 > 4 & month3 < 11, "1", "0"),
-                  monsoon1 = ifelse(is.na(month1),"missing", monsoon1),
                   monsoon2 = ifelse(is.na(month2),"missing", monsoon2),
                   monsoon3 = ifelse(is.na(month3),"missing", monsoon3),
-                  monsoon1 = factor(monsoon1),
                   monsoon2 = factor(monsoon2),
                   monsoon3 = factor(monsoon3))
 
-table(is.na(d$monsoon1))
-table(d$monsoon1)
-
-Wvars1<-c("aged1", "monsoon1") 
 Wvars2<-c("aged2", "monsoon2") 
 Wvars3<-c("aged3", "monsoon3") 
-
-table(is.na(d$aged1), is.na(d$LM1))
-
 
 
 #subset time-constant W adjustment set
@@ -380,7 +408,6 @@ for(i in 1:ncol(W)){
 
 
 #Add in time-varying covariates
-W1<- cbind(W, subset(d, select=Wvars1))
 W2<- cbind(W, subset(d, select=Wvars2))
 W3<- cbind(W, subset(d, select=Wvars3))
 
@@ -419,49 +446,84 @@ for(i in 1:ncol(W3)){
 ##############################################
 
 
-#dataframe of urine biomarkers:
-Y<-d %>% select(Lact1,Mann1,LM1,Lact2,Mann2,LM2,Lact3,Mann3,LM3)
-
-#Create empty matrix to hold the tmle results:
-res_adj<-list(lact_t1_adj=matrix(0,5,6), mann_t1_adj=matrix(0,5,6), lm_t1_adj=matrix(0,5,6), 
-              lact_t2_adj=matrix(0,5,6), mann_t2_adj=matrix(0,5,6), lm_t2_adj=matrix(0,5,6),  
-              lact_t3_adj=matrix(0,5,6), mann_t3_adj=matrix(0,5,6), lm_t3_adj=matrix(0,5,6))
-
-d %>% group_by(tr) %>%
-  summarize(Lac=mean(log(Lact1) ,na.rm=T), N=n())
-mean(log(d$Lact1), na.rm=T)
-mean(log(Y[,1]), na.rm=T)
-
-table(is.na(d$Lact1))
-table(is.na(Y[,1]))
-
-
-
-for(i in 1:3){
-  for(j in 1:5){
-    temp<-washb_glm(Y=log(Y[,i]), tr=d$tr, W=W1, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=T)
-    res_adj[[i]][j,]<-as.numeric(temp$TR)
+#Fully adjusted glm models
+res_adj <- NULL
+for(i in 1:ncol(Y)){
+  if(i < 18){
+    temp<-washb_glm(Y=(Y[,i]), tr=d$tr, W=W2, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), print=F)
+  }else{
+    temp<-washb_glm(Y=(Y[,i]), tr=d$tr, W=W3, id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), print=F)
   }
+  res_adj<-rbind(res_adj, as.numeric(temp$TR))
 }
-for(i in 4:6){
-  for(j in 1:5){
-    temp<-washb_glm(Y=log(Y[,i]), tr=d$tr, W=W2, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=T)
-    res_adj[[i]][j,]<-as.numeric(temp$TR)
-  }
+res_adj <- as.data.frame(res_adj)
+
+colnames(res_adj)<-c("RD","ci.l","ci.u", "Std. Error", "z value", "Pval")
+res_adj$Y <-colnames(Y)
+
+#Compare to Audrie's objects
+load("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Audrie/immune_adj_glm.RData")
+
+aud_adj <- as.data.frame(rbindlist(lapply(lapply(ls(pattern="_adj_L"), get), as.data.frame)))
+aud_adj$Y = gsub("_adj_L","",ls(pattern="_adj_L"))
+
+dim(res_adj)
+dim(aud_adj)
+comp_adj <- full_join(res_adj, aud_adj, by="Y")
+dim(comp_adj)
+comp_adj$RD.x - comp_adj$RD.y
+
+
+
+
+##############################################
+#Run GLMs for the sex-stratified subgroup analysis
+##############################################
+
+#sex stratified glm models
+res_sub <- NULL
+for(i in 1:ncol(Y)){
+  temp<-washb_glm(Y=(Y[,i]), tr=d$tr, W=data.frame(sex=d$sex), V="sex", id=d$block, pair=NULL, family="gaussian", contrast= c("Control","Nutrition + WSH"), print=F)
+  res_sub<-rbind(res_sub, temp$lincom)
 }
-for(i in 7:9){
-  for(j in 1:5){
-    temp<-washb_glm(Y=log(Y[,i]), tr=d$tr, W=W3, id=d$block.x, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=T)
-    res_adj[[i]][j,]<-as.numeric(temp$TR)
-  }
-}
+res_sub <- as.data.frame(res_sub)
+
+colnames(res_sub)<-c("sex","RD","ci.l","ci.u", "Std. Error", "z value", "Pval")
+res_sub$Y <-rep(colnames(Y), each=2)
+res_sub <- res_sub %>% mutate(subgroup = case_when(sex==1 ~ "male", sex==0 ~ "female", TRUE~""), subgroup=factor(subgroup))
+
+load("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Audrie/immune_subgroup.RData")
+aud_sub <- as.data.frame(rbindlist(lapply(lapply(ls(pattern="_subgroup_L"), get), as.data.frame)))
+aud_sub$Y = gsub("_subgroup_L","",ls(pattern="_subgroup_L"))
+
+dim(res_sub)
+dim(aud_sub)
+comp_sub <- full_join(res_sub, aud_sub, by=c("Y","subgroup"))
+dim(comp_sub)
+
+comp_sub$RD.x - comp_sub$RD.y
+
+il6_t3_subgroup_L
+
+##############################################
+#Plot results
+##############################################
+
+res_adj$marker <- str_split(res_adj$Y, "_t", simplify=T)[,1]
+res_adj$round <- as.numeric(str_split(res_adj$Y, "_t", simplify=T)[,2])
+res_adj <- res_adj %>% arrange(round, RD) %>%
+  mutate(Y=factor(Y, levels=unique(Y)))
+
+ggplot(res_adj, aes(x=Y, y=RD)) + geom_point() +
+  geom_pointrange(aes(ymin=ci.l, ymax=ci.u)) + geom_hline(yintercept = 0) + 
+  facet_wrap(~round, scales="free_x") + theme_bw()
 
 
+##############################################
+#Examine baseline data
+##############################################
 
-
-
-
-
-
-
+load("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Audrie/immune_enrol_baseline_char.RData")
+load("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Audrie/immune_enrol_supp_baseline_char_t2.RData")
+load("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Audrie/immune_enrol_supp_baseline_char_lost_t3.RData")
 

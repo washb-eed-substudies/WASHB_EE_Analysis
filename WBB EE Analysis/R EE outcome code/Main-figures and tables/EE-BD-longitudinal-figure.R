@@ -381,3 +381,18 @@ legendplot(x=0.5, y=.5, T, 1.3)
 dev.off()
 
 
+tiff("EE-mean-longitudinal-plots.tiff",width=10,height=8.5, units = 'in', res = 1200, compression = 'none')
+lo <- layout(mat=matrix(c(1:6,7,7),ncol=2,nrow=4,byrow=T),widths=c(1,1),heights=c(1,1,1,0.5))
+
+op <- par(mar=c(4,0,3,0)+0.1)
+
+long.plot(d<-N_df[N_df$Location=="AAT",])
+long.plot(d<-N_df[N_df$Location=="Lact",])
+long.plot(d<-N_df[N_df$Location=="NEO",])
+long.plot(d<-N_df[N_df$Location=="Mann",])
+long.plot(d<-N_df[N_df$Location=="MPO",], xlab=T)
+long.plot(d<-N_df[N_df$Location=="LM",], xlab=T)
+legendplot(x=0.5, y=.5, T, 1.3)
+
+dev.off()
+

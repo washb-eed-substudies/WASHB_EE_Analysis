@@ -88,12 +88,12 @@ ur <- ur %>% subset(., select = -c(consent1,nonconsent_reason1,h2aliqout1_t1,h2a
                                     agey3,clusterid.y,block.y,union,fracode,svydate,
                                    
                                     Nhh,momeduy,dadeduy,dadagri,landacre,hfias))
-st_only <- st_only %>% subset(., select = -c(tubewell,storewat,treatwat,odmen,odwom,odch815,odch38,odchu3,latown,latslab,latseal,
-                                    latfeces,potty,humfeces,humfecesch,hwlat,hwlatwat,hwlatsoap,hwkit,hwkitwat,hwkitsoap,hwsw,hwss,hwsws,
-                                    n_asset_wardrobe,n_asset_table,n_asset_chair,n_asset_clock,n_asset_khat,n_asset_chouki,n_asset_mobile,n_cows,n_goats,n_chickens,
-                                    aliqout1_t1,aliqout2_t1,aliqout3_t1,aliqout4_t1,aliqout5_t1,nonconsent_reason1,agey1,
-                                    aliqout1_t2,aliqout2_t2,aliqout3_t2,aliqout4_t2,aliqout5_t2,nonconsent_reason2,agey2,aliqout1_t3,aliqout2_t3,aliqout3_t3,
-                                    aliqout4_t3,aliqout5_t3,nonconsent_reason3,agey3,clusterid.y,block.y,union,dadeduy,dadagri,landacre,hfias))
+# st_only <- st_only %>% subset(., select = -c(tubewell,storewat,treatwat,odmen,odwom,odch815,odch38,odchu3,latown,latslab,latseal,
+#                                     latfeces,potty,humfeces,humfecesch,hwlat,hwlatwat,hwlatsoap,hwkit,hwkitwat,hwkitsoap,hwsw,hwss,hwsws,
+#                                     n_asset_wardrobe,n_asset_table,n_asset_chair,n_asset_clock,n_asset_khat,n_asset_chouki,n_asset_mobile,n_cows,n_goats,n_chickens,
+#                                     aliqout1_t1,aliqout2_t1,aliqout3_t1,aliqout4_t1,aliqout5_t1,nonconsent_reason1,agey1,
+#                                     aliqout1_t2,aliqout2_t2,aliqout3_t2,aliqout4_t2,aliqout5_t2,nonconsent_reason2,agey2,aliqout1_t3,aliqout2_t3,aliqout3_t3,
+#                                     aliqout4_t3,aliqout5_t3,nonconsent_reason3,agey3,clusterid.y,block.y,union,dadeduy,dadagri,landacre,hfias))
 
 
 #Join urine and stool datasets, keeping only rows in both
