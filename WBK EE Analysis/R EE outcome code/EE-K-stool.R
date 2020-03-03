@@ -508,3 +508,5 @@ save(neo_t1_adj_M, mpo_t1_adj_M, aat_t1_adj_M,
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Temp/")
 save(d, file="stool_figure_data.Rdata")
 
+#save cleaned dataset
+write.csv(d, file="C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew/washb-kenya-eed-stool.csv")

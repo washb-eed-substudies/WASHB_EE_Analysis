@@ -11,7 +11,7 @@
 
 
 ###Load in data
-#rm(list=ls())
+rm(list=ls())
 library(tidyverse)
 library(washb)
 library(lubridate)
@@ -61,33 +61,33 @@ d <- d %>%
 #Calculate average age across arms at followup time 1, 2, and 3
 #Survey 1
 #Tabulate overall N, gender, and age 
-overallN1<-d%>% subset(!(is.na(d$Lact1)|is.na(d$Mann1))) %>% summarize(N=n(),Median_agem=median(agem1, na.rm=T), Mean_agem=mean(agem1, na.rm=T), Sd_agem=sd(agem1, na.rm=T), nummales=sum(sex), numfemales=n()-sum(sex)) 
+overallN1<-d%>% subset(!(is.na(d$ln_lact1)|is.na(d$ln_mann1))) %>% summarize(N=n(),Median_agem=median(agem1, na.rm=T), Mean_agem=mean(agem1, na.rm=T), Sd_agem=sd(agem1, na.rm=T), nummales=sum(sex), numfemales=n()-sum(sex)) 
 overallN1<-cbind("Overall", overallN1)
 colnames(overallN1)[1]<-"tr"
 #subset(!is.na(h2aliqout1_t1) & h2aliqout1_t1>1 | !is.na(h5aliqout7_t1) & h5aliqout7_t1>1) 
 
 #Tabulate N, gender, and age across survey rounds
-t1<-d %>% subset(!(is.na(d$Lact1)|is.na(d$Mann1))) %>% group_by(tr) %>%summarize(N=n(), Median_agem=median(agem1, na.rm=T), Mean_agem=mean(agem1, na.rm=T), Sd_agem=sd(agem1, na.rm=T), nummales=sum(sex), numfemales=n()-sum(sex)) 
+t1<-d %>% subset(!(is.na(d$ln_lact1)|is.na(d$ln_mann1))) %>% group_by(tr) %>%summarize(N=n(), Median_agem=median(agem1, na.rm=T), Mean_agem=mean(agem1, na.rm=T), Sd_agem=sd(agem1, na.rm=T), nummales=sum(sex), numfemales=n()-sum(sex)) 
 
 
 #Survey 2
 #Tabulate overall N, gender, and age 
-overallN2<-d %>% subset(!(is.na(d$Lact2)|is.na(d$Mann2))) %>% summarize(N=n(),Median_agem=median(agem2, na.rm=T), Mean_agem=mean(agem2, na.rm=T), Sd_agem=sd(agem2, na.rm=T), nummales=sum(sex), numfemales=n()-sum(sex)) 
+overallN2<-d %>% subset(!(is.na(d$ln_lact2)|is.na(d$ln_mann2))) %>% summarize(N=n(),Median_agem=median(agem2, na.rm=T), Mean_agem=mean(agem2, na.rm=T), Sd_agem=sd(agem2, na.rm=T), nummales=sum(sex), numfemales=n()-sum(sex)) 
 overallN2<-cbind("Overall", overallN2)
 colnames(overallN2)[1]<-"tr"
 
 #Tabulate N, gender, and age across survey rounds
-t2<-d%>% subset(!(is.na(d$Lact2)|is.na(d$Mann2))) %>% group_by(tr) %>%summarize(N=n(), Median_agem=median(agem2, na.rm=T), Mean_agem=mean(agem2, na.rm=T), Sd_agem=sd(agem2, na.rm=T), nummales=sum(sex), numfemales=n()-sum(sex)) 
+t2<-d%>% subset(!(is.na(d$ln_lact2)|is.na(d$ln_mann2))) %>% group_by(tr) %>%summarize(N=n(), Median_agem=median(agem2, na.rm=T), Mean_agem=mean(agem2, na.rm=T), Sd_agem=sd(agem2, na.rm=T), nummales=sum(sex), numfemales=n()-sum(sex)) 
 
 
 #Survey 3
 #Tabulate overall N, gender, and age 
-overallN3<-d%>% subset(!(is.na(d$Lact3)|is.na(d$Mann3))) %>% summarize(N=n(),Median_agem=median(agem3, na.rm=T), Mean_agem=mean(agem3, na.rm=T), Sd_agem=sd(agem3, na.rm=T), nummales=sum(sex, na.rm=T), numfemales=n()-sum(sex, na.rm=T)) 
+overallN3<-d%>% subset(!(is.na(d$ln_lact3)|is.na(d$ln_mann3))) %>% summarize(N=n(),Median_agem=median(agem3, na.rm=T), Mean_agem=mean(agem3, na.rm=T), Sd_agem=sd(agem3, na.rm=T), nummales=sum(sex, na.rm=T), numfemales=n()-sum(sex, na.rm=T)) 
 overallN3<-cbind("Overall", overallN3)
 colnames(overallN3)[1]<-"tr"
 
 #Tabulate N, gender, and age across survey rounds
-t3<-d %>% subset(!(is.na(d$Lact3)|is.na(d$Mann3))) %>% group_by(tr) %>%summarize(N=n(), Median_agem=median(agem3, na.rm=T), Mean_agem=mean(agem3, na.rm=T), Sd_agem=sd(agem3, na.rm=T), nummales=sum(sex, na.rm=T), numfemales=n()-sum(sex, na.rm=T)) 
+t3<-d %>% subset(!(is.na(d$ln_lact3)|is.na(d$ln_mann3))) %>% group_by(tr) %>%summarize(N=n(), Median_agem=median(agem3, na.rm=T), Mean_agem=mean(agem3, na.rm=T), Sd_agem=sd(agem3, na.rm=T), nummales=sum(sex, na.rm=T), numfemales=n()-sum(sex, na.rm=T)) 
 
 
 age_t1_urine_M<-rbind(overallN1, t1)
@@ -138,26 +138,29 @@ lm_t3_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$LM3, id=.$bl
 #N Log-transformed means
 #------------------
 
-d$Lact1 <- log(d$Lact1)
-d$Lact2 <- log(d$Lact2)
-d$Lact3 <- log(d$Lact3)
-d$Mann1 <- log(d$Mann1)
-d$Mann2 <- log(d$Mann2) 
-d$Mann3 <- log(d$Mann3) 
-d$LM1 <- log(d$LM1)
-d$LM2 <- log(d$LM2)
-d$LM3 <- log(d$LM3) 
+#untransformed outcomes
+
+
+d$ln_lact1 <- log(d$Lact1)
+d$ln_lact2 <- log(d$Lact2)
+d$ln_lact3 <- log(d$Lact3)
+d$ln_mann1 <- log(d$Mann1)
+d$ln_mann2 <- log(d$Mann2) 
+d$ln_mann3 <- log(d$Mann3) 
+d$ln_LM1 <- log(d$LM1)
+d$ln_LM2 <- log(d$LM2)
+d$ln_LM3 <- log(d$LM3) 
 
 #Means and 95% CI's for mean by arm plots
-lac_t1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Lact1, id=.$block, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-lac_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Lact2, id=.$block, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-lac_t3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Lact3, id=.$block, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-man_t1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Mann1, id=.$block, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-man_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Mann2, id=.$block, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-man_t3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$Mann3, id=.$block, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-lm_t1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$LM1, id=.$block, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-lm_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$LM2, id=.$block, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
-lm_t3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$LM3, id=.$block, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+lac_t1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$ln_lact1, id=.$block, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+lac_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$ln_lact2, id=.$block, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+lac_t3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$ln_lact3, id=.$block, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+man_t1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$ln_mann1, id=.$block, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+man_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$ln_mann2, id=.$block, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+man_t3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$ln_mann3, id=.$block, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+lm_t1_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$ln_LM1, id=.$block, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+lm_t2_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$ln_LM2, id=.$block, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
+lm_t3_mn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$ln_LM3, id=.$block, print = F))) %>% ungroup %>% as.data.frame %>% `rownames<-`(.[,1]) %>% .[,-1] 
 
 
 
@@ -191,7 +194,7 @@ urine_overall_mn
 #------------------
 
 #dataframe of urine biomarkers:
-Y<-d %>% select(Lact1,Mann1,LM1,Lact2,Mann2,LM2,Lact3,Mann3,LM3)
+Y<-d %>% select(ln_lact1,ln_mann1,ln_LM1,ln_lact2,ln_mann2,ln_LM2,ln_lact3,ln_mann3,ln_LM3)
 
 #Set contrasts:
 contrasts <- list(c("Control","WSH"), c("Control","Nutrition"), c("Control","Nutrition + WSH"), c("WSH","Nutrition + WSH"), c("Nutrition","Nutrition + WSH"))
@@ -452,7 +455,8 @@ save(lac_t1_adj_M, man_t1_adj_M, lm_t1_adj_M,
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Temp/")
 save(d, file="urine_figure_data.Rdata")
 
-
+#save cleaned dataset
+write.csv(d, file="C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew/washb-kenya-eed-urine.csv")
 
 #--------------------------------
 # Percent L and M recovery
