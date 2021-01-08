@@ -100,6 +100,12 @@ table(d$tr)
 #Subset to EED arms
 d<-subset(d, tr=="Control" | tr=="WSH" | tr=="Nutrition" | tr=="Nutrition + WSH")
 
+#check on discrepencies for Jess
+d[d$dataid==6103,]
+treatment[treatment$dataid==6103,]
+ipcw[ipcw$dataid==6103,]
+stool_outcomes[stool_outcomes$dataid==6103,]
+stool[stool$dataid==6103,]
 
 #--------------------------------------------------------------------
 #Impute time varying covariates

@@ -18,9 +18,13 @@ library(reshape2)
 
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/")
-load("washb-bangladesh-tr.Rdata")
+load("washb-bangladesh-tr (real).Rdata")
 d$clusterid<-as.numeric(d$clusterid)
 treatment<-d
+
+#treatment <- read.csv("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/washb-bangladesh-tr (real).csv")
+#treatment <- read.csv("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/washb-BD-EE-blind-tr.csv")
+
 # load("washb-BD-EE-blind-tr.Rdata")
  levels(treatment$tr)
  treatment$tr <- factor(treatment$tr,levels=c("Control","WSH","Nutrition","Nutrition + WSH"))
@@ -87,6 +91,7 @@ colnames(d)
 
 #Drop twins so HH characteristics aren't duplicates
 d<-subset(d, childNo!=2)
+table(d$tr)
 
 #test that all rows are matched to enrollment data
 table(is.na(d$svydate)) 
