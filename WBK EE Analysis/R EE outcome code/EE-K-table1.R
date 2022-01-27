@@ -93,7 +93,7 @@ d$feces_bl <-ifelse(d$feces_bl=="yes", 1, ifelse(d$feces_bl=="", NA, 0))
 d$water_bl <-ifelse(d$water_bl=="yes", 1, ifelse(d$water_bl=="", NA, 0))
 d$soap_bl <-ifelse(d$soap_bl=="yes", 1, ifelse(d$soap_bl=="", NA, 0))
 
-vlist <- c("mother_age","motherht", "mom_primary","dad_primary","dad_agri","Nhh","elec","cement","roof","water_time","prim_drink_ws_bl","tr_storedwt_bl",
+vlist <- c("mother_age","motherht", "mom_primary","dad_primary","dad_agri","Ncomp","elec","cement","roof","water_time","prim_drink_ws_bl","tr_storedwt_bl",
            "od_child03_bl","ownlat_bl", "imp_lat_bl", "feces_bl","water_bl","soap_bl", "foodinsecure")
 
 
@@ -143,7 +143,7 @@ for (i in 1:length(vlist)) {
   n <- round(balance.tab.n_M[i+1,])
   sd <- round(balance.tab.sd_M[i+1,])
   
-  if(vlist[i] %in% c("mother_age","motherht","Nhh","water_time")){
+  if(vlist[i] %in% c("mother_age","motherht","Ncomp","water_time")){
     results <- rbind(results, paste0(round(mu), " (", sd, ")"))
   }else{
     results <- rbind(results, paste0(n, " (", round(mu*100), "%)"))
@@ -155,7 +155,7 @@ N <- Ns$Freq
 names(results) <- paste0(c("Control", "Water, Sanitation, and Handwashing", "Nutrition", "Water, Sanitation, Handwashing, and Nutrition"),
                          " (N=", N, ")")
 vlist_names <- c("Age (years)","Height (cm)", "Completed at least primary education","Completed at least primary education",
-                 "Works in agriculture","Number of people","Has electricity","Has a cement floor","Has an iron roof",
+                 "Works in agriculture","Number of people per compound","Has electricity","Has a cement floor","Has an iron roof",
                  "One-way walking time to primary water source (min)",
                  "Primary drinking water source is improved","Reported treating currently stored water",
                  "Daily defecating in the open, children aged 0 to <3 years","Own any latrine", "Access to improved latrine", 
@@ -169,13 +169,45 @@ setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Results/tables")
 library(flextable)
 flextable(results) %>% align(j=3:6, align="center") %>% hline(i=c(3,5,9,12,16,18)) %>% save_as_docx(path="EE-Kenya-table1.docx")
 
+ctrl <- c("26 (6)", "160 (6)", "916 (48%)", "1098 (62%)", "749 (41%)", 
+          "8 (5)", "122 (6%)", "107 (6%)", "1302 (68%)", 
+          "11 (12)", "1446 (76%)", "196 (13%)", 
+          "789 (78%)", "1561 (82%)", "309 (17%)", "163 (9%)", 
+          "487 (25%)", "164 (9%)", "203 (11%)")
+wsh <- c("26 (6)", "160 (6)", "430 (47%)", "521 (61%)", "374 (43%)", 
+         "8 (5)", "64 (7%)", "50 (5%)", "574 (63%)", 
+         "11 (13)", "624 (69%)", "97 (13%)", 
+         "394 (77%)", "754 (83%)", "153 (18%)", "73 (8%)", 
+         "251 (28%)", "115 (13%)", "101 (11%)")
+nutrition <- c("26 (6)", "160 (6)", "409 (49%)", "491 (64%)", "343 (43%)", 
+          "8 (7)", "58 (7%)", "48 (6%)", "581 (69%)", 
+          "11 (12)", "603 (72%)", "79 (12%)", 
+          "363 (79%)", "701 (83%)", "119 (15%)", "73 (9%)", 
+          "228 (27%)", "90 (11%)", "98 (12%)")
+n_wsh <- c("26 (6)", "160 (6)", "438 (48%)", "526 (62%)", "372 (43%)", 
+           "8 (5)", "67 (7%)", "56 (6%)", "615 (67%)", 
+           "11 (12)", "697 (76%)", "106 (14%)", 
+           "388 (78%)", "764 (83%)", "143 (16%)", "87 (9%)", 
+           "249 (27%)", "87 (9%)", "104 (11%)")
+
+tbls1 <- cbind(ctrl, wsh, nutrition, n_wsh) %>% as.data.frame()
+names(tbls1) <- paste0(c("Control", "Water, Sanitation, and Handwashing", "Nutrition", "Water, Sanitation, Handwashing, and Nutrition"),
+                         " (N=", c(1919, 912, 843, 921), ")")
+
+tbls1 <- cbind(results, tbls1) %>% select(1, 2, 7:10, 3:6)
+tbls1_flex <- flextable(tbls1) %>% align(j=3:10, align="center", part = "all") %>% hline(i=c(3,5,9,12,16,18))
+tbls1_flex <- tbls1_flex %>% add_header_row(values = c("", "WASH Benefits Main Trial", "EED Substudy"), colwidths = c(2, 4, 4)) %>% hline_top(part="header") 
+
+tbls1_flex %>% save_as_docx(path="EE-Kenya-tables1.docx")
+
 #Create supplimentary table 1
 #Merge in outcomes
 
 
 #Create supplimentary table 1
 #Merge in outcomes
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew")
+setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Data/Cleaned/Andrew")
+#setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew")
 urine.outcomes<-read.dta("washb-BD-EE-urine-outcomes-stata12.dta")
 stool.outcomes<-read.dta("BD-EE-stool-outcomes-Stata12.dta")
 urine.outcomes$childid<-as.numeric(urine.outcomes$childid)
