@@ -2,10 +2,11 @@
 #---------------------------------------
 # EE-BD-table1.R
 #
-# andrew mertens (amertens@berkeley.edu)
+# sophia tan
 #
 # The tabulate enrollment variables for 
 # manuscript table 1
+# Also contains supplementary tables 1 and 2 
 #---------------------------------------
 
 ###Load in data
@@ -200,7 +201,9 @@ tbls1_flex <- tbls1_flex %>% add_header_row(values = c("", "WASH Benefits Main T
 
 tbls1_flex %>% save_as_docx(path="EE-Kenya-tables1.docx")
 
-#Create supplimentary table 1
+
+
+#Create supplimentary table 2
 #Merge in outcomes
 
 
@@ -208,30 +211,41 @@ tbls1_flex %>% save_as_docx(path="EE-Kenya-tables1.docx")
 #Merge in outcomes
 setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Data/Cleaned/Andrew")
 #setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew")
-urine.outcomes<-read.dta("washb-BD-EE-urine-outcomes-stata12.dta")
-stool.outcomes<-read.dta("BD-EE-stool-outcomes-Stata12.dta")
-urine.outcomes$childid<-as.numeric(urine.outcomes$childid)
-stool.outcomes$childid<-as.numeric(stool.outcomes$childid)
+urine<-read.csv("washb-kenya-eed-urine.csv", stringsAsFactors = TRUE)
+stool<-read.csv("washb-kenya-eed-stool.csv", stringsAsFactors = TRUE)
+urine$childid<-as.numeric(urine$childid)
+stool$childid<-as.numeric(stool$childid)
+
+urine <- urine%>%select(childid, Lact1, Lact2, Lact3, Mann1, Mann2, Mann3, agem1, agem2, agem3) %>% 
+  rename("agem_u1"="agem1", "agem_u2"="agem2", "agem_u3"="agem3")
+stool <- stool%>%select(childid, aat1, aat2, aat3, mpo1, mpo2, mpo3, neo1, neo2, neo3, agem1, agem2, agem3) %>% 
+  rename("agem_s1"="agem1", "agem_s2"="agem2", "agem_s3"="agem3")
 
 
+d<-left_join(d,urine, by="childid")
+d<-left_join(d,stool, by="childid")
+d <- d%>%mutate(agem1_min = min(agem_u1, agem_s1, na.rm=T), agem2_min = min(agem_u2, agem_s2, na.rm=T), agem3_min = min(agem_u3, agem_s3, na.rm=T))
 
-d<-left_join(d,urine.outcomes, by="childid")
-d<-left_join(d,stool.outcomes, by="childid")
-
+d <- d %>% left_join(read_csv("raw CSV/washk_allchild_covariates.csv") %>% select(childid, sex), 'childid')
 
 overallN1<-d%>% 
-  subset(!is.na(d$Lact1)|!is.na(d$Mann1)|!is.na(d$t1_aat)|!is.na(d$t1_mpo)|!is.na(d$t1_neo)) %>% 
-  summarize(N=n(),Median_agem=median(agem1, na.rm=T), Mean_agem=mean(agem1, na.rm=T), Sd_agem=sd(agem1, na.rm=T), nummales=sum(sex), numfemales=n()-sum(sex)) 
+  subset(!is.na(d$Lact1)|!is.na(d$Mann1)|!is.na(d$aat1)|!is.na(d$mpo1)|!is.na(d$neo1)|
+           !is.na(d$Lact2)|!is.na(d$Mann2)|!is.na(d$aat2)|!is.na(d$mpo2)|!is.na(d$neo2)|
+           !is.na(d$Lact3)|!is.na(d$Mann3)|!is.na(d$aat3)|!is.na(d$mpo3)|!is.na(d$neo3)) %>% 
+  summarize(N=n(),
+            Median_agem=median(agem1_min, na.rm=T), 
+            Mean_agem=mean(agem1_min, na.rm=T), 
+            Sd_agem=sd(agem1_min, na.rm=T), nummales=sum(sex=="Male", na.rm=T), numfemales=sum(sex=="Female", na.rm=T)) 
 overallN1<-cbind("Overall", overallN1)
 colnames(overallN1)[1]<-"tr"
 
 suppd1<-d %>% 
-    subset(is.na(d$Lact2) & is.na(d$Mann2)&is.na(d$t2_aat)&is.na(d$t2_mpo)&is.na(d$t2_neo))
+    subset(is.na(d$Lact2) & is.na(d$Mann2)&is.na(d$aat2)&is.na(d$mpo2)&is.na(d$neo2))
 dim(suppd1)
 
 
 suppd2<-d %>% 
-    subset(is.na(d$Lact3) & is.na(d$Mann3) & is.na(d$t3_aat) & is.na(d$t3_mpo) & is.na(d$t3_neo))
+    subset(is.na(d$Lact3) & is.na(d$Mann3) & is.na(d$aat3) & is.na(d$mpo3) & is.na(d$neo3))
 dim(suppd2) 
   
 
@@ -244,21 +258,14 @@ suppd2$col<-3
 
 
 table.dat<-subset(d, select=c("tr","col",vlist)) %>% subset(tr=="Control" | tr=="WSH" | tr=="Nutrition" | tr=="Nutrition + WSH") %>% select(-tr)
-#Telomere substudy enrolled at Year 1
+#Lost to follow-up at t2
 s1.table.dat<-subset(suppd1, select=c("tr","col", vlist)) %>% subset(tr=="Control" | tr=="WSH" | tr=="Nutrition" | tr=="Nutrition + WSH") %>% select(-tr)
-#Telomere substudy lost to follow-up at Year 2
+#Lost to follow-up at t3
 s2.table.dat<-subset(suppd2, select=c("tr","col", vlist)) %>% subset(tr=="Control" | tr=="WSH" | tr=="Nutrition" | tr=="Nutrition + WSH") %>% select(-tr)
 
 #combine:
 s.table.dat<-rbind(table.dat,s1.table.dat,s2.table.dat)
 head(s.table.dat)
-
-#Change factors to indicators
-for(i in 1:ncol(s.table.dat)){
-  cat(colnames(s.table.dat)[i]," : ",class((s.table.dat[,i])),"\n")
-}
-
-s.table.dat$hfiacat<-ifelse(s.table.dat$hfiacat=="Severely Food Insecure" | s.table.dat$hfiacat=="Moderately Food Insecure", 1,0)
 
 #Supplimentary table 1 
 s.table1_mu<-s.table.dat%>%
@@ -291,8 +298,43 @@ s.balance.tab.mu_M[,1]<-s.Ns
 s.balance.tab.n_M[,1]<-s.Ns
 s.balance.tab.sd_M[,1]<-s.Ns
 
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Tables/")
+setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Results/tables")
 save(s.balance.tab.mu_M, s.balance.tab.n_M, s.balance.tab.sd_M, 
-     file="EE-BD_s.table1.Rdata")
+     file="EE-BD_s.table2.Rdata")
 
 
+library(data.table)
+s.mu <- s.balance.tab.mu_M %>%transpose(keep.names = "v")
+s.n <- s.balance.tab.n_M %>%transpose(keep.names = "v")
+s.sd <- s.balance.tab.sd_M %>%transpose(keep.names = "v")
+
+results <- data.frame()
+for (i in 1:length(vlist)) {
+  mu <- s.mu[i+1,2:4] %>% as.vector()
+  n <- round(s.n[i+1,2:4])%>% as.vector()
+  sd <- round(s.sd[i+1,2:4])%>% as.vector()
+  
+  if(vlist[i] %in% c("mother_age","motherht","Ncomp","water_time")){
+    results <- rbind(results, paste0(round(mu), " (", sd, ")"))
+  }else{
+    results <- rbind(results, paste0(n, " (", round(mu*100), "%)"))
+  }
+}
+
+N <- s.mu[1,2:4] %>% as.vector()
+names(results) <- paste0(c("Included", "Lost to follow-up at 17 months", "Lost to follow-up at 22 months"),
+                         " (N=", N, ")")
+vlist_names <- c("Age (years)","Height (cm)", "Completed at least primary education","Completed at least primary education",
+                 "Works in agriculture","Number of people per compound","Has electricity","Has a cement floor","Has an iron roof",
+                 "One-way walking time to primary water source (min)",
+                 "Primary drinking water source is improved","Reported treating currently stored water",
+                 "Daily defecating in the open, children aged 0 to <3 years","Own any latrine", "Access to improved latrine", 
+                 "Human feces observed in compound","Has water within 2 m","Has soap within 2 m", "Moderate to severe household hunger")
+categories <- c("Maternal", "","", "Paternal", "", "Household", "","","","Drinking water", "","","Sanitation","","","","Handwashing location", "","Food security")
+results$` ` <- vlist_names
+results$`  ` <- categories
+results <- results %>% select(5, 4, 1, 2, 3)
+
+setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Results/tables")
+library(flextable)
+flextable(results) %>% align(j=3:5, align="center", part = "all") %>% autofit() %>% hline(i=c(3,5,9,12,16,18)) %>% save_as_docx(path="EE-Kenya-tables2.docx")
