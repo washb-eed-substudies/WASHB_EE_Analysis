@@ -3,7 +3,8 @@
 # EE-K-tables.R
 #
 # andrew mertens (amertens@berkeley.edu)
-#
+# and sophia tan
+# 
 # Create R-objects for xtable printing
 # for the WASH Benefits Bangladesh EED 
 # substudy
@@ -66,68 +67,6 @@ pt.est.ci.f=function(obj,decimals,scale){
 }
 
 
-table1_create<-function(mu, n, sd, mean.ind, vargroup, vargroup.row, Rownames, round){
-  dat<-NULL
-  for(j in 1:nrow(n)){
-      if(mean.ind[j]==1){
-      temp<-cbind(mu[j,1],sd[j,1],mu[j,2],sd[j,2],mu[j,3],sd[j,3],mu[j,4],sd[j,4])
-      temp<-rnd(temp, 0)
-      dat<-rbind(dat, temp)
-      }else{
-      temp<-cbind(n[j,1],mu[j,1]*100,
-                  n[j,2],mu[j,2]*100,
-                  n[j,3],mu[j,3]*100,
-                  n[j,4],mu[j,4]*100)
-      temp<-rnd(temp, 0)
-      dat<-rbind(dat, temp)
-      }
-  }
-  rownames(dat)<-rownames(mu)
-  #dat<-rnd(dat, round)
-  #dat<-cbind(Rownames,dat)
-  col1<-NULL
-  col2<-NULL
-  col3<-NULL
-  col4<-NULL
-  for(j in 1:nrow(n)){
-      if(mean.ind[j]==1){
-      temp1<-cbind(paste(dat[j,1]," (",dat[j,2],")",sep=""))
-      temp2<-cbind(paste(dat[j,3]," (",dat[j,4],")",sep=""))
-      temp3<-cbind(paste(dat[j,5]," (",dat[j,6],")",sep=""))
-      temp4<-cbind(paste(dat[j,7]," (",dat[j,8],")",sep=""))
-
-      col1<-rbind(col1, temp1)
-      col2<-rbind(col2, temp2)
-      col3<-rbind(col3, temp3)
-      col4<-rbind(col4, temp4)
-
-      }else{
-        if(j==1){
-      temp1<-cbind(paste(dat[j,1],sep=""))
-      temp2<-cbind(paste(dat[j,3],sep=""))
-      temp3<-cbind(paste(dat[j,5],sep=""))
-      temp4<-cbind(paste(dat[j,7],sep=""))
-
-      col1<-rbind(col1, temp1)
-      col2<-rbind(col2, temp2)  
-      col3<-rbind(col3, temp3)           
-      col4<-rbind(col4, temp4)           
-        }else{
-      temp1<-cbind(paste(dat[j,1]," (",dat[j,2],"\\%)",sep=""))
-      temp2<-cbind(paste(dat[j,3]," (",dat[j,4],"\\%)",sep=""))
-      temp3<-cbind(paste(dat[j,5]," (",dat[j,6],"\\%)",sep=""))
-      temp4<-cbind(paste(dat[j,7]," (",dat[j,8],"\\%)",sep=""))
-      col1<-rbind(col1, temp1)
-      col2<-rbind(col2, temp2) 
-      col3<-rbind(col3, temp3) 
-      col4<-rbind(col4, temp4) 
-          }
-      }
-  } 
-  dat<-cbind(Rownames, col1, col2, col3, col4)
-  colnames(dat)=c(" ","Control","WSH","Nutrition","Nutrition + WSH")
-  return(dat)
-}
 
 
 #Function to round 0.5 away from zero (differs from R's default behavior)
@@ -150,134 +89,13 @@ rnd<- function(x, n=2) {
   z*posneg
 }
 
-
-#load objects
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Andrew/")
-# load("EE-K-table1.Rdata")
-# 
-# 
-# balance.tab.mu_M 
-# balance.tab.n_M 
-# balance.tab.sd_M
-# 
-# mean.ind<-c(0,1,1,1,0,1,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
-# 
-# rownames(balance.tab.mu_M)[which(mean.ind==1)]
-# rownames(balance.tab.mu_M)[which(mean.ind!=1)]
-# balance.tab.n_M[which(mean.ind!=1),]
-# #vargroup<-c(0)
-# #vargroup.row<-c(2,5,8,13,20,21,27,32,33,36,37,40,43)
-# Rownames<-c("No. of compounds",
-#             "Age (years)",
-#   "Years of education",
-#   "Years of education",
-#   "Works in agriculture",
-#   "Number of persons"
-#   ,"Has electricity"
-#   ,"Has a cement floor"
-#   ,"Acres of agricultural land owned",
-#       "Shallow tubewell primary water source",
-#     "Stored water observed at home",
-#     "Reported treating water yesterday",
-#     "Distance (mins) to primary water source",
-#         "Adult men",
-#         "Adult women",
-#         "Children: 8-\\textless 15 years",
-#         "Children: 3-\\textless 8 years",
-#         "Children: 0-\\textless 3 years",
-#         "Owned",
-#         "Concrete slab",
-#         "Functional water seal",
-#         "Visible stool on slab or floor",
-#         "Owned a potty",
-#         "House",
-#         "Child's play area",
-#         "Has water",
-#         "Has soap",
-#         "Has water",
-#         "Has soap",
-#     "Household is food secure"
-#   )
-# 
-# tab<-table1_create(mu=balance.tab.mu_M, 
-#                    n=balance.tab.n_M, 
-#                    sd=balance.tab.sd_M, 
-#                    mean.ind=mean.ind,
-#                    Rownames=Rownames,
-#                    round=1)
-# tab
-# 
-# 
-# 
-# #Add in variable group labels
-# blank=rep("",12)
-# 
-# n.comp.f<-tab[1,]
-# tab<-tab[-1,]
-# 
-# table1_f=   rbind(
-#                c("\\textbf{Maternal}",blank,blank),
-#                tab[c(1:2),],
-#                c( "\\textbf{Paternal}",blank,blank),
-#                tab[c(3:4),],
-#                c("\\textbf{Household}",blank,blank),
-#                tab[c(5:8),],
-#                c("\\textbf{Drinking Water}",blank,blank),
-#                tab[c(9:12),],
-#                c("\\textbf{Sanitation}",blank,blank),
-#                c("Reported daily open defecation",blank,blank),
-#                tab[c(13:17),],
-#                c("Latrine",blank,blank),
-#                tab[c(18:22),],
-#                c("Human feces observed in the",blank,blank),
-#                tab[c(23:24),],
-#                c("\\textbf{Handwashing}",blank,blank),
-#                c("Within 6 steps of latrine",blank,blank),
-#                tab[c(25:26),],
-#                c("Within 6 steps of kitchen",blank,blank),
-#                tab[c(27:28),],
-#                c("\\textbf{Nutrition}",blank,blank),
-#                tab[c(29),])
-# 
-# rownames(table1_f)=NULL
-# 
-# table1_f
-# n.comp.f
-# 
-# n.comp.f[2]=paste(" (N=",n.comp.f[2],")",sep="")
-# n.comp.f[3]=paste(" (N=",n.comp.f[3],")",sep="")
-# n.comp.f[4]=paste(" (N=",n.comp.f[4],")",sep="")
-# n.comp.f[5]=paste(" (N=",n.comp.f[5],")",sep="")
-# n.comp.f<-n.comp.f[2:5]
-# colnames(n.comp.f)<-NULL
-# 
-# 
-# for(i in c(2:3,5:6,8:11,13:16,18,24,29:30,34,37,41)){
-#   table1_f[i,1]=paste("~~~",table1_f[i,1],sep="")
-# }
-# for(i in c(19:23,25:28,26:27,31,32,35:36,38:39)){
-#   table1_f[i,1]=paste("~~~~~",table1_f[i,1],sep="")
-# }
-# 
-# table1_f
-# 
-# #n.comp.f<-c("No. of compounds:")
-# 
-# 
-# setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Tables/")
-# save(n.comp.f, table1_f, file="EE-K-table1_f.RData")
-# 
-# 
-# #cleantable(n.comp.f,digits=0)
-# cleantable(table1_f,digits=0)
-
-
 #--------------------------------
 #Table 2
 #--------------------------------
 
 #load objects
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Andrew/")
+setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Results/Andrew/")
+#setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Andrew/")
 load("stool_res_unadj_M.Rdata")
 load("stool_res_adj_M.Rdata")
 load("stool_res_N_M.Rdata")
@@ -372,24 +190,32 @@ tab2<-rbind(
 
 blank=rep("",6)
 tab2<-as.matrix(tab2)
-tab2<-rbind(t(c("\\textbf{Ln myeloperoxidase (ng/ml)}",blank)),
+tab2<-rbind(t(c("Ln myeloperoxidase (ng/ml)",blank)),
             tab2[1:4,],
-            t(c("\\textbf{Ln alpha-1 antitrypsin (mg/g)}",blank)),
+            t(c("Ln alpha-1 antitrypsin (mg/g)",blank)),
             tab2[5:8,],
-            t(c("\\textbf{Ln neopterin (nmol/L)}",blank)),
+            t(c("Ln neopterin (nmol/L)",blank)),
             tab2[9:12,],
-            t(c("\\textbf{Ln lactulose (mmol/L)}",blank)),
+            t(c("Ln lactulose (mmol/L)",blank)),
             tab2[13:16,],
-            t(c("\\textbf{Ln mannitol (mmol/L)l}",blank)),
+            t(c("Ln mannitol (mmol/L)",blank)),
             tab2[17:20,],
-            t(c("\\textbf{Ln L:M ratio}",blank)),
+            t(c("Ln L:M ratio",blank)),
             tab2[21:24,]
             )
 
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Tables/")
+setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Results/Tables/")
+col_names <- c("Outcome, Arm", "N", "Mean", "SD", 
+               "Difference from Control (95% CI)", "Difference from Nutrition", 
+               "Difference from WSH")
 save(tab2, file="EE-K-table2.RData")
 
-cleantable(tab2, 2)
+tab2 <- as.data.frame(tab2)
+names(tab2) <- col_names 
+tab2_flex <- flextable(tab2) %>% 
+  bold(i=c(1, 6, 11, 16, 21, 26)) %>% 
+  align(j=2:7, align="center", part="all")
+tab2_flex
 
 
 
@@ -413,24 +239,29 @@ tab3<-rbind(
 
 blank=rep("",6)
 tab3<-as.matrix(tab3)
-tab3<-rbind(t(c("\\textbf{Ln myeloperoxidase (ng/ml)}",blank)),
+tab3<-rbind(t(c("Ln myeloperoxidase (ng/ml)",blank)),
             tab3[1:4,],
-            t(c("\\textbf{Ln alpha-1 antitrypsin (mg/g)}",blank)),
+            t(c("Ln alpha-1 antitrypsin (mg/g)",blank)),
             tab3[5:8,],
-            t(c("\\textbf{Ln neopterin (nmol/L)}",blank)),
+            t(c("Ln neopterin (nmol/L)",blank)),
             tab3[9:12,],
-            t(c("\\textbf{Ln lactulose (mmol/L)}",blank)),
+            t(c("Ln lactulose (mmol/L)",blank)),
             tab3[13:16,],
-            t(c("\\textbf{Ln mannitol (mmol/L)l}",blank)),
+            t(c("Ln mannitol (mmol/L)",blank)),
             tab3[17:20,],
-            t(c("\\textbf{Ln L:M ratio}",blank)),
+            t(c("Ln L:M ratio",blank)),
             tab3[21:24,]
             )
 
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Tables/")
+setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Results/Tables/")
 save(tab3, file="EE-K-table3.RData")
 
-cleantable(tab3, 2)
+tab3 <- as.data.frame(tab3)
+names(tab3) <- col_names 
+tab3_flex <- flextable(tab3) %>% 
+  bold(i=c(1, 6, 11, 16, 21, 26)) %>% 
+  align(j=2:7, align="center", part="all")
+tab3_flex
 
 
 
@@ -452,222 +283,35 @@ tab4<-rbind(
 
 blank=rep("",6)
 tab4<-as.matrix(tab4)
-tab4<-rbind(t(c("\\textbf{Ln myeloperoxidase (ng/ml)}",blank)),
+tab4<-rbind(t(c("Ln myeloperoxidase (ng/ml)",blank)),
             tab4[1:4,],
-            t(c("\\textbf{Ln alpha-1 antitrypsin (mg/g)}",blank)),
+            t(c("Ln alpha-1 antitrypsin (mg/g)",blank)),
             tab4[5:8,],
-            t(c("\\textbf{Ln neopterin (nmol/L)}",blank)),
+            t(c("Ln neopterin (nmol/L)",blank)),
             tab4[9:12,],
-            t(c("\\textbf{Ln lactulose (mmol/L)}",blank)),
+            t(c("Ln lactulose (mmol/L)",blank)),
             tab4[13:16,],
-            t(c("\\textbf{Ln mannitol (mmol/L)l}",blank)),
+            t(c("Ln mannitol (mmol/L)",blank)),
             tab4[17:20,],
-            t(c("\\textbf{Ln L:M ratio}",blank)),
+            t(c("Ln L:M ratio}",blank)),
             tab4[21:24,]
             )
 
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Tables/")
+setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Results/Tables/")
 save(tab4, file="EE-K-table4.RData")
 
-cleantable(tab4, 2)
+tab4 <- as.data.frame(tab4)
+names(tab4) <- col_names 
+tab4_flex <- flextable(tab4) %>% 
+  bold(i=c(1, 6, 11, 16, 21, 26)) %>% 
+  align(j=2:7, align="center", part="all")
+tab4_flex
 
 
-#--------------------------------
-# Supplimentary table 1: 
-# Enrollment characteristics included in the follow-up and children lost to follow-up 
-#--------------------------------
-
-
-s.table1_create<-function(mu, n, sd, mean.ind, vargroup, vargroup.row, Rownames, round){
-  dat<-NULL
-  for(j in 1:nrow(n)){
-      if(mean.ind[j]==1){
-      temp<-cbind(mu[j,1],sd[j,1],mu[j,2],sd[j,2],mu[j,3],sd[j,3])
-      temp<-rnd(temp, 0)
-      dat<-rbind(dat, temp)
-      }else{
-      temp<-cbind(n[j,1],mu[j,1]*100,
-                  n[j,2],mu[j,2]*100,
-                  n[j,3],mu[j,3]*100)
-      temp<-rnd(temp, 0)
-      dat<-rbind(dat, temp)
-      }
-  }
-  rownames(dat)<-rownames(mu)
-  #dat<-rnd(dat, round)
-  #dat<-cbind(Rownames,dat)
-  col1<-NULL
-  col2<-NULL
-  col3<-NULL
-  for(j in 1:nrow(n)){
-      if(mean.ind[j]==1){
-      temp1<-cbind(paste(dat[j,1]," (",dat[j,2],")",sep=""))
-      temp2<-cbind(paste(dat[j,3]," (",dat[j,4],")",sep=""))
-      temp3<-cbind(paste(dat[j,5]," (",dat[j,6],")",sep=""))
-
-      col1<-rbind(col1, temp1)
-      col2<-rbind(col2, temp2)
-      col3<-rbind(col3, temp3)
-
-      }else{
-        if(j==1){
-      temp1<-cbind(paste(dat[j,1],sep=""))
-      temp2<-cbind(paste(dat[j,3],sep=""))
-      temp3<-cbind(paste(dat[j,5],sep=""))
-
-      col1<-rbind(col1, temp1)
-      col2<-rbind(col2, temp2)  
-      col3<-rbind(col3, temp3)           
-        }else{
-      temp1<-cbind(paste(dat[j,1]," (",dat[j,2],"\\%)",sep=""))
-      temp2<-cbind(paste(dat[j,3]," (",dat[j,4],"\\%)",sep=""))
-      temp3<-cbind(paste(dat[j,5]," (",dat[j,6],"\\%)",sep=""))
-      col1<-rbind(col1, temp1)
-      col2<-rbind(col2, temp2) 
-      col3<-rbind(col3, temp3) 
-          }
-      }
-  } 
-  dat<-cbind(Rownames, col1, col2, col3)
-  colnames(dat)=c(" ","Included","Lost to follow-up at Year 1","Lost to follow-up at Year 2")
-  return(dat)
-}
-
-
-	 	 
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Tables/")
-load("EE-K_s.table1.Rdata")
-
-s.balance.tab.mu_M
-s.balance.tab.n_M
-s.balance.tab.sd_M
-
-
-s.balance.tab.mu_M<-t(s.balance.tab.mu_M)
-s.balance.tab.n_M <-t(s.balance.tab.n_M)
-s.balance.tab.sd_M<-t(s.balance.tab.sd_M) 
-s.balance.tab.mu_M 
-s.balance.tab.n_M 
-s.balance.tab.sd_M
-
-mean.ind<-c(0,1,1,1,0,1,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
-#vargroup<-c(0)
-#vargroup.row<-c(2,5,8,13,20,21,27,32,33,36,37,40,43)
-Rownames<-c("No. of compounds",
-            "Age (years)",
-  "Years of education",
-  "Years of education",
-  "Works in agriculture",
-  "Number of persons"
-  ,"Has electricity"
-  ,"Has a cement floor"
-  ,"Acres of agricultural land owned",
-      "Shallow tubewell primary water source",
-    "Stored water observed at home",
-    "Reported treating water yesterday",
-    "Distance (mins) to primary water source",
-        "Adult men",
-        "Adult women",
-        "Children: 8-\\textless 15 years",
-        "Children: 3-\\textless 8 years",
-        "Children: 0-\\textless 3 years",
-        "Owned",
-        "Concrete slab",
-        "Functional water seal",
-        "Visible stool on slab or floor",
-        "Owned a potty",
-        "House",
-        "Child's play area",
-        "Has water",
-        "Has soap",
-        "Has water",
-        "Has soap",
-    "Household is food secure"
-  )
-
-
-
-
-#EE substudy table S1
-tab<-s.table1_create(mu=s.balance.tab.mu_M, 
-                   n=s.balance.tab.n_M, 
-                   sd=s.balance.tab.sd_M, 
-                   mean.ind=mean.ind,
-                   Rownames=Rownames,
-                   round=1)
-tab
-
-
-#Add in variable group labels
-blank=rep("",8)
-
-s.n.comp.f<-tab[1,]
-tab<-tab[-1,]
-
-s.table1_f=   rbind(
-               c("\\textbf{Maternal}",blank,blank,blank),
-               tab[c(1:2),],
-               c( "\\textbf{Paternal}",blank,blank,blank),
-               tab[c(3:4),],
-               c("\\textbf{Household}",blank,blank,blank),
-               tab[c(5:8),],
-               c("\\textbf{Drinking Water}",blank,blank,blank),
-               tab[c(9:12),],
-               c("\\textbf{Sanitation}",blank,blank,blank),
-               c("Reported daily open defecation",blank,blank,blank),
-               tab[c(13:17),],
-               c("Latrine",blank,blank,blank),
-               tab[c(18:22),],
-               c("Human feces observed in the",blank,blank,blank),
-               tab[c(23:24),],
-               c("\\textbf{Handwashing}",blank,blank,blank),
-               c("Within 6 steps of latrine",blank,blank,blank),
-               tab[c(25:26),],
-               c("Within 6 steps of kitchen",blank,blank,blank),
-               tab[c(27:28),],
-               c("\\textbf{Nutrition}",blank,blank,blank),
-               tab[c(29),])
-
-rownames(s.table1_f)=NULL
-
-s.table1_f
-s.n.comp.f
-
-n.comp.f[2]=paste("(N=",n.comp.f[2],")",sep="")
-n.comp.f[3]=paste("(N=",n.comp.f[3],")",sep="")
-n.comp.f<-n.comp.f[2:3]
-colnames(n.comp.f)<-NULL
-
-
-#FIX:
-for(i in c(2:3,5:6,8:11,13:16,18,24,29,30,34,37,41)){
-  s.table1_f[i,1]=paste("~~~",s.table1_f[i,1],sep="")
-}
-for(i in c(19:23,25:28,31,32,35:36,38:39)){
-  s.table1_f[i,1]=paste("~~~~~",s.table1_f[i,1],sep="")
-}
-
-
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Tables/")
-save(s.n.comp.f, s.table1_f, file="EE-K-s.table1_f.RData")
-
-
-#cleantable(n.comp.f,digits=0)
-cleantable(s.table1_f,digits=0)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+save_as_docx("Table 2. Effect of intervention on environmental enteric dysfunction measurements at 6 months" = tab2_flex,
+             "Table 3. Effect of intervention on environmental enteric dysfunction measurements at 17 months" = tab3_flex,
+             "Table 4. Effect of intervention on environmental enteric dysfunction measurements at 22 months" = tab4_flex,
+             path = "EE_kenya_tables_2_4.docx")
 
 
 #--------------------------------
@@ -676,7 +320,7 @@ cleantable(s.table1_f,digits=0)
 # at follow-up 1 
 #--------------------------------
 
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Andrew/")
+setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Results/Andrew/")
 load("stool_ipcw_res.Rdata")
 load("urine_ipcw_res.Rdata")
 load("stool_res_adj_sex_age_M.Rdata")
@@ -757,17 +401,17 @@ s.tab2<-rbind(
 
 blank=rep("",7)
 s.tab2<-as.matrix(s.tab2)
-s.tab2<-rbind(t(c("\\textbf{Ln myeloperoxidase (ng/ml)}",blank)),
+s.tab2<-rbind(t(c("Ln myeloperoxidase (ng/ml)}",blank)),
             s.tab2[1:4,],
-            t(c("\\textbf{Ln alpha-1 antitrypsin (mg/g)}",blank)),
+            t(c("Ln alpha-1 antitrypsin (mg/g)}",blank)),
             s.tab2[5:8,],
-            t(c("\\textbf{Ln neopterin (nmol/L)}",blank)),
+            t(c("Ln neopterin (nmol/L)}",blank)),
             s.tab2[9:12,],
-            t(c("\\textbf{Ln lactulose (mmol/L)}",blank)),
+            t(c("Ln lactulose (mmol/L)}",blank)),
             s.tab2[13:16,],
-            t(c("\\textbf{Ln mannitol (mmol/L)}",blank)),
+            t(c("Ln mannitol (mmol/L)}",blank)),
             s.tab2[17:20,],
-            t(c("\\textbf{Ln L:M ratio}",blank)),
+            t(c("Ln L:M ratio}",blank)),
             s.tab2[21:24,]
             )
 
@@ -801,19 +445,19 @@ s.tab3<-rbind(
 
 blank=rep("",7)
 s.tab3<-as.matrix(s.tab3)
-s.tab3<-rbind(t(c("\\textbf{Ln myeloperoxidase (ng/ml)}",blank)),
+s.tab3<-rbind(t(c("Ln myeloperoxidase (ng/ml)}",blank)),
             s.tab3[1:4,],
-            t(c("\\textbf{Ln alpha-1 antitrypsin (mg/g)}",blank)),
+            t(c("Ln alpha-1 antitrypsin (mg/g)}",blank)),
             s.tab3[5:8,],
-            t(c("\\textbf{Ln neopterin (nmol/L)}",blank)),
+            t(c("Ln neopterin (nmol/L)}",blank)),
             s.tab3[9:12,],
-            t(c("\\textbf{Ln regenerating gene 1$\\beta$ ($\\mu$g/ml)}",blank)),
+            t(c("Ln regenerating gene 1$\\beta$ ($\\mu$g/ml)}",blank)),
             s.tab3[13:16,],
-            t(c("\\textbf{Ln lactulose (mmol/L)}",blank)),
+            t(c("Ln lactulose (mmol/L)}",blank)),
             s.tab3[17:20,],
-            t(c("\\textbf{Ln mannitol (mmol/L)}",blank)),
+            t(c("Ln mannitol (mmol/L)}",blank)),
             s.tab3[21:24,],
-            t(c("\\textbf{Ln L:M ratio}",blank)),
+            t(c("Ln L:M ratio}",blank)),
             s.tab3[25:28,]
             )
 
@@ -839,17 +483,17 @@ s.tab4<-rbind(
 
 blank=rep("",7)
 s.tab4<-as.matrix(s.tab4)
-s.tab4<-rbind(t(c("\\textbf{Ln myeloperoxidase (ng/ml)}",blank)),
+s.tab4<-rbind(t(c("Ln myeloperoxidase (ng/ml)}",blank)),
             s.tab4[1:4,],
-            t(c("\\textbf{Ln alpha-1 antitrypsin (mg/g)}",blank)),
+            t(c("Ln alpha-1 antitrypsin (mg/g)}",blank)),
             s.tab4[5:8,],
-            t(c("\\textbf{Ln neopterin (nmol/L)}",blank)),
+            t(c("Ln neopterin (nmol/L)}",blank)),
             s.tab4[9:12,],
-            t(c("\\textbf{Ln lactulose (mmol/L)}",blank)),
+            t(c("Ln lactulose (mmol/L)}",blank)),
             s.tab4[13:16,],
-            t(c("\\textbf{Ln mannitol (mmol/L)}",blank)),
+            t(c("Ln mannitol (mmol/L)}",blank)),
             s.tab4[17:20,],
-            t(c("\\textbf{Ln L:M ratio}",blank)),
+            t(c("Ln L:M ratio}",blank)),
             s.tab4[21:24,]
             )
 
@@ -1055,405 +699,7 @@ s.tab7<-s.tab7[,c(1,2,3,4,5,6,10,11,12)]
       cleantable(s.tab7.2,2)
 
 
-#--------------------------------
-# Supplementary Table 8: 
-#   L and M %s
-#--------------------------------   
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Andrew/")
-load("pre_recovery_res_M.Rdata")
-load("pre_recovery_ipcw_res_M.Rdata")
-
-
-s.tab8<-rbind(
-  s.glm_print(perl1_N_M, perl1_mn, perl1_unadj_M, perl1_adj_sex_age_M, perl1_adj_M, perl1_adj_ipcw_M),
-  s.glm_print(perm1_N_M, perm1_mn, perm1_unadj_M, perm1_adj_sex_age_M, perm1_adj_M, perm1_adj_ipcw_M),
-  s.glm_print(perl2_N_M, perl2_mn, perl2_unadj_M, perl2_adj_sex_age_M, perl2_adj_M, perl2_adj_ipcw_M),
-  s.glm_print(perm2_N_M, perm2_mn, perm2_unadj_M, perm2_adj_sex_age_M, perm2_adj_M, perm2_adj_ipcw_M),
-  s.glm_print(perl3_N_M, perl3_mn, perl3_unadj_M, perl3_adj_sex_age_M, perl3_adj_M, perl3_adj_ipcw_M),
-  s.glm_print(perm3_N_M, perm3_mn, perm3_unadj_M, perm3_adj_sex_age_M, perm3_adj_M, perm3_adj_ipcw_M)
-)
-
-blank=rep("",7)
-s.tab8<-as.matrix(s.tab8)
-s.tab8<-rbind(t(c("\\textbf{Lactulose recovery (\\%) at child age 3 months}",blank)),
-            s.tab8[1:4,],
-            t(c("\\textbf{Mannitol recovery (\\%) at child age 3 months}",blank)),
-            s.tab8[5:8,],
-            t(c("\\textbf{Lactulose recovery (\\%) at child age 14 months}",blank)),
-            s.tab8[9:12,],
-            t(c("\\textbf{Mannitol recovery (\\%) at child age 14 months}",blank)),
-            s.tab8[13:16,],
-            t(c("\\textbf{Lactulose recovery (\\%) at child age 28 months}",blank)),
-            s.tab8[17:20,],
-            t(c("\\textbf{Mannitol recovery (\\%) at child age 28 months}",blank)),
-            s.tab8[21:24,]
-            )
-
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Tables/")
-save(s.tab8, file="EE-K-s.table8.RData")
-
-cleantable(s.tab8, 2)
-
       
-#--------------------------------
-# Supplementary Table 9: 
-#   Effect of intervention on environmental enteric dysfunction measurements 
-# after 2 years of intervention using inverse probability weighting
-#--------------------------------
-
-#--------------------------------
-# Supplementary Table 10: 
-#   Absolute concentrations of environmental enteric dysfunction measurements 
-#--------------------------------
-
-#--------------------------------
-# Supplementary Table 11 (Or should this be the first one?): 
-#   Balance  of enrollment characteristics between EED subgroup 
-#   and the main trial population
-#--------------------------------
-
-
-
-
-#--------------------------------
-#Table S1 (eLife table 2)
-#--------------------------------
-
-#load objects
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Andrew/")
-load("telo_s.table1.Rdata")
-
-
-s.balance.tab.mu_M 
-s.balance.tab.n_M 
-s.balance.tab.sd_M
-s.balance.tab.mu_M<-t(s.balance.tab.mu_M[,-2])
-s.balance.tab.n_M <-t(s.balance.tab.n_M[,-2])
-s.balance.tab.sd_M<-t(s.balance.tab.sd_M[,-2]) 
-s.balance.tab.mu_M 
-s.balance.tab.n_M 
-s.balance.tab.sd_M
-
-mean.ind<-c(0,1,1,1,0,1,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
-
-Rownames<-c("No. of compounds",
-            "Age (years)",
-  "Years of education",
-  "Years of education",
-  "Works in agriculture",
-  "Number of persons"
-  ,"Has electricity"
-  ,"Has a cement floor"
-  ,"Acres of agricultural land owned",
-      "Shallow tubewell primary water source",
-    "Stored water observed at home",
-    "Reported treating water yesterday",
-    "Distance (mins) to primary water source",
-        "Adult men",
-        "Adult women",
-        "Children: 8-\\textless 15 years",
-        "Children: 3-\\textless 8 years",
-        "Children: 0-\\textless 3 years",
-        "Owned",
-        "Concrete slab",
-        "Functional water seal",
-        "Visible stool on slab or floor",
-        "Owned a potty",
-        "House",
-        "Child's play area",
-        "Has water",
-        "Has soap",
-        "Has water",
-        "Has soap",
-    "Household is food secure"
-  )
-
-
-
-
-
-#--------------------------------
-#Table S9
-#--------------------------------
-tab<-table1_create(mu=balance.tab.mu_M, 
-                   n=balance.tab.n_M, 
-                   sd=balance.tab.sd_M, 
-                   mean.ind=mean.ind,
-                   Rownames=Rownames,
-                   round=1)
-tab
-
-main.control<-c("1382",
-                "24 (5)",
-                "6 (3)",
-                "5 (4)",
-                "414 (30\\%)",
-                "5 (2)",
-                "784 (57\\%)",
-                "145 (10\\%)",
-                "0.15 (0.21)",
-                "1038 (75\\%)",
-                "666 (48\\%)",
-                "4 (0\\%)",
-                "1 (3)",
-                "97 (7\\%)",
-                "62 (4\\%)",
-                "53 (10\\%)",
-                "267 (38\\%)",
-                "245 (82\\%)",
-                "750 (54\\%)",
-                "1251 (95\\%)",
-                "358 (31\\%)",
-                "625 (48\\%)",
-                "61 (4\\%)",
-                "114 (8\\%)",
-                "21 (2\\%)",
-                "178 (14\\%)",
-                "88 (7\\%)",
-                "118 (9\\%)",
-                "33 (3\\%)",
-                "932 (67\\%)"
-                ) 
-
-main.WSH<-c("702",
-"24 (5)",
-"6 (3)",
-"5 (4)",
-"216 (31\\%)",
-"5 (2)",
-"426 (61\\%)",
-"77 (11\\%)",
-"0.15 (0.23)",
-"546 (78\\%)",
-"304 (43\\%)",
-"0 (0\\%)",
-"1 (5)",
-"54 (8\\%)",
-"29 (4\\%)",
-"30 (10\\%)",
-"137 (38\\%)",
-"123 (79\\%)",
-"373 (53\\%)",
-"620 (993\\%)",
-"152 (26\\%)",
-"289 (44\\%)",
-"27 (4\\%)",
-"48 (7\\%)",
-"7 (1\\%)",
-"67 (10\\%)",
-"42 (7\\%)",
-"61 (9\\%)",
-"15 (2\\%)",
-"482 (69\\%)"
-)
-
-
-main.N<-c(
-"699",
-"24 (5)",
-"6 (3)",
-"5 (4)",
-"232 (33\\%)",
-"5 (2)",
-"409 (59\\%)",
-"67 (10\\%)",
-"0.16 (0.27\\%)",
-"519 (74\\%)",
-"301 (43\\%)",
-"0 (0\\%)",
-"1 (3)",
-"59 (9\\%)",
-"39 (6\\%)",
-"23 (8\\%)",
-"129 (39\\%)",
-"128 (85\\%)",
-"377 (54\\%)",
-"620 (94\\%)",
-"183 (31\\%)",
-"331 (51\\%)",
-"36 (5\\%)",
-"58 (8\\%)",
-"8 (1\\%)",
-"62 (10\\%)",
-"32 (5\\%)",
-"61 (9\\%)",
-"23 (4\\%)",
-"479 (69\\%)") 
-
-main.WSHN<-c("686",
-                "24 (6)",
-                "6 (3)",
-                "5 (4)",
-                "207 (30\\%)",
-                "5 (2)",
-                "412 (60\\%)",
-                "72 (10\\%)",
-                "0.14 (0.38)",
-                "504 (73\\%)",
-                "331 (48\\%)",
-                "2 (0\\%)",
-                "1 (2)",
-                "50 (7\\%)",
-                "24 (4\\%)",
-                "28 (10\\%)",
-                "134 (37\\%)",
-                "123 (88\\%)",
-                "367 (53\\%)",
-                "621 (94\\%)",
-                "155 (27\\%)",
-                "298 (46\\%)",
-                "30 (4\\%)",
-                "49 (7\\%)",
-                "7 (1\\%)",
-                "72 (11\\%)",
-                "36 (6\\%)",
-                "60 (9\\%)",
-                "18 (3\\%)",
-                "485 (71\\%)"
-                ) 
-
-
-dim(tab)
-length(main.control)
-length(main.N)
-length(main.WSH)
-length(main.WSHN)
-
-tab<-cbind(tab[,1],main.control,main.WSH,main.N,main.WSHN,tab[,2:5])
-
-
-#Add in variable group labels
-blank=rep("",4)
-
-s.n.comp.f<-tab[1,]
-tab<-tab[-1,]
-
-s.table9_f=   rbind(
-               c("\\textbf{Maternal}",blank,blank),
-               tab[c(1:2),],
-               c( "\\textbf{Paternal}",blank,blank),
-               tab[c(3:4),],
-               c("\\textbf{Household}",blank,blank),
-               tab[c(5:8),],
-               c("\\textbf{Drinking Water}",blank,blank),
-               tab[c(9:12),],
-               c("\\textbf{Sanitation}",blank,blank),
-               c("Reported daily open defecation",blank,blank),
-               tab[c(13:17),],
-               c("Latrine",blank,blank),
-               tab[c(18:22),],
-               c("Human feces observed in the",blank,blank),
-               tab[c(23:24),],
-               c("\\textbf{Handwashing}",blank,blank),
-               c("Within 6 steps of latrine",blank,blank),
-               tab[c(25:26),],
-               c("Within 6 steps of kitchen",blank,blank),
-               tab[c(27:28),],
-               c("\\textbf{Nutrition}",blank,blank),
-               tab[c(29),])
-
-rownames(s.table9_f)=NULL
-
-s.table9_f
-
-
-
-
-
-#FIX:
-for(i in c(2:3,5:6,8:11,13:16,18,24,29:30,34,37,41)){
-  s.table9_f[i,1]=paste("~~~",s.table9_f[i,1],sep="")
-}
-for(i in c(19:23,25:28,31,32,35:36,38:39)){
-  s.table9_f[i,1]=paste("~~~~~",s.table9_f[i,1],sep="")
-}
-
-
-
-#n.comp.f<-c("No. of compounds:")
-
-
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Tables/")
-save(s.n.comp.f, s.table9_f, file="s.table9_f.RData")
-
-
-#cleantable(n.comp.f,digits=0)
-cleantable(s.table9_f,digits=0)
-
-
-
-
-
-#--------------------------------
-#Table S10:
-# Can you create another supplementary table with geometric means and 95%CI of each biomarker at each age/time point?
-# biomarkers in the table: mpo, neo, reg, aat, lactulose concentration, mannitol concentration, %L recovery, %M recovery, LMR
-# And it'd be best to include an overall geo mean of each biomarker across all time points in the table, in addition to a means 
-# at each time point individually (other EED studies report these absolute concentrations). 
-#--------------------------------
-
-#load objects
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Andrew/")
-load("urine_overall_means.Rdata")
-load("stool_overall_means.Rdata")
-
-d<-rbind(stool_overall_mn[,-c(4:5)], urine_overall_mn[,-c(4:5)])
-tab_overall<-d[c(1:4,15:19),]
-
-tab<-data.frame(biomarker=tab_overall[,1],
-                N=rep(NA,9),
-                mean=rep(NA,9),
-                ci.lb=rep(NA,9),
-                ci.ub=rep(NA,9),
-                N1=rep(NA,9),
-                mean1=rep(NA,9),
-                ci.lb1=rep(NA,9),
-                ci.ub1=rep(NA,9),
-                N2=rep(NA,9),
-                mean2=rep(NA,9),
-                ci.lb2=rep(NA,9),
-                ci.ub2=rep(NA,9),
-                N3=rep(NA,9),
-                mean3=rep(NA,9),
-                ci.lb3=rep(NA,9),
-                ci.ub3=rep(NA,9))
-tab[,c(2:5)]<-d[c(1:4,15:19),2:5]                
-tab[c(1:3,5:9),c(6:9)]<-d[c(5,8,11,20,23,26,29,32),2:5]                
-tab[,c(10:13)]<-d[c(6,9,12,14,21,24,27,30,33),2:5]                
-tab[c(1:3,5:9),c(14:17)]<-d[c(7,10,12,20,25,28,31,34),2:5]                
-
-#convert back to raw scale from log scale
-for(i in c(3,4,5,7,8,9,11,12,13,15,16,17)){
-  tab[,i]<-exp(tab[,i])
-}
-
-
-tab[,3] <- paste(sprintf("%1.2f",tab[,3])," (",sprintf("%1.2f",tab[,4]),",",sprintf("%1.2f",tab[,5]),")", sep="")
-tab[,7] <- paste(sprintf("%1.2f",tab[,7])," (",sprintf("%1.2f",tab[,8]),",",sprintf("%1.2f",tab[,9]),")", sep="")
-tab[,11] <- paste(sprintf("%1.2f",tab[,11])," (",sprintf("%1.2f",tab[,12]),",",sprintf("%1.2f",tab[,13]),")", sep="")
-tab[,15] <- paste(sprintf("%1.2f",tab[,15])," (",sprintf("%1.2f",tab[,16]),",",sprintf("%1.2f",tab[,17]),")", sep="")
-
-tab<-tab[,-c(4,5,8,9,12,13,16,17)]
-tab[4,c(4,5,8,9)]<-"---"
-tab<-tab[c(2,1,3,4,5,7,8,9,6),]
-tab
-
-tab[,1]<-c(
-"Myeloperoxidase (ng/ml)",
-"Alpha-1 antitrypsin (mg/g)",
-"Neopterin (nmol/L)",
-"Regenerating gene 1$\\beta$ ($\\mu$g/ml)",
-"Lactulose (mmol/L)",
-"Mannitol (mmol/L)",
-"Lactulose (\\%)",
-"Mannitol (\\%)",
-"Ln L:M ratio"
-)
-
-
-
-cleantable(tab,digits=0)
-
 
 
 
@@ -1552,153 +798,24 @@ sens.tab<-rbind(
 blank=rep("",7)
 sens.tab<-as.matrix(sens.tab)
 sens.tab<-rbind(
-            t(c("\\textbf{Ln lactulose (mmol/L) at child age 3 months}",blank)),
+            t(c("Ln lactulose (mmol/L) at child age 3 months}",blank)),
             sens.tab[1:4,],
-            t(c("\\textbf{Ln mannitol (mmol/L) at child age 3 months}",blank)),
+            t(c("Ln mannitol (mmol/L) at child age 3 months}",blank)),
             sens.tab[5:8,],
-            t(c("\\textbf{Ln L:M ratio at child age 3 months}",blank)),
+            t(c("Ln L:M ratio at child age 3 months}",blank)),
             sens.tab[9:12,],
-            t(c("\\textbf{Ln lactulose (mmol/L) at child age 14 months}",blank)),
+            t(c("Ln lactulose (mmol/L) at child age 14 months}",blank)),
             sens.tab[13:16,],
-            t(c("\\textbf{Ln mannitol (mmol/L) at child age 14 months}",blank)),
+            t(c("Ln mannitol (mmol/L) at child age 14 months}",blank)),
             sens.tab[17:20,],
-            t(c("\\textbf{Ln L:M ratio at child age 14 months}",blank)),
+            t(c("Ln L:M ratio at child age 14 months}",blank)),
             sens.tab[21:24,],
-             t(c("\\textbf{Ln lactulose (mmol/L) at child age 28 months}",blank)),
+             t(c("Ln lactulose (mmol/L) at child age 28 months}",blank)),
             sens.tab[25:28,],
-            t(c("\\textbf{Ln mannitol (mmol/L) at child age 28 months}",blank)),
+            t(c("Ln mannitol (mmol/L) at child age 28 months}",blank)),
             sens.tab[29:32,],
-            t(c("\\textbf{Ln L:M ratio at child age 28 months}",blank)),
+            t(c("Ln L:M ratio at child age 28 months}",blank)),
             sens.tab[33:36,]
             )
-
-
-# sens.tab<-rbind( 
-#             t(c("\\textbf{Ln lactulose}",blank)),
-#             t(c("\\textbf{(mmol/L) at child}",blank)),
-#             t(c("\\textbf{age 3 months}",blank)),
-#             sens.tab[1:4,],
-#             t(c("\\textbf{Ln mannitol}",blank)),
-#                         t(c("\\textbf{(mmol/L) at child}",blank)),
-#             t(c("\\textbf{age 3 months}",blank)),
-#             sens.tab[5:8,],
-#             t(c("\\textbf{Ln L:M ratio}",blank)),
-#                         t(c("\\textbf{(mmol/L) at child}",blank)),
-#             t(c("\\textbf{age 3 months}",blank)),
-#             sens.tab[9:12,],
-#             t(c("\\textbf{Ln lactulose}",blank)),
-#                         t(c("\\textbf{(mmol/L) at child}",blank)),
-#             t(c("\\textbf{age 14 months}",blank)),
-#             sens.tab[13:16,],
-#             t(c("\\textbf{Ln mannitol}",blank)),
-#                         t(c("\\textbf{(mmol/L) at child}",blank)),
-#             t(c("\\textbf{age 14 months}",blank)),
-#             sens.tab[17:20,],
-#             t(c("\\textbf{Ln L:M ratio}",blank)),
-#                         t(c("\\textbf{(mmol/L) at child}",blank)),
-#             t(c("\\textbf{age 14 months}",blank)),
-#             sens.tab[21:24,],
-#              t(c("\\textbf{Ln lactulose}",blank)),
-#                         t(c("\\textbf{(mmol/L) at child}",blank)),
-#             t(c("\\textbf{age 28 months}",blank)),
-#             sens.tab[25:27,],
-#             t(c("\\textbf{Ln mannitol}",blank)),
-#                         t(c("\\textbf{(mmol/L) at child}",blank)),
-#             t(c("\\textbf{age 28 months}",blank)),
-#             sens.tab[28:30,],
-#             t(c("\\textbf{Ln L:M ratio}",blank)),
-#                         t(c("\\textbf{(mmol/L) at child}",blank)),
-#             t(c("\\textbf{age 28 months}",blank)),
-#             sens.tab[31:33,]
-#             )
-
-# sens.tab<-rbind( 
-#             t(c("\\textbf{Ln lactulose (mmol/L)}",blank)),
-#             t(c("\\textbf{at child age 3 months}",blank)),
-#             sens.tab[1:4,],
-#             t(c("\\textbf{Ln mannitol (mmol/L)}",blank)),
-#             t(c("\\textbf{at child age 3 months}",blank)),
-#             sens.tab[5:8,],
-#             t(c("\\textbf{Ln L:M ratio}",blank)),
-#             t(c("\\textbf{at child age 3 months}",blank)),
-#             sens.tab[9:12,],
-#             t(c("\\textbf{Ln lactulose (mmol/L)}",blank)),
-#             t(c("\\textbf{at child age 14 months}",blank)),
-#             sens.tab[13:16,],
-#             t(c("\\textbf{Ln mannitol (mmol/L)}",blank)),
-#             t(c("\\textbf{at child age 14 months}",blank)),
-#             sens.tab[17:20,],
-#             t(c("\\textbf{Ln L:M ratio}",blank)),
-#             t(c("\\textbf{at child age 14 months}",blank)),
-#             sens.tab[21:24,],
-#              t(c("\\textbf{Ln lactulose (mmol/L)}",blank)),
-#             t(c("\\textbf{at child age 28 months}",blank)),
-#             sens.tab[25:27,],
-#             t(c("\\textbf{Ln mannitol (mmol/L)}",blank)),
-#             t(c("\\textbf{at child age 28 months}",blank)),
-#             sens.tab[28:30,],
-#             t(c("\\textbf{Ln L:M ratio}",blank)),
-#             t(c("\\textbf{at child age 28 months}",blank)),
-#             sens.tab[31:33,]
-#             )
-
-
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Tables/")
-save(sens.tab, file="EE-K-sens.table.RData")
-
-cleantable(sens.tab, 2)
-
-
-
-
-
-
-#--------------------------------
-# Supplementary Table 12: 
-#   L and M %s sensitivity analysis
-#--------------------------------   
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Andrew/")
-load("pre_recovery_sens_res_M.Rdata")
-load("pre_recovery_ipcw_sens_res_M.Rdata")
-
-
-sens.tab12<-rbind(
-  s.glm_print(sens_perl1_N_M, sens_perl1_mn, sens_perl1_unadj_M, sens_perl1_adj_sex_age_M, sens_perl1_adj_M, sens_perl1_adj_ipcw_M),
-  s.glm_print(sens_perm1_N_M, sens_perm1_mn, sens_perm1_unadj_M, sens_perm1_adj_sex_age_M, sens_perm1_adj_M, sens_perm1_adj_ipcw_M),
-  s.glm_print(sens_perl2_N_M, sens_perl2_mn, sens_perl2_unadj_M, sens_perl2_adj_sex_age_M, sens_perl2_adj_M, sens_perl2_adj_ipcw_M),
-  s.glm_print(sens_perm2_N_M, sens_perm2_mn, sens_perm2_unadj_M, sens_perm2_adj_sex_age_M, sens_perm2_adj_M, sens_perm2_adj_ipcw_M),
-  s.glm_print(sens_perl3_N_M, sens_perl3_mn, sens_perl3_unadj_M, sens_perl3_adj_sex_age_M, sens_perl3_adj_M, sens_perl3_adj_ipcw_M),
-  s.glm_print(sens_perm3_N_M, sens_perm3_mn, sens_perm3_unadj_M, sens_perm3_adj_sex_age_M, sens_perm3_adj_M, sens_perm3_adj_ipcw_M)
-)
-
-blank=rep("",7)
-sens.tab12<-as.matrix(sens.tab12)
-sens.tab12<-rbind(t(c("\\textbf{Lactulose recovery (\\%) at child age 3 months}",blank)),
-            sens.tab12[1:4,],
-            t(c("\\textbf{Mannitol recovery (\\%) at child age 3 months}",blank)),
-            sens.tab12[5:8,],
-            t(c("\\textbf{Lactulose recovery (\\%) at child age 14 months}",blank)),
-            sens.tab12[9:12,],
-            t(c("\\textbf{Mannitol recovery (\\%) at child age 14 months}",blank)),
-            sens.tab12[13:16,],
-            t(c("\\textbf{Lactulose recovery (\\%) at child age 28 months}",blank)),
-            sens.tab12[17:20,],
-            t(c("\\textbf{Mannitol recovery (\\%) at child age 28 months}",blank)),
-            sens.tab12[21:24,]
-            )
-
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Tables/")
-save(sens.tab12, file="EE-K-sens.table12.RData")
-
-cleantable(sens.tab12, 2)
-
-
-
-
-
-
-
-
-
 
 
