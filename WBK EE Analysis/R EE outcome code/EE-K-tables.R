@@ -562,8 +562,8 @@ age$adjp<-ifelse(age$adjp>0.99,0.99,age$adjp)
 adj$adjp<-ifelse(adj$adjp>0.99,0.99,adj$adjp)
 ipcw$adjp<-ifelse(ipcw$adjp>0.99,0.99,ipcw$adjp)
 
-time<-ifelse(t>6,"Year 1", "3 month")
-time<-ifelse(t>13,"Year 2", time)
+time<-ifelse(t>6,"17 months", "6 months")
+time<-ifelse(t>12,"22 Months", time)
 
 obj<-data.frame((rep(paste0(sample[t]),5)), (rep(time,5)), contrasts, glm ,age, adj, ipcw)
 for(i in 4:ncol(obj)){
@@ -613,16 +613,15 @@ s.tab7<-rbind(
   s.pval_print(7, sample,mpo_t2_unadj_M, mpo_t2_adj_sex_age_M, mpo_t2_adj_M, mpo_t2_adj_ipcw_M),
   s.pval_print(8, sample,aat_t2_unadj_M, aat_t2_adj_sex_age_M, aat_t2_adj_M, aat_t2_adj_ipcw_M),
   s.pval_print(9, sample,neo_t2_unadj_M, neo_t2_adj_sex_age_M, neo_t2_adj_M, neo_t2_adj_ipcw_M),
-  s.pval_print(10, sample,reg1b_t2_unadj_M, reg1b_t2_adj_sex_age_M, reg1b_t2_adj_M, reg_t2_adj_ipcw_M),
-  s.pval_print(11, sample,lac_t2_unadj_M, lac_t2_adj_sex_age_M, lac_t2_adj_M, l2_adj_ipcw_M),
-  s.pval_print(12, sample,man_t2_unadj_M, man_t2_adj_sex_age_M, man_t2_adj_M, m2_adj_ipcw_M),
-  s.pval_print(13, sample,lm_t2_unadj_M, lm_t2_adj_sex_age_M, lm_t2_adj_M, lmr2_adj_ipcw_M),
-  s.pval_print(14, sample,mpo_t3_unadj_M, mpo_t3_adj_sex_age_M, mpo_t3_adj_M, mpo_t3_adj_ipcw_M),
-  s.pval_print(15, sample,aat_t3_unadj_M, aat_t3_adj_sex_age_M, aat_t3_adj_M, aat_t3_adj_ipcw_M),
-  s.pval_print(16, sample,neo_t3_unadj_M, neo_t3_adj_sex_age_M, neo_t3_adj_M, neo_t3_adj_ipcw_M),
-  s.pval_print(17, sample,lac_t3_unadj_M, lac_t3_adj_sex_age_M, lac_t3_adj_M, l3_adj_ipcw_M),
-  s.pval_print(18, sample,man_t3_unadj_M, man_t3_adj_sex_age_M, man_t3_adj_M, m3_adj_ipcw_M),
-  s.pval_print(19, sample,lm_t3_unadj_M, lm_t3_adj_sex_age_M, lm_t3_adj_M, lmr3_adj_ipcw_M)
+  s.pval_print(10, sample,lac_t2_unadj_M, lac_t2_adj_sex_age_M, lac_t2_adj_M, l2_adj_ipcw_M),
+  s.pval_print(11, sample,man_t2_unadj_M, man_t2_adj_sex_age_M, man_t2_adj_M, m2_adj_ipcw_M),
+  s.pval_print(12, sample,lm_t2_unadj_M, lm_t2_adj_sex_age_M, lm_t2_adj_M, lmr2_adj_ipcw_M),
+  s.pval_print(13, sample,mpo_t3_unadj_M, mpo_t3_adj_sex_age_M, mpo_t3_adj_M, mpo_t3_adj_ipcw_M),
+  s.pval_print(14, sample,aat_t3_unadj_M, aat_t3_adj_sex_age_M, aat_t3_adj_M, aat_t3_adj_ipcw_M),
+  s.pval_print(15, sample,neo_t3_unadj_M, neo_t3_adj_sex_age_M, neo_t3_adj_M, neo_t3_adj_ipcw_M),
+  s.pval_print(16, sample,lac_t3_unadj_M, lac_t3_adj_sex_age_M, lac_t3_adj_M, l3_adj_ipcw_M),
+  s.pval_print(17, sample,man_t3_unadj_M, man_t3_adj_sex_age_M, man_t3_adj_M, m3_adj_ipcw_M),
+  s.pval_print(18, sample,lm_t3_unadj_M, lm_t3_adj_sex_age_M, lm_t3_adj_M, lmr3_adj_ipcw_M)
 )
 
 #Drop out age_sex and ipcw
@@ -632,18 +631,36 @@ s.tab7<-s.tab7[,c(1,2,3,4,5,6,10,11,12)]
   cleantable(s.tab7,2)
   
   #Split by time
-  s.tab7.m3<-s.tab7[s.tab7[,2]=="3 month",c(1,3:9)]
-  s.tab7.1<-s.tab7[s.tab7[,2]=="Year 1",c(1,3:9)]
-  s.tab7.2<-s.tab7[s.tab7[,2]=="Year 2",c(1,3:9)]
+  s.tab7.m3<-s.tab7[s.tab7[,2]=="6 months",c(1,3:9)]
+  s.tab7.1<-s.tab7[s.tab7[,2]=="17 months",c(1,3:9)]
+  s.tab7.2<-s.tab7[s.tab7[,2]=="22 months",c(1,3:9)]
   
       cleantable(s.tab7.m3,2)
       cleantable(s.tab7.1,2)
       cleantable(s.tab7.2,2)
 
 
-      
+s.tab7.m3 <- as.data.frame(s.tab7.m3) 
+
+s.tab7.1 <- as.data.frame(s.tab7.1) 
+
+s.tab7.2 <- as.data.frame(s.tab7.2) 
+
+col_names <- c("Outcome", "Treatment contrast", "Unadjusted Difference", "Unadjusted P-value", "Bonferroni P-value",
+               "Adjusted Difference", "Unadjusted P-value1", "Bonferroni P-value1")      
+names(s.tab7.m3) <- col_names
+names(s.tab7.1) <- col_names
+names(s.tab7.2) <- col_names
+s.tab7.m3 <- flextable(s.tab7.m3) %>% 
+  align(j=2:8, align="center", part="all") 
+s.tab7.1 <- flextable(s.tab7.1) %>% 
+  align(j=2:8, align="center", part="all")
+s.tab7.2 <- flextable(s.tab7.2) %>% 
+  align(j=2:8, align="center", part="all")
 
 
-
-
+save_as_docx("Table S7. P-values of treatment estimates, unadjusted, and adjusted for multiple testing using Bonferroni correction at 6 months" = s.tab7.m3,
+             "Table S8. P-values of treatment estimates, unadjusted, and adjusted for multiple testing using Bonferroni correction at 17 months" = s.tab7.1,
+             "Table S9. P-values of treatment estimates, unadjusted, and adjusted for multiple testing using Bonferroni correction at 22 months" = s.tab7.2,
+             path = "EE_kenya_tables_s7-9.docx")
 
