@@ -563,7 +563,7 @@ adj$adjp<-ifelse(adj$adjp>0.99,0.99,adj$adjp)
 ipcw$adjp<-ifelse(ipcw$adjp>0.99,0.99,ipcw$adjp)
 
 time<-ifelse(t>6,"17 months", "6 months")
-time<-ifelse(t>12,"22 Months", time)
+time<-ifelse(t>12,"22 months", time)
 
 obj<-data.frame((rep(paste0(sample[t]),5)), (rep(time,5)), contrasts, glm ,age, adj, ipcw)
 for(i in 4:ncol(obj)){
@@ -592,7 +592,6 @@ sample<-c("Ln myeloperoxidase (ng/ml)",
 "Ln alpha-1 antitrypsin (mg/g)",
 "Ln neopterin (nmol/L)",
 "Ln lactulose (mmol/L)",
-"Ln regenerating gene 1$\\beta$ ($\\mu$g/ml)",
 "Ln mannitol (mmol/L)",
 "Ln L:M ratio",
 "Ln myeloperoxidase (ng/ml)",
