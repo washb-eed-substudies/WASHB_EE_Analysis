@@ -480,7 +480,7 @@ s.tab4<-rbind(
   s.glm_print(neo_t3_N_M, neo_t3_mn, neo_t3_unadj_M, neo_t3_adj_sex_age_M, neo_t3_adj_M, neo_t3_adj_ipcw_M),
   s.glm_print(lac_t3_N_M, lac_t3_mn, lac_t3_unadj_M, lac_t3_adj_sex_age_M, lac_t3_adj_M, l3_adj_ipcw_M),
   s.glm_print(man_t3_N_M, man_t3_mn, man_t3_unadj_M, man_t3_adj_sex_age_M, man_t3_adj_M, m3_adj_ipcw_M),
-  s.glm_print(lm_t3_N_M, lm_t3_mn, lm_t3_unadj_M, lm_t3_adj_sex_age_M, lm_t3_adj_M, lm3_adj_ipcw_M)
+  s.glm_print(lm_t3_N_M, lm_t3_mn, lm_t3_unadj_M, lm_t3_adj_sex_age_M, lm_t3_adj_M, lmr3_adj_ipcw_M)
 )
 
 blank=rep("",7)
