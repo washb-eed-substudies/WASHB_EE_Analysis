@@ -16,7 +16,7 @@ library(washb)
 
 
 
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Untouched/")
 load("washb-BD-EE-blind-tr.Rdata")
 levels(treatment$tr)
 treatment$tr <- factor(treatment$tr,levels=c("Control","WSH","Nutrition","Nutrition + WSH"))
@@ -25,7 +25,7 @@ levels(treatment$tr)
 enrol<-read.csv("washb-bangladesh-enrol.csv",stringsAsFactors = TRUE)
 
 #Load in maternal history data
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew")
 mathist<-read.csv("BD-EE-medhistory.csv")
 
 head(mathist)

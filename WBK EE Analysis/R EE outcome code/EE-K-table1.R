@@ -17,8 +17,8 @@ library(washb)
 library(tidyr)
 library(reshape2)
 
-setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Data/Cleaned/Andrew")
-#setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/")
+#setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Data/Cleaned/Andrew")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew/")
 tr <- read.csv("raw CSV/washk_TR.csv")
 tr$tr <- factor(tr$tr, levels = c("Control", "WSH", "Nutrition", "Nutrition + WSH"))
 
@@ -133,8 +133,8 @@ balance.tab.sd_M<-rbind(Ns,t((table1_sd[,2:ncol(table1_sd)])))
 
 
 #save objects
-setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Results/Andrew")
-#setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
+#setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Results/Andrew")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Andrew/")
 save(balance.tab.mu_M, balance.tab.n_M, balance.tab.sd_M, 
      file="EE-Kenya-table1.Rdata")
 
@@ -166,7 +166,9 @@ results$` ` <- vlist_names
 results$`  ` <- categories
 results <- results %>% select(6, 5, 1, 2, 3, 4)
 
-setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Results/tables")
+#setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Results/tables")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/tables/")
+
 library(flextable)
 flextable(results) %>% align(j=3:6, align="center") %>% hline(i=c(3,5,9,12,16,18)) %>% save_as_docx(path="EE-Kenya-table1.docx")
 
@@ -199,7 +201,7 @@ tbls1 <- cbind(results, tbls1) %>% select(1, 2, 7:10, 3:6)
 tbls1_flex <- flextable(tbls1) %>% align(j=3:10, align="center", part = "all") %>% hline(i=c(3,5,9,12,16,18))
 tbls1_flex <- tbls1_flex %>% add_header_row(values = c("", "WASH Benefits Main Trial", "EED Substudy"), colwidths = c(2, 4, 4)) %>% hline_top(part="header") 
 
-tbls1_flex %>% save_as_docx(path="EE-Kenya-tables1.docx")
+tbls1_flex %>% save_as_docx(path="EE-Kenya-tableS1.docx")
 
 
 
@@ -209,7 +211,9 @@ tbls1_flex %>% save_as_docx(path="EE-Kenya-tables1.docx")
 
 #Create supplimentary table 1
 #Merge in outcomes
-setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Data/Cleaned/Andrew")
+#setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Data/Cleaned/Andrew")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew/")
+
 #setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew")
 urine<-read.csv("washb-kenya-eed-urine.csv", stringsAsFactors = TRUE)
 stool<-read.csv("washb-kenya-eed-stool.csv", stringsAsFactors = TRUE)
@@ -298,7 +302,8 @@ s.balance.tab.mu_M[,1]<-s.Ns
 s.balance.tab.n_M[,1]<-s.Ns
 s.balance.tab.sd_M[,1]<-s.Ns
 
-setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Results/tables")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/tables/")
+#setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Results/tables")
 save(s.balance.tab.mu_M, s.balance.tab.n_M, s.balance.tab.sd_M, 
      file="EE-BD_s.table2.Rdata")
 
@@ -335,6 +340,6 @@ results$` ` <- vlist_names
 results$`  ` <- categories
 results <- results %>% select(5, 4, 1, 2, 3)
 
-setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Results/tables")
+
 library(flextable)
-flextable(results) %>% align(j=3:5, align="center", part = "all") %>% autofit() %>% hline(i=c(3,5,9,12,16,18)) %>% save_as_docx(path="EE-Kenya-tables2.docx")
+flextable(results) %>% align(j=3:5, align="center", part = "all") %>% autofit() %>% hline(i=c(3,5,9,12,16,18)) %>% save_as_docx(path="EE-Kenya-tableS2.docx")

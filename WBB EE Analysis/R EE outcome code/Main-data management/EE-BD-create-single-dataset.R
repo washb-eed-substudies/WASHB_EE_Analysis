@@ -127,6 +127,7 @@ table(is.na(d$clusterid))
 write.csv(d, file = "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew/EE-BD_fulldata.csv")
 
 
-
-
+colnames(d)
+d$birthord
+df <- d %>% subset(., select = c(dataid, childNo, birthord, ))
 

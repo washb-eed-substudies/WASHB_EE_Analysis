@@ -1,6 +1,6 @@
 
 #---------------------------------------
-# EE-BD-ages.R
+# EE-K-ages.R
 #
 # andrew mertens (amertens@berkeley.edu)
 #
@@ -17,7 +17,7 @@ library(washb)
 
 
 #Load in blinded treatment information
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Untouched/")
 load("washb-bangladesh-tr.Rdata")
 d$clusterid<-as.numeric(d$clusterid)
 treatment<-d
@@ -26,7 +26,7 @@ treatment<-d
 # levels(treatment$tr)
 
 #Load in lab outcomes
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Cleaned/Andrew")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew")
 outcomes.stool<-read.dta("BD-EE-stool-outcomes-Stata12.dta")
 outcomes.urine<-read.dta("washb-BD-EE-urine-outcomes-stata12.dta")
 
@@ -158,7 +158,7 @@ age_t3_urine_stool_M<-age_t3_urine_stool_M[,c(1,2,4,3,5,7,6)]
 
 
 
-setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Andrew/")
 save(age_t1_urine_stool_M, 
      age_t2_urine_stool_M, 
      age_t3_urine_stool_M, 

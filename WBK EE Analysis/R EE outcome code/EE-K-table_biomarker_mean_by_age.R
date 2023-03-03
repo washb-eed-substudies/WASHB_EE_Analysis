@@ -16,7 +16,8 @@ library(washb)
 library(tidyr)
 library(reshape2)
 
-setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Data/Cleaned/Andrew")
+#setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Data/Cleaned/Andrew")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew/")
 
 #Load in urine, stool datasets 
 urine<-read.csv("washb-kenya-eed-urine.csv", stringsAsFactors = TRUE) %>% 
@@ -53,8 +54,9 @@ results <- results[c(7, 1:6),]
 names(results) <- c(" ", "Child age 6 months", "Child age 17 months", "Child age 22 months")
 
 #save objects
-setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Results/Tables")
+#setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Results/Tables")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Tables/")
 
 library(flextable)
 flextable(results) %>% hline(i = 1) %>% 
-  align(j=2:4, align="center", part="all") %>% save_as_docx(path="EE-Kenya-tables3.docx")
+  align(j=2:4, align="center", part="all") %>% save_as_docx(path="EE-Kenya-tableSX.docx")

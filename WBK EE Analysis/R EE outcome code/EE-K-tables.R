@@ -94,8 +94,8 @@ rnd<- function(x, n=2) {
 #--------------------------------
 
 #load objects
-setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Results/Andrew/")
-#setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Andrew/")
+#setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Results/Andrew/")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Andrew/")
 load("stool_res_unadj_M.Rdata")
 load("stool_res_adj_M.Rdata")
 load("stool_res_N_M.Rdata")
@@ -204,7 +204,9 @@ tab2<-rbind(t(c("Ln myeloperoxidase (ng/ml)",blank)),
             tab2[21:24,]
             )
 
-setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Results/Tables/")
+#setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Results/Tables/")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Tables/")
+
 col_names <- c("Outcome, Arm", "N", "Mean", "SD", 
                "Difference from Control (95% CI)", "Difference from Nutrition", 
                "Difference from WSH")
@@ -215,7 +217,7 @@ names(tab2) <- col_names
 library(flextable)
 tab2_flex <- flextable(tab2) %>% 
   bold(i=c(1, 6, 11, 16, 21, 26)) %>% 
-  align(j=2:7, align="center", part="all")
+  flextable::align(j=2:7, align="center", part="all")
 tab2_flex
 
 
@@ -254,14 +256,16 @@ tab3<-rbind(t(c("Ln myeloperoxidase (ng/ml)",blank)),
             tab3[21:24,]
             )
 
-setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Results/Tables/")
+#setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Results/Tables/")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Tables/")
+
 save(tab3, file="EE-K-table3.RData")
 
 tab3 <- as.data.frame(tab3)
 names(tab3) <- col_names 
 tab3_flex <- flextable(tab3) %>% 
   bold(i=c(1, 6, 11, 16, 21, 26)) %>% 
-  align(j=2:7, align="center", part="all")
+  flextable::align(j=2:7, align="center", part="all")
 tab3_flex
 
 
@@ -298,14 +302,16 @@ tab4<-rbind(t(c("Ln myeloperoxidase (ng/ml)",blank)),
             tab4[21:24,]
             )
 
-setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Results/Tables/")
+#setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Results/Tables/")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Tables/")
+
 save(tab4, file="EE-K-table4.RData")
 
 tab4 <- as.data.frame(tab4)
 names(tab4) <- col_names 
 tab4_flex <- flextable(tab4) %>% 
   bold(i=c(1, 6, 11, 16, 21, 26)) %>% 
-  align(j=2:7, align="center", part="all")
+  flextable::align(j=2:7, align="center", part="all")
 tab4_flex
 
 
@@ -321,15 +327,15 @@ save_as_docx("Table 2. Effect of intervention on environmental enteric dysfuncti
 # at follow-up 1 
 #--------------------------------
 
-setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Results/Andrew/")
+#setwd("/Users/sophiatan/Dropbox/WASH/WBK-EE-analysis/Results/Andrew/")
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Andrew/")
+
 load("stool_ipcw_res.Rdata")
 load("urine_ipcw_res.Rdata")
 load("stool_res_adj_sex_age_M.Rdata")
 load("urine_res_adj_sex_age_M.Rdata")
 
-
-
-###NOTE! Need to fix to print the 
+setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Results/Tables/")
 
 
 s.glm_print<-function(n, mean, glm, age, adj,ipcw, t=F){
@@ -421,7 +427,7 @@ col_names <- c("Outcome, Arm", "N", "Mean", "SD",
                "Adjusted Difference from Control (95% CI)", "IPCW-adjusted Difference from Control (95% CI)")
 s.tab2 <- as.data.frame(s.tab2)
 names(s.tab2) <- col_names
-save(s.tab2, file="EE-K-s.table4.RData")
+save(s.tab2, file="EE-K-s.table3.RData")
 
 cleantable(s.tab2, 2)
 
@@ -465,7 +471,7 @@ s.tab3<-rbind(t(c("Ln myeloperoxidase (ng/ml)",blank)),
 
 s.tab3 <- as.data.frame(s.tab3)
 names(s.tab3) <- col_names
-save(s.tab3, file="EE-K-s.table5.RData")
+save(s.tab3, file="EE-K-s.table4.RData")
 
 cleantable(s.tab3, 2)
 
@@ -501,25 +507,25 @@ s.tab4<-rbind(t(c("Ln myeloperoxidase (ng/ml)",blank)),
 
 s.tab4 <- as.data.frame(s.tab4)
 names(s.tab4) <- col_names
-save(s.tab4, file="EE-K-s.table6.RData")
+save(s.tab4, file="EE-K-s.table5.RData")
 
 cleantable(s.tab4, 2)
 
 tabs4_flex <- flextable(s.tab2) %>% 
   bold(i=c(1, 6, 11, 16, 21, 26)) %>% 
-  align(j=2:8, align="center", part="all")
+  flextable::align(j=2:8, align="center", part="all")
 tabs5_flex <- flextable(s.tab3) %>% 
   bold(i=c(1, 6, 11, 16, 21, 26)) %>% 
-  align(j=2:8, align="center", part="all")
+  flextable::align(j=2:8, align="center", part="all")
 tabs6_flex <- flextable(s.tab4) %>% 
   bold(i=c(1, 6, 11, 16, 21, 26)) %>% 
-  align(j=2:8, align="center", part="all")
+  flextable::align(j=2:8, align="center", part="all")
 
 
-save_as_docx("Table S4. Effect of intervention on environmental enteric dysfunction measurements at 6 months" = tabs4_flex,
-             "Table S5. Effect of intervention on environmental enteric dysfunction measurements at 17 months" = tabs5_flex,
-             "Table S6. Effect of intervention on environmental enteric dysfunction measurements at 22 months" = tabs6_flex,
-             path = "EE_kenya_tables_s4-6.docx")
+save_as_docx("Table S3. Effect of intervention on environmental enteric dysfunction measurements at 6 months" = tabs4_flex,
+             "Table S4. Effect of intervention on environmental enteric dysfunction measurements at 17 months" = tabs5_flex,
+             "Table S5. Effect of intervention on environmental enteric dysfunction measurements at 22 months" = tabs6_flex,
+             path = "EE_kenya_tables_s3-5.docx")
 
 
 
@@ -651,15 +657,15 @@ names(s.tab7.m3) <- col_names
 names(s.tab7.1) <- col_names
 names(s.tab7.2) <- col_names
 s.tab7.m3 <- flextable(s.tab7.m3) %>% 
-  align(j=2:8, align="center", part="all") 
+  flextable::align(j=2:8, align="center", part="all") 
 s.tab7.1 <- flextable(s.tab7.1) %>% 
-  align(j=2:8, align="center", part="all")
+  flextable::align(j=2:8, align="center", part="all")
 s.tab7.2 <- flextable(s.tab7.2) %>% 
-  align(j=2:8, align="center", part="all")
+  flextable::align(j=2:8, align="center", part="all")
 
 
-save_as_docx("Table S7. P-values of treatment estimates, unadjusted, and adjusted for multiple testing using Bonferroni correction at 6 months" = s.tab7.m3,
-             "Table S8. P-values of treatment estimates, unadjusted, and adjusted for multiple testing using Bonferroni correction at 17 months" = s.tab7.1,
-             "Table S9. P-values of treatment estimates, unadjusted, and adjusted for multiple testing using Bonferroni correction at 22 months" = s.tab7.2,
-             path = "EE_kenya_tables_s7-9.docx")
+save_as_docx("Table S6. P-values of treatment estimates, unadjusted, and adjusted for multiple testing using Bonferroni correction at 6 months" = s.tab7.m3,
+             "Table S7. P-values of treatment estimates, unadjusted, and adjusted for multiple testing using Bonferroni correction at 17 months" = s.tab7.1,
+             "Table S8. P-values of treatment estimates, unadjusted, and adjusted for multiple testing using Bonferroni correction at 22 months" = s.tab7.2,
+             path = "EE_kenya_tables_s6-8.docx")
 
