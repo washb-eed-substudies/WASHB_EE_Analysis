@@ -61,7 +61,7 @@ d <- left_join(d, enrol, by="hhid")
 
 d <- left_join(d, tr, by="clusterid")
 
-
+head(d)
 
 #----------------------------------------
 # Drop childids with data problems
@@ -103,22 +103,6 @@ d$childid[no_tr]
 d <- d[!is.na(d$tr),]
 
 
-# table(is.na(d$tr))
-# d$childid[is.na(d$tr)]
-# 
-# #Drop children not in Audrie's dataset
-# load("C:/Users/andre/Downloads/temp.Rdata")
-#   flag <-which(!(d$childid %in% da$childid))
-#  
-# dropped_rows <- d[c(no_tr,flag),]
-#   
-# d <- d[-c(no_tr,flag),]
-# 
-# 
-# write.csv(dropped_rows, file = "C:/Users/andre/Downloads/WBK_stool_dropped_rows.csv")
-
-
-
 
 
 #Calculate child age and month of the year at each measurement
@@ -133,8 +117,12 @@ d <- d %>%
                month2= month(d$stool_ml_date),
                month3= month(d$stool_el_date))
                
+head(d)
 
 
+
+# summary(growthstandards::who_lencm2zscore(19*365, d$momheight, sex="Female"))
+# table(growthstandards::who_lencm2zscore(19*365, d$momheight, sex="Female") < -1)
 
 #Survey 1
 #Tabulate overall N, gender, and age 
@@ -319,6 +307,13 @@ for(i in 7:9){
 #Adjusted GLM
 #------------------
 
+#Categorize maternal height
+summary(d$momheight)
+d$mht_cat <- as.character(ntile(d$momheight,4))
+d$mht_cat[is.na(d$mht_cat)] <- "missing"
+d$mht_cat <- factor(d$mht_cat, levels=c("1","2","3","4","missing"))
+table(d$mht_cat)
+
 # Set factor variables
 
 # d$n_chickens[is.na(d$n_chickens)] <- 99
@@ -335,6 +330,10 @@ d$asset_tv <-relevel(d$asset_tv, ref = "Missing/DK")
 d$elec <-relevel(d$elec, ref = "Has electricity")
 d$momedu <-relevel(d$momedu, ref = "")
 
+d$staffid1 <- fct_lump_min(d$staffid1, 50, other_level = "inexp")
+d$staffid2 <- fct_lump_min(d$staffid2, 50, other_level = "inexp")
+d$staffid3 <- fct_lump_min(d$staffid3, 50, other_level = "inexp")
+
 d$month1 <- factor(d$month1)
 d$month2 <- factor(d$month2)
 d$month3 <- factor(d$month3)
@@ -345,7 +344,7 @@ d$staffid3 <- factor(d$staffid3)
 
 #Make vectors of adjustment variable names
 Wvars<-c("sex", "birthord",  "momage", "momedu",  "Ncomp", "Nlt18", "elec","roof",
-         "momheight",
+         "mht_cat",
          "asset_radio", "asset_tv", "asset_mobile", "asset_clock", "asset_bike", "asset_moto", "asset_stove",  
          "n_cows", "n_goats","n_chickens", "n_dogs", "watmin", "hfiacat")
 

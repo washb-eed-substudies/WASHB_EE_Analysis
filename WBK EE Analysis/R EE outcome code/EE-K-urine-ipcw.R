@@ -12,9 +12,10 @@
 ###Load in data
 rm(list=ls())
 library(foreign)
-library(dplyr)
+library(tidyverse)
 library(washb)
-
+library(lubridate)
+source("C:/Users/andre/Documents/EE/WASHB_EE_Analysis/WBK EE Analysis/R EE outcome code/washb_tmle_ipcw.R")
 
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andrew")
@@ -34,8 +35,8 @@ load("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Data/Cleaned/Andr
 
 
 #Load in main trial enrollment data for ipcw analysis
-enrol <- read.dta("C:/Users/andre/Dropbox/washb_Kenya_primary_outcomes_Andrew/Data-selected/clean/washb-kenya-enrol.dta")
-#enrol<-read.dta("C:/Users/andre/Dropbox/washb_Kenya_primary_outcomes_Andrew/Data-selected/clean/washb-kenya-enrol.dta")
+#enrol <- read.dta("C:/Users/andre/Dropbox/washb_Kenya_primary_outcomes_Andrew/Data-selected/clean/washb-kenya-enrol.dta")
+enrol <- read.csv("C:/Users/andre/Dropbox/WASHB-Kenya-Data/1-primary-outcome-datasets/washb-kenya-enrol.csv")
 head(enrol)
 
 
@@ -44,7 +45,7 @@ d <- left_join(lm, dob, by=c("childid","hhid"))
 # d <- left_join(d, ursurv, by="childid")
 
 dim(d)
-d <- left_join(d, enrol,  by="childid")
+d <- left_join(enrol, d,  by="childid")
 dim(d)
 
 class(d$DOB)
@@ -52,7 +53,7 @@ class(d$urine_bl_date)
 
 #Calculate child age and month of the year at each measurement
 d <- d %>% 
-        mutate(#DOB=dmy(DOB),
+        mutate(DOB=dmy(DOB),
                aged1= urine_bl_date-DOB,
                aged2= urine_ml_date-DOB,
                aged3= urine_el_date-DOB,
@@ -62,12 +63,6 @@ d <- d %>%
                month1= month(d$urine_bl_date),
                month2= month(d$urine_ml_date),
                month3= month(d$urine_el_date))
-
-
-
-
-#Single urine outcome not matched to main trial data
-#anti_join(urine_outcomes, ipcw, by=c("dataid", "childNo")) %>% subset(select=c(dataid, childNo))
 
 
 
@@ -102,6 +97,13 @@ d <- d %>%
 # Covariate cleaning
 #------------------
 
+#Categorize maternal height
+summary(d$momheight)
+d$mht_cat <- as.character(ntile(d$momheight,4))
+d$mht_cat[is.na(d$mht_cat)] <- "missing"
+d$mht_cat <- factor(d$mht_cat, levels=c("1","2","3","4","missing"))
+table(d$mht_cat)
+
 # Set factor variables
 d$asset_tv <- factor(d$asset_tv)
 d$elec <- factor(d$elec)
@@ -109,7 +111,13 @@ d$momedu <- factor(d$momedu)
 
 d$asset_tv <-relevel(d$asset_tv, ref = "0")
 d$elec <-relevel(d$elec, ref = "0")
-d$momedu <-relevel(d$momedu, ref = "Incomplete Primary")
+d$momedu <-relevel(d$momedu, ref = "IncompletePrimary")
+
+d$birthord[is.na(d$birthord)] <- ""
+
+d$staffid1 <- fct_lump_min(d$staffid1, 50, other_level = "inexp")
+d$staffid2 <- fct_lump_min(d$staffid2, 50, other_level = "inexp")
+d$staffid3 <- fct_lump_min(d$staffid3, 50, other_level = "inexp")
 
 d$month1 <- factor(d$month1)
 d$month2 <- factor(d$month2)
@@ -121,34 +129,35 @@ d$staffid3 <- factor(d$staffid3)
 
 #Make vectors of adjustment variable names
 Wvars<-c("sex", "birthord",  "momage", "momedu",  "Ncomp", "Nlt18", "elec","roof",
-         "momheight",
+         "mht_cat",
          "asset_radio", "asset_tv", "asset_mobile", "asset_clock", "asset_bike", "asset_moto", "asset_stove",  
          "n_cows", "n_goats","n_chickens", "n_dogs", "watmin", "hfiacat")
 
 #Add in time varying covariates:
-Wvars1<-c("aged1", "month1", "staffid1") 
-Wvars2<-c("aged2", "month2", "staffid2") 
-Wvars3<-c("aged3", "month3", "staffid3") 
+# Wvars1<-c("aged1", "month1", "staffid1") 
+# Wvars2<-c("aged2", "month2", "staffid2") 
+# Wvars3<-c("aged3", "month3", "staffid3") 
 
 
 
 #subset time-constant W adjustment set
 W<- subset(d, select=Wvars)
+W3 <- W2 <- W1 <- W
 
 
-#Add in time-varying covariates
-W1<- cbind(W, subset(d, select=Wvars1))
-W2<- cbind(W, subset(d, select=Wvars2))
-W3<- cbind(W, subset(d, select=Wvars3))
-
-
-#Set time-varying covariates as factors
-W1$month1<-as.factor(W1$month1)
-W2$month2<-as.factor(W2$month2)
-W3$month3<-as.factor(W3$month3)
-W1$staffid1<-factor(W1$staffid1)
-W2$staffid2<-factor(W2$staffid2)
-W3$staffid3<-factor(W3$staffid3)
+# #Add in time-varying covariates
+# W1<- cbind(W, subset(d, select=Wvars1))
+# W2<- cbind(W, subset(d, select=Wvars2))
+# W3<- cbind(W, subset(d, select=Wvars3))
+# 
+# 
+# #Set time-varying covariates as factors
+# W1$month1<-as.factor(W1$month1)
+# W2$month2<-as.factor(W2$month2)
+# W3$month3<-as.factor(W3$month3)
+# W1$staffid1<-factor(W1$staffid1)
+# W2$staffid2<-factor(W2$staffid2)
+# W3$staffid3<-factor(W3$staffid3)
 
 
 
@@ -221,9 +230,6 @@ table(d$Lact2.miss)
 table(d$Lact3.miss)
 
 
-mean(d$Lact1.miss, na.rm=T)
-
-
 # set missing outcomes to an arbitrary, non-missing value. In this case use 9
 d$Lact1Delta <- d$Lact1
 d$Lact1Delta[d$Lact1.miss==0] <- exp(9)
@@ -286,7 +292,7 @@ res_adj<-list(lact_t1_adj=matrix(0,5,5), mann_t1_adj=matrix(0,5,5), lm_t1_adj=ma
 for(i in 1:ncol(Y)){
   for(j in 1:5){
     #note the log transformation of the outcome prior to running GLM model:
-    temp<-washb_tmle(Y=log(Y[,i]), Delta=miss[,i], tr=d$tr, W=Wlist[[i]], id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], Q.SL.library = c("SL.glm"), seed=12345, print=T)
+    temp<-washb_tmle_ipcw(Y=log(Y[,i]), Delta=miss[,i], tr=d$tr, W=Wlist[[i]], id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], Q.SL.library = c("SL.glm"), seed=12345, print=T)
     cat(i," : ",j, "\n")
     res_adj[[i]][j,]<-(t(unlist(temp$estimates$ATE)))
     colnames(res_adj[[i]])<-c("psi","var.psi","ci.l","ci.u", "Pval")
@@ -377,7 +383,7 @@ perWlist <- list(W1,W1,W2,W2,W3,W3)
 
 for(i in 1:ncol(perY)){
   for(j in 1:5){
-    temp<-washb_tmle(Y=(perY[,i]), Delta=per.miss[,i], tr=d$tr, W=perWlist[[i]], id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], Q.SL.library = c("SL.glm"), seed=12345, print=T)
+    temp<-washb_tmle_ipcw(Y=(perY[,i]), Delta=per.miss[,i], tr=d$tr, W=perWlist[[i]], id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], Q.SL.library = c("SL.glm"), seed=12345, print=T)
     cat(i," : ",j, "\n")
     res_per[[i]][j,]<-(t(unlist(temp$estimates$ATE)))
     colnames(res_per[[i]])<-c("psi","var.psi","ci.l","ci.u", "Pval")

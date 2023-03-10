@@ -138,9 +138,7 @@ lm_t3_absmn<-d %>% group_by(tr) %>% do(as.data.frame(washb_mean(Y=.$LM3, id=.$bl
 #N Log-transformed means
 #------------------
 
-#untransformed outcomes
-
-
+#transform outcomes
 d$ln_lact1 <- log(d$Lact1)
 d$ln_lact2 <- log(d$Lact2)
 d$ln_lact3 <- log(d$Lact3)
@@ -274,6 +272,14 @@ for(i in 7:9){
 #Adjusted GLM
 #------------------
 
+#Categorize maternal height
+summary(d$momheight)
+d$mht_cat <- as.character(ntile(d$momheight,4))
+d$mht_cat[is.na(d$mht_cat)] <- "missing"
+d$mht_cat <- factor(d$mht_cat, levels=c("1","2","3","4","missing"))
+table(d$mht_cat)
+
+
 # Set factor variables
 
 d$asset_tv <-relevel(d$asset_tv, ref = "Missing/DK")
@@ -290,7 +296,7 @@ d$staffid3 <- factor(d$staffid3)
 
 #Make vectors of adjustment variable names
 Wvars<-c("sex", "birthord",  "momage", "momedu",  "Ncomp", "Nlt18", "elec","roof",
-         "momheight",
+         "mht_cat",
          "asset_radio", "asset_tv", "asset_mobile", "asset_clock", "asset_bike", "asset_moto", "asset_stove",  
          "n_cows", "n_goats","n_chickens", "n_dogs", "watmin", "hfiacat")
 
@@ -312,6 +318,10 @@ W3<- cbind(W, subset(d, select=Wvars3))
 
 
 #Set time-varying covariates as factors
+d$staffid1 <- fct_lump_min(d$staffid1, 50, other_level = "inexp")
+d$staffid2 <- fct_lump_min(d$staffid2, 50, other_level = "inexp")
+d$staffid3 <- fct_lump_min(d$staffid3, 50, other_level = "inexp")
+
 W1$month1<-as.factor(W1$month1)
 W2$month2<-as.factor(W2$month2)
 W3$month3<-as.factor(W3$month3)
@@ -353,9 +363,6 @@ for(i in 1:ncol(W3)){
 ##############################################
 
 
-#dataframe of urine biomarkers:
-Y<-d %>% select(Lact1,Mann1,LM1,Lact2,Mann2,LM2,Lact3,Mann3,LM3)
-
 #Create empty matrix to hold the tmle results:
 res_adj<-list(lact_t1_adj=matrix(0,5,6), mann_t1_adj=matrix(0,5,6), lm_t1_adj=matrix(0,5,6), 
                 lact_t2_adj=matrix(0,5,6), mann_t2_adj=matrix(0,5,6), lm_t2_adj=matrix(0,5,6),  
@@ -381,7 +388,8 @@ for(i in 7:9){
 }
 
 
-
+washb_glm(Y=Y[,i], tr=d$tr, W=W1 %>% subset(., select = -c(staffid1, month1, aged1)), id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=T)$TR
+washb_glm(Y=Y[,i], tr=d$tr, W=NULL, id=d$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=T)$TR
 
 
 #------------------
