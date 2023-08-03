@@ -3,7 +3,7 @@
 
 rm(list=ls())
 library(tidyverse)
-library(xlsx)
+library(readxl)
 library(stringr)
 library(washb)
 library(knitr)
@@ -14,8 +14,8 @@ library(data.table)
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/Endline/")
 
 #Saliva lab data
-child <- read.xlsx("EE_Endline_Child_Saliva_FU2.xlsx", 1)
-mother <- read.xlsx("EE_Endline_Mother_Saliva_FU2.xlsx", 1)
+child <- readxl::read_excel("EE_Endline_Child_Saliva_FU2.xlsx", 1)
+mother <- readxl::read_excel("EE_Endline_Mother_Saliva_FU2.xlsx", 1)
 
 
 
@@ -112,6 +112,7 @@ for(i in 1:length(time_vars)){
 
 d$reg1b1 <- d$reg1b3 <- NA
 
+d_wide<-d
 d = melt(data.table(d), measure = time_var_list, value.name = names(time_var_list))
 d <- d %>% rename(round = variable) %>% as.data.frame()
      
@@ -589,6 +590,8 @@ save(
      pooled_childFU2_growthRF_bin,pooled_motherFU2_growthRF_bin,
      file="C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/FU2_pooled_results.Rdata")
 
+#save clean data for tables/figures
+saveRDS(d, file="C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/FU2_clean_data.RDS")
 
 
 
