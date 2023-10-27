@@ -113,6 +113,10 @@ for(i in 1:length(time_vars)){
 d$reg1b1 <- d$reg1b3 <- NA
 
 d_wide<-d
+#Save analysis dataset
+saveRDS(d_wide,"EE-BD_fut2_analysis_dataset_wide.rds")
+
+
 d = melt(data.table(d), measure = time_var_list, value.name = names(time_var_list))
 d <- d %>% rename(round = variable) %>% as.data.frame()
      
@@ -163,7 +167,7 @@ d <- d %>% rename(round = variable) %>% as.data.frame()
 d <- left_join(d, child, by=c("dataid","childNo"))
 d <- left_join(d, mother, by=c("dataid"))
 
-
+head(d)
 
 
 #Summary statistics on FU2
@@ -194,8 +198,8 @@ d$tr[d$tr=="Nutrition"] <- "N"
 d$tr[d$tr=="Nutrition + WSH"] <- "N + WSH"
 
 
-
-
+#Save analysis dataset
+saveRDS(d,"EE-BD_fut2_analysis_dataset.rds")
 
 
 #Create mother and child FU2 analysis datasets

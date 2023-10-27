@@ -1,0 +1,213 @@
+---
+title: "Tables and Figures"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width=12, fig.height=20, message=FALSE, warning =FALSE)
+```
+
+```{r, include=FALSE}
+rm(list=ls())
+library(tidyverse)
+library(knitr)
+library(here)
+load("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/FU2_results.RDATA")
+load("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/FU2_pooled_results.Rdata")
+
+#Plot parameters
+scaleFUN <- function(x) sprintf("%.2f", x)
+
+#Plot themes
+theme_set(theme_bw())
+
+#hbgdki pallet
+tableau10 <- c("#1F77B4","#FF7F0E","#2CA02C","#D62728",
+  "#9467BD","#8C564B","#E377C2","#7F7F7F","#BCBD22","#17BECF")
+
+  
+```
+
+
+# N's by treatment arm
+
+```{r, echo=F}
+
+colnames(summary_res) <- c("Treatment Arm","FUT2 Status", "Number of Children", "Number of Mothers")
+summary_res<-summary_res[!is.na(summary_res$`FUT2 Status`),]
+summary_res$`FUT2 Status` <- factor(summary_res$`FUT2 Status`, levels=c("Positive","Negative","Inconclusive"))
+summary_res <- summary_res %>% arrange(`Treatment Arm`, `FUT2 Status`)
+knitr::kable(summary_res)
+```
+
+# Tables of associations between FUT2 status and growth outcomes (FUT2 as a risk factor)
+
+
+### Child FUT2 status - continous outcomes
+
+```{r, echo=F}
+
+  knitr::kable(pooled_childFU2_growthRF_cont)
+  cat("\n\n\n")
+  
+
+```
+
+### Child FUT2 status - binary outcomes
+
+```{r, echo=F}
+
+  knitr::kable(pooled_childFU2_growthRF_bin)
+  cat("\n\n\n")
+  
+
+```
+
+### Maternal FUT2 status - continous outcomes
+
+```{r, echo=F}
+  knitr::kable(pooled_motherFU2_growthRF_cont)
+  cat("\n\n\n")
+
+```
+
+### Maternal FUT2 status - binary outcomes
+
+```{r, echo=F}
+  knitr::kable(pooled_motherFU2_growthRF_bin)
+  cat("\n\n\n")
+
+```
+
+
+
+
+
+# Tables of associations between FUT2 status and EED outcomes (FUT2 as a risk factor)
+
+
+### Child FUT2 status
+
+```{r, echo=F}
+
+  knitr::kable(pooled_childFU2_RF_adj)
+  cat("\n\n\n")
+  
+
+```
+
+### Maternal FUT2 status
+
+```{r, echo=F}
+  knitr::kable(pooled_motherFU2_RF_adj)
+  cat("\n\n\n")
+
+```
+
+
+
+
+
+
+
+
+# Tables of associations between FUT2 status and growth outcomes (FUT2 as a risk factor) - Stratified by measurement round
+
+
+### Child FUT2 status - continous outcomes
+
+```{r, echo=F}
+
+  knitr::kable(res_childFU2_growthRF_cont)
+  cat("\n\n\n")
+  
+
+```
+
+### Child FUT2 status - binary outcomes
+
+```{r, echo=F}
+
+  knitr::kable(res_childFU2_growthRF_bin)
+  cat("\n\n\n")
+  
+
+```
+
+### Maternal FUT2 status - continous outcomes
+
+```{r, echo=F}
+  knitr::kable(res_motherFU2_growthRF_cont)
+  cat("\n\n\n")
+
+```
+
+### Maternal FUT2 status - binary outcomes
+
+```{r, echo=F}
+  knitr::kable(res_motherFU2_growthRF_bin)
+  cat("\n\n\n")
+
+```
+
+
+
+
+# Tables of associations between FUT2 status and EED outcomes (FUT2 as a risk factor) - Stratified by measurement round
+
+
+### Child FUT2 status
+
+```{r, echo=F}
+
+  knitr::kable(res_childFU2_RF_adj)
+  cat("\n\n\n")
+  
+
+```
+
+### Maternal FUT2 status
+
+```{r, echo=F}
+  knitr::kable(res_motherFU2_RF_adj)
+  cat("\n\n\n")
+
+```
+
+
+
+
+# Tables of WASH Benefits intervention effects, stratified by FUT2 status (FUT2 as an effect modifier)
+
+
+## Child FUT2 status
+
+```{r, echo=F, results='asis'}
+for(i in 1:length(res_childFU2_EM_unadj)){
+  
+  cat("### Outcome: ",names(res_childFU2_EM_unadj)[i],"\n\n")
+  print(knitr::kable(res_childFU2_EM_unadj[[i]]))
+  
+  cat("\n\n\n")
+  
+}
+```
+
+## Maternal FUT2 status
+
+```{r, echo=F, results='asis'}
+for(i in 1:length(res_motherFU2_EM_unadj)){
+  
+  cat("### Outcome: ",names(res_motherFU2_EM_unadj)[i],"\n\n")
+  print(knitr::kable(res_motherFU2_EM_unadj[[i]]))
+  
+  cat("\n\n\n")
+  
+}
+```
+
+ 
+
+

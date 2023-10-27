@@ -24,10 +24,7 @@ Wvars<-c(
          'momage', 'momheight','momedu','hfiacat',
          'Nlt18','Ncomp','watmin',
          'walls', 'floor',
-         'elec', 'asset_wardrobe', 'asset_table', 'asset_chair', 'asset_clock', 
-         'asset_khat', 'asset_chouki', 'asset_radio', 
-         'asset_tv', 'asset_refrig', 'asset_bike',
-         'asset_moto', 'asset_sewmach', 'asset_mobile',
+         'elec', 
          'n_cows', 'n_goats', 'n_chickens')
 tab1 <- CreateTableOne(vars = Wvars, strata = "tr", data = d, test = FALSE)
 
@@ -43,3 +40,6 @@ tab1_flex <- flextable::flextable(tab1_df)
 doc <- officer::read_docx()
 doc <- body_add_flextable(doc, tab1_flex)
 print(doc, "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/FUT2_table1.docx")  # replace "TableOne.docx" with your preferred filename
+print(doc, "C:/Users/andre/Documents/EE/WASHB_EE_Analysis/WBB EE Analysis/R EE outcome output/FUT2_table1.docx")  # replace "TableOne.docx" with your preferred filename
+
+

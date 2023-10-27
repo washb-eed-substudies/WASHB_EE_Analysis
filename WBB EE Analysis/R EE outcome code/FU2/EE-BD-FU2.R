@@ -3,18 +3,19 @@
 
 rm(list=ls())
 library(tidyverse)
-library(xlsx)
+library(readxl)
 library(stringr)
 library(washb)
 library(knitr)
 library(lubridate)
+library(here)
 
 
 setwd("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/Endline/")
 
 #Saliva lab data
-child <- read.xlsx("EE_Endline_Child_Saliva_FU2.xlsx", 1)
-mother <- read.xlsx("EE_Endline_Mother_Saliva_FU2.xlsx", 1)
+child <- read_excel("EE_Endline_Child_Saliva_FU2.xlsx", 1)
+mother <- read_excel("EE_Endline_Mother_Saliva_FU2.xlsx", 1)
 
 
 #Saliva survey
@@ -234,12 +235,12 @@ contrasts <- list(c("Control","WSH"), c("Control","N"), c("Control","N + WSH"), 
 res_childFU2_EM_unadj <- list()
 res_motherFU2_EM_unadj <- list()
 
-i<-2
+i<-j<-2
 #Unadjusted glm models -FU2 as an EM
 for(i in 1:ncol(Yc)){
   for(j in 1:5){
     #note the log transformation of the outcome prior to running GLM model:
-    temp <- washb_glm(Y=log(Yc[,i]), tr=dc$tr, W=data.frame(cFU2=dc$cFU2), V="cFU2", id=dc$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=T)
+    temp <- washb_glm(Y=log(Yc[,i]), tr=dc$tr, W=data.frame(cFU2=factor(dc$cFU2)), V="cFU2", id=dc$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=T)
     #Get interaction p-val
     pval<-temp$fit$`Pr(>|z|)`[nrow(temp$fit)]
     temp <- data.frame(contrast= paste0(contrasts[[j]][1]," v ",contrasts[[j]][2]), temp$lincom, int_pval=pval)
@@ -253,12 +254,14 @@ for(i in 1:ncol(Yc)){
 }
 
 names(res_childFU2_EM_unadj) <- colnames(Yc)
+
+#table(dm$cFU2, dm$tr, dm$round)
   
 
 for(i in 1:ncol(Ym)){
   for(j in 1:5){
     #note the log transformation of the outcome prior to running GLM model:
-    temp <- washb_glm(Y=log(Ym[,i]), tr=dm$tr, W=data.frame(mFU2=dm$mFU2), V="mFU2", id=dm$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=T)
+    temp <- washb_glm(Y=log(Ym[,i]), tr=dm$tr, W=data.frame(mFU2=factor(dm$mFU2)), V="mFU2", id=dm$block, pair=NULL, family="gaussian", contrast= contrasts[[j]], print=T)
     #Get interaction p-val
     pval<-temp$fit$`Pr(>|z|)`[nrow(temp$fit)]
     temp <- data.frame(contrast= paste0(contrasts[[j]][1]," v ",contrasts[[j]][2]), temp$lincom, int_pval=pval)
@@ -497,136 +500,136 @@ mWlist <- list(ur_mW1,ur_mW1,ur_mW1,ur_mW2,ur_mW2,ur_mW2,ur_mW3,ur_mW3,ur_mW3,
 
 
 
-#-------------------------------------------------------
-# Associations with EED outcomes
-#-------------------------------------------------------
-
-library=c("SL.glm")
-
-#Set up SL library
-
-#Create empty matrix to hold the glm results:
-res_childFU2_RF_adj <- NULL
-res_motherFU2_RF_adj <- NULL
-#i<-11
-#TMLE models -FU2 as a RF
-for(i in  1:ncol(Yc)){
-    #note the log transformation of the outcome prior to running TMLE model:
-      set.seed(12345)
-    temp<-washb_tmle(Y=log(Yc[,i]), tr=dc$cFU2, W=cWlist[[i]], id=dc$block, pair=NULL, family="gaussian", contrast=c("Positive","Negative"), print=F, Q.SL.library=library)
-    temp<-(t(unlist(temp$estimates$ATE)))
-    colnames(temp)<-c("ATE","variance","ci.l","ci.u", "Pvalue")
-    res_childFU2_RF_adj <- rbind(res_childFU2_RF_adj , temp) 
-} 
-rownames(res_childFU2_RF_adj)<-colnames(Yc)
-
-table(is.na(log(Yc[,i])))
-table(is.na(dc$cFU2))
-table(is.na(dc$block))
-table(W$birthord[!is.na(log(Yc[,11]))])
-
-for(i in 1:ncol(W)){
-  cat("\n",colnames(W)[i]," ",i,"\n")
-  print(table(is.na(W[!is.na(log(Ym[,12]))&!is.na(dm$mFU2),i])))
-}
-
-dm$aat1[dm$dataid=="33701"]
-
-i<-12
-for(i in  1:ncol(Ym)){
-    #note the log transformation of the outcome prior to running TMLE model:
-    set.seed(12345)
-    temp<-washb_tmle(Y=log(Ym[,i]), tr=dm$mFU2, W=mWlist[[i]], id=dm$block, pair=NULL, family="gaussian", contrast=c("Positive","Negative"), print=T, Q.SL.library=library)
-    temp<-(t(unlist(temp$estimates$ATE)))
-    colnames(temp)<-c("ATE","variance","ci.l","ci.u", "Pvalue")
-    res_motherFU2_RF_adj <- rbind(res_motherFU2_RF_adj , temp) 
-} 
-rownames(res_motherFU2_RF_adj) <- colnames(Ym)
-  
-
-
-#-------------------------------------------------------
-# Associations with growth outcomes
-#-------------------------------------------------------
-
-
-#dataframe of EED biomarkers:
-Yc_cont <- dc %>% subset(., select=c(laz1, laz2, laz3, whz1, whz2, whz3, waz1, waz2, waz3, hcz1, hcz2, hcz3))
-Ym_cont <- dm %>% subset(., select=c(laz1, laz2, laz3, whz1, whz2, whz3, waz1, waz2, waz3, hcz1, hcz2, hcz3))
-
-Yc_bin <- dc %>% subset(., select=c( stunt1, stunt2, stunt3, wast1, wast2, wast3, 
-                                     sstunt1, sstunt2, sstunt3, swast1, swast2, swast3,  
-                                     underwt1, underwt2, underwt3,
-                                     sunderwt1, sunderwt2, sunderwt3))
-Ym_bin <- dm %>% subset(., select=c( stunt1, stunt2, stunt3, wast1, wast2, wast3, 
-                                     sstunt1, sstunt2, sstunt3, swast1, swast2, swast3,  
-                                     underwt1, underwt2, underwt3,
-                                     sunderwt1, sunderwt2, sunderwt3))
-
-
-
-
-
-#Create lists of adjustment covariates
-cWlist_anthro <- list(an_cW1, an_cW2, an_cW3, an_cW1, an_cW2, an_cW3, an_cW1, an_cW2, an_cW3, an_cW1, an_cW2, an_cW3)
-mWlist_anthro <- list(an_mW1, an_mW2, an_mW3, an_mW1, an_mW2, an_mW3, an_mW1, an_mW2, an_mW3, an_mW1, an_mW2, an_mW3)
-
-cWlist_anthro_bin <- list(an_cW1, an_cW2, an_cW3, an_cW1, an_cW2, an_cW3, an_cW1, an_cW2, an_cW3, an_cW1, an_cW2, an_cW3, an_cW1, an_cW2, an_cW3, an_cW1, an_cW2, an_cW3)
-mWlist_anthro_bin <- list(an_mW1, an_mW2, an_mW3, an_mW1, an_mW2, an_mW3, an_mW1, an_mW2, an_mW3, an_mW1, an_mW2, an_mW3, an_mW1, an_mW2, an_mW3, an_mW1, an_mW2, an_mW3)
-
-     
-
-
-#Create empty matrix to hold the glm results:
-res_childFU2_growthRF_cont <- NULL
-res_motherFU2_growthRF_cont <- NULL
-res_childFU2_growthRF_bin <- NULL
-res_motherFU2_growthRF_bin <- NULL
-
-#TMLE models -continuous outcomes 
-for(i in  1:ncol(Yc_cont)){
-    #note the log transformation of the outcome prior to running TMLE model:
-        set.seed(12345)
-    temp<-washb_tmle(Y=Yc_cont[,i], tr=dc$cFU2, W=cWlist_anthro[[i]], id=dc$block, pair=NULL, family="gaussian", contrast=c("Positive","Negative"), print=F, Q.SL.library=library)
-    temp<-(t(unlist(temp$estimates$ATE)))
-    colnames(temp)<-c("ATE","variance","ci.l","ci.u", "Pvalue")
-    res_childFU2_growthRF_cont <- rbind(res_childFU2_growthRF_cont , temp) 
-} 
-rownames(res_childFU2_growthRF_cont)<-colnames(Yc_cont)
-
-
-for(i in  1:ncol(Ym_cont)){
-    #note the log transformation of the outcome prior to running TMLE model:
-        set.seed(12345)
-    temp<-washb_tmle(Y=Ym_cont[,i], tr=dm$mFU2, W=mWlist_anthro[[i]], id=dm$block, pair=NULL, family="gaussian", contrast=c("Positive","Negative"), print=F, Q.SL.library=library)
-    temp<-(t(unlist(temp$estimates$ATE)))
-    colnames(temp)<-c("ATE","variance","ci.l","ci.u", "Pvalue")
-    res_motherFU2_growthRF_cont <- rbind(res_motherFU2_growthRF_cont , temp) 
-} 
-rownames(res_motherFU2_growthRF_cont) <- colnames(Ym_cont)
-  
-#TMLE models -binary outcomes 
-for(i in  1:ncol(Yc_bin)){
-    #note the log transformation of the outcome prior to running TMLE model:
-        set.seed(12345)
-    temp<-washb_tmle(Y=Yc_bin[,i], tr=dc$cFU2, W=cWlist_anthro_bin[[i]], id=dc$block, pair=NULL, family="binomial", contrast=c("Positive","Negative"), print=F, Q.SL.library=library)
-    temp<-(t(unlist(temp$estimates$RR)))
-    colnames(temp)<-c("RR","ci.l","ci.u", "Pvalue", "logRR","logRR_var")
-    res_childFU2_growthRF_bin <- rbind(res_childFU2_growthRF_bin , temp) 
-} 
-rownames(res_childFU2_growthRF_bin)<-colnames(Yc_bin)
-
-
-for(i in  1:ncol(Ym_bin)){
-    #note the log transformation of the outcome prior to running TMLE model:
-        set.seed(12345)
-    temp<-washb_tmle(Y=Ym_bin[,i], tr=dm$mFU2, W=mWlist_anthro_bin[[i]], id=dm$block, pair=NULL, family="binomial", contrast=c("Positive","Negative"), print=F, Q.SL.library=library)
-    temp<-(t(unlist(temp$estimates$RR)))
-    colnames(temp)<-c("RR","ci.l","ci.u", "Pvalue", "logRR","logRR_var")
-    res_motherFU2_growthRF_bin <- rbind(res_motherFU2_growthRF_bin , temp) 
-} 
-rownames(res_motherFU2_growthRF_bin) <- colnames(Ym_bin)
-  
+# #-------------------------------------------------------
+# # Associations with EED outcomes
+# #-------------------------------------------------------
+# 
+# library=c("SL.glm")
+# 
+# #Set up SL library
+# 
+# #Create empty matrix to hold the glm results:
+# res_childFU2_RF_adj <- NULL
+# res_motherFU2_RF_adj <- NULL
+# #i<-11
+# #TMLE models -FU2 as a RF
+# for(i in  1:ncol(Yc)){
+#     #note the log transformation of the outcome prior to running TMLE model:
+#       set.seed(12345)
+#     temp<-washb_tmle(Y=log(Yc[,i]), tr=dc$cFU2, W=cWlist[[i]], id=dc$block, pair=NULL, family="gaussian", contrast=c("Positive","Negative"), print=F, Q.SL.library=library)
+#     temp<-(t(unlist(temp$estimates$ATE)))
+#     colnames(temp)<-c("ATE","variance","ci.l","ci.u", "Pvalue")
+#     res_childFU2_RF_adj <- rbind(res_childFU2_RF_adj , temp) 
+# } 
+# rownames(res_childFU2_RF_adj)<-colnames(Yc)
+# 
+# table(is.na(log(Yc[,i])))
+# table(is.na(dc$cFU2))
+# table(is.na(dc$block))
+# table(W$birthord[!is.na(log(Yc[,11]))])
+# 
+# for(i in 1:ncol(W)){
+#   cat("\n",colnames(W)[i]," ",i,"\n")
+#   print(table(is.na(W[!is.na(log(Ym[,12]))&!is.na(dm$mFU2),i])))
+# }
+# 
+# dm$aat1[dm$dataid=="33701"]
+# 
+# i<-12
+# for(i in  1:ncol(Ym)){
+#     #note the log transformation of the outcome prior to running TMLE model:
+#     set.seed(12345)
+#     temp<-washb_tmle(Y=log(Ym[,i]), tr=dm$mFU2, W=mWlist[[i]], id=dm$block, pair=NULL, family="gaussian", contrast=c("Positive","Negative"), print=T, Q.SL.library=library)
+#     temp<-(t(unlist(temp$estimates$ATE)))
+#     colnames(temp)<-c("ATE","variance","ci.l","ci.u", "Pvalue")
+#     res_motherFU2_RF_adj <- rbind(res_motherFU2_RF_adj , temp) 
+# } 
+# rownames(res_motherFU2_RF_adj) <- colnames(Ym)
+#   
+# 
+# 
+# #-------------------------------------------------------
+# # Associations with growth outcomes
+# #-------------------------------------------------------
+# 
+# 
+# #dataframe of EED biomarkers:
+# Yc_cont <- dc %>% subset(., select=c(laz1, laz2, laz3, whz1, whz2, whz3, waz1, waz2, waz3, hcz1, hcz2, hcz3))
+# Ym_cont <- dm %>% subset(., select=c(laz1, laz2, laz3, whz1, whz2, whz3, waz1, waz2, waz3, hcz1, hcz2, hcz3))
+# 
+# Yc_bin <- dc %>% subset(., select=c( stunt1, stunt2, stunt3, wast1, wast2, wast3, 
+#                                      sstunt1, sstunt2, sstunt3, swast1, swast2, swast3,  
+#                                      underwt1, underwt2, underwt3,
+#                                      sunderwt1, sunderwt2, sunderwt3))
+# Ym_bin <- dm %>% subset(., select=c( stunt1, stunt2, stunt3, wast1, wast2, wast3, 
+#                                      sstunt1, sstunt2, sstunt3, swast1, swast2, swast3,  
+#                                      underwt1, underwt2, underwt3,
+#                                      sunderwt1, sunderwt2, sunderwt3))
+# 
+# 
+# 
+# 
+# 
+# #Create lists of adjustment covariates
+# cWlist_anthro <- list(an_cW1, an_cW2, an_cW3, an_cW1, an_cW2, an_cW3, an_cW1, an_cW2, an_cW3, an_cW1, an_cW2, an_cW3)
+# mWlist_anthro <- list(an_mW1, an_mW2, an_mW3, an_mW1, an_mW2, an_mW3, an_mW1, an_mW2, an_mW3, an_mW1, an_mW2, an_mW3)
+# 
+# cWlist_anthro_bin <- list(an_cW1, an_cW2, an_cW3, an_cW1, an_cW2, an_cW3, an_cW1, an_cW2, an_cW3, an_cW1, an_cW2, an_cW3, an_cW1, an_cW2, an_cW3, an_cW1, an_cW2, an_cW3)
+# mWlist_anthro_bin <- list(an_mW1, an_mW2, an_mW3, an_mW1, an_mW2, an_mW3, an_mW1, an_mW2, an_mW3, an_mW1, an_mW2, an_mW3, an_mW1, an_mW2, an_mW3, an_mW1, an_mW2, an_mW3)
+# 
+#      
+# 
+# 
+# #Create empty matrix to hold the glm results:
+# res_childFU2_growthRF_cont <- NULL
+# res_motherFU2_growthRF_cont <- NULL
+# res_childFU2_growthRF_bin <- NULL
+# res_motherFU2_growthRF_bin <- NULL
+# 
+# #TMLE models -continuous outcomes 
+# for(i in  1:ncol(Yc_cont)){
+#     #note the log transformation of the outcome prior to running TMLE model:
+#         set.seed(12345)
+#     temp<-washb_tmle(Y=Yc_cont[,i], tr=dc$cFU2, W=cWlist_anthro[[i]], id=dc$block, pair=NULL, family="gaussian", contrast=c("Positive","Negative"), print=F, Q.SL.library=library)
+#     temp<-(t(unlist(temp$estimates$ATE)))
+#     colnames(temp)<-c("ATE","variance","ci.l","ci.u", "Pvalue")
+#     res_childFU2_growthRF_cont <- rbind(res_childFU2_growthRF_cont , temp) 
+# } 
+# rownames(res_childFU2_growthRF_cont)<-colnames(Yc_cont)
+# 
+# 
+# for(i in  1:ncol(Ym_cont)){
+#     #note the log transformation of the outcome prior to running TMLE model:
+#         set.seed(12345)
+#     temp<-washb_tmle(Y=Ym_cont[,i], tr=dm$mFU2, W=mWlist_anthro[[i]], id=dm$block, pair=NULL, family="gaussian", contrast=c("Positive","Negative"), print=F, Q.SL.library=library)
+#     temp<-(t(unlist(temp$estimates$ATE)))
+#     colnames(temp)<-c("ATE","variance","ci.l","ci.u", "Pvalue")
+#     res_motherFU2_growthRF_cont <- rbind(res_motherFU2_growthRF_cont , temp) 
+# } 
+# rownames(res_motherFU2_growthRF_cont) <- colnames(Ym_cont)
+#   
+# #TMLE models -binary outcomes 
+# for(i in  1:ncol(Yc_bin)){
+#     #note the log transformation of the outcome prior to running TMLE model:
+#         set.seed(12345)
+#     temp<-washb_tmle(Y=Yc_bin[,i], tr=dc$cFU2, W=cWlist_anthro_bin[[i]], id=dc$block, pair=NULL, family="binomial", contrast=c("Positive","Negative"), print=F, Q.SL.library=library)
+#     temp<-(t(unlist(temp$estimates$RR)))
+#     colnames(temp)<-c("RR","ci.l","ci.u", "Pvalue", "logRR","logRR_var")
+#     res_childFU2_growthRF_bin <- rbind(res_childFU2_growthRF_bin , temp) 
+# } 
+# rownames(res_childFU2_growthRF_bin)<-colnames(Yc_bin)
+# 
+# 
+# for(i in  1:ncol(Ym_bin)){
+#     #note the log transformation of the outcome prior to running TMLE model:
+#         set.seed(12345)
+#     temp<-washb_tmle(Y=Ym_bin[,i], tr=dm$mFU2, W=mWlist_anthro_bin[[i]], id=dm$block, pair=NULL, family="binomial", contrast=c("Positive","Negative"), print=F, Q.SL.library=library)
+#     temp<-(t(unlist(temp$estimates$RR)))
+#     colnames(temp)<-c("RR","ci.l","ci.u", "Pvalue", "logRR","logRR_var")
+#     res_motherFU2_growthRF_bin <- rbind(res_motherFU2_growthRF_bin , temp) 
+# } 
+# rownames(res_motherFU2_growthRF_bin) <- colnames(Ym_bin)
+#   
 
 #-------------------------------------------------------
 # Plotting dataframe data management
