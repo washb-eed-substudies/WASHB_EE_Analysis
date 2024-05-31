@@ -27,11 +27,21 @@ theme_set(theme_bw())
 tableau10 <- c("#1F77B4","#FF7F0E","#2CA02C","#D62728",
   "#9467BD","#8C564B","#E377C2","#7F7F7F","#BCBD22","#17BECF")
 
-  
+
+#make clean_table function to clean up column names
+clean_table <- function(tab){
+  tab <- tab %>% as.data.frame() %>% rename(`Lower 95% CI`=ci.l, `Upper 95% CI`=ci.u)
+  try(tab <- tab %>% as.data.frame() %>% rename( `P-value`=Pvalue))
+  tab <- tab[,!(colnames(tab) %in% c("variance","logRR", "logRR_var"))]
+  return(tab)
+}
+
+
+
 ```
 
 
-# N's by treatment arm
+## Supplementary Table 1: N's by treatment arm
 
 ```{r, echo=F}
 
@@ -42,66 +52,40 @@ summary_res <- summary_res %>% arrange(`Treatment Arm`, `FUT2 Status`)
 knitr::kable(summary_res)
 ```
 
-# Tables of associations between FUT2 status and growth outcomes (FUT2 as a risk factor)
 
 
-### Child FUT2 status - continous outcomes
+## Supplementary Table 2: Table of associations between child FUT2 status and continous growth outcomes 
 
 ```{r, echo=F}
 
-  knitr::kable(pooled_childFU2_growthRF_cont)
+  knitr::kable(clean_table(pooled_childFU2_growthRF_cont), digits=3)
   cat("\n\n\n")
   
 
 ```
 
-### Child FUT2 status - binary outcomes
+## Supplementary Table 3: Table of associations between child FUT2 status and categorical growth outcomes 
 
 ```{r, echo=F}
 
-  knitr::kable(pooled_childFU2_growthRF_bin)
+  knitr::kable(clean_table(pooled_childFU2_growthRF_bin), digits=3)
   cat("\n\n\n")
   
 
 ```
 
-### Maternal FUT2 status - continous outcomes
+## Supplementary Table 4: Table of associations between maternal FUT2 status and continous growth outcomes 
 
 ```{r, echo=F}
-  knitr::kable(pooled_motherFU2_growthRF_cont)
+  knitr::kable(clean_table(pooled_motherFU2_growthRF_cont), digits=3)
   cat("\n\n\n")
 
 ```
 
-### Maternal FUT2 status - binary outcomes
+## Supplementary Table 5:  Table of associations between maternal FUT2 status and categorical growth outcomes 
 
 ```{r, echo=F}
-  knitr::kable(pooled_motherFU2_growthRF_bin)
-  cat("\n\n\n")
-
-```
-
-
-
-
-
-# Tables of associations between FUT2 status and EED outcomes (FUT2 as a risk factor)
-
-
-### Child FUT2 status
-
-```{r, echo=F}
-
-  knitr::kable(pooled_childFU2_RF_adj)
-  cat("\n\n\n")
-  
-
-```
-
-### Maternal FUT2 status
-
-```{r, echo=F}
-  knitr::kable(pooled_motherFU2_RF_adj)
+  knitr::kable(clean_table(pooled_motherFU2_growthRF_bin), digits=3)
   cat("\n\n\n")
 
 ```
@@ -112,66 +96,64 @@ knitr::kable(summary_res)
 
 
 
-
-# Tables of associations between FUT2 status and growth outcomes (FUT2 as a risk factor) - Stratified by measurement round
-
-
-### Child FUT2 status - continous outcomes
+## Supplementary Table 6: Table of associations between child FUT2 status and EED outcomes 
 
 ```{r, echo=F}
 
-  knitr::kable(res_childFU2_growthRF_cont)
+  knitr::kable(clean_table(pooled_childFU2_RF_adj), digits=3)
   cat("\n\n\n")
   
 
 ```
 
-### Child FUT2 status - binary outcomes
+## Supplementary Table 7: Table of associations between maternal FUT2 status and EED outcomes 
+
+```{r, echo=F}
+  knitr::kable(clean_table(pooled_motherFU2_RF_adj), digits=3)
+  cat("\n\n\n")
+
+```
+
+
+
+
+
+
+## Supplementary Table 8: Table of associations between child FUT2 status and continous growth outcomes stratified by measurement round
 
 ```{r, echo=F}
 
-  knitr::kable(res_childFU2_growthRF_bin)
+  knitr::kable(clean_table(res_childFU2_growthRF_cont), digits=3)
   cat("\n\n\n")
   
 
 ```
 
-### Maternal FUT2 status - continous outcomes
+## Supplementary Table 9:  Table of associations between child FUT2 status and categorical growth outcomes stratified by measurement round
 
-```{r, echo=F}
-  knitr::kable(res_motherFU2_growthRF_cont)
-  cat("\n\n\n")
-
-```
-
-### Maternal FUT2 status - binary outcomes
-
-```{r, echo=F}
-  knitr::kable(res_motherFU2_growthRF_bin)
-  cat("\n\n\n")
-
-```
-
-
-
-
-# Tables of associations between FUT2 status and EED outcomes (FUT2 as a risk factor) - Stratified by measurement round
-
-
-### Child FUT2 status
 
 ```{r, echo=F}
 
-  knitr::kable(res_childFU2_RF_adj)
+  knitr::kable(clean_table(res_childFU2_growthRF_bin), digits=3)
   cat("\n\n\n")
   
 
 ```
 
-### Maternal FUT2 status
+## Supplementary Table 10: Table of associations between maternal FUT2 status and continous growth outcomes stratified by measurement round
+
 
 ```{r, echo=F}
-  knitr::kable(res_motherFU2_RF_adj)
+  knitr::kable(clean_table(res_motherFU2_growthRF_cont), digits=3)
+  cat("\n\n\n")
+
+```
+
+## Supplementary Table 11: Table of associations between maternal FUT2 status and categorical growth outcomes stratified by measurement round
+
+
+```{r, echo=F}
+  knitr::kable(clean_table(res_motherFU2_growthRF_bin), digits=3)
   cat("\n\n\n")
 
 ```
@@ -179,33 +161,62 @@ knitr::kable(summary_res)
 
 
 
-# Tables of WASH Benefits intervention effects, stratified by FUT2 status (FUT2 as an effect modifier)
+## Supplementary Table 12: Table of associations between child FUT2 status and EED outcomes stratified by measurement round
 
 
-## Child FUT2 status
+```{r, echo=F}
+
+  knitr::kable(clean_table(res_childFU2_RF_adj), digits=3)
+  cat("\n\n\n")
+  
+
+```
+
+## Supplementary Table 13: Table of associations between maternal FUT2 status and continous growth outcomes stratified by measurement round
+
+
+```{r, echo=F}
+  knitr::kable(clean_table(res_motherFU2_RF_adj), digits=3)
+  cat("\n\n\n")
+
+```
+
+
+
+## Supplementary Table 14: Table of WASH Benefits intervention effects, stratified by child FUT2 status
 
 ```{r, echo=F, results='asis'}
-for(i in 1:length(res_childFU2_EM_unadj)){
-  
-  cat("### Outcome: ",names(res_childFU2_EM_unadj)[i],"\n\n")
-  print(knitr::kable(res_childFU2_EM_unadj[[i]]))
+
+  tab_childFU2_EM_unadj=list_rbind(res_childFU2_EM_unadj, names_to="Outcome")
+    tab_childFU2_EM_unadj <- tab_childFU2_EM_unadj %>% subset(., select= -c(`Std. Error`,`z value`))  %>%
+          rename(`P-value`=Pval, `Interaction P-value`=InteractionPval)
+
+  print(knitr::kable(clean_table(tab_childFU2_EM_unadj), digits=3))
   
   cat("\n\n\n")
   
-}
+
 ```
 
-## Maternal FUT2 status
+## Supplementary Table 15: Table of WASH Benefits intervention effects, stratified by maternal FUT2 status
 
 ```{r, echo=F, results='asis'}
-for(i in 1:length(res_motherFU2_EM_unadj)){
+  #To do:
+  #clean up ci.l and ci.u for all tables
+  #Combine tables together
+  #Add outcome names as column
+  #(drop Z-value)
   
-  cat("### Outcome: ",names(res_motherFU2_EM_unadj)[i],"\n\n")
-  print(knitr::kable(res_motherFU2_EM_unadj[[i]]))
+  tab_motherFU2_EM_unadj=list_rbind(res_motherFU2_EM_unadj, names_to="Outcome")
+  tab_motherFU2_EM_unadj <- tab_motherFU2_EM_unadj %>% subset(., select= -c(`Std. Error`,`z value`)) %>%
+          rename(`P-value`=Pval, `Interaction P-value`=InteractionPval)
+
+
+
+  print(knitr::kable(clean_table(tab_motherFU2_EM_unadj), digits=3))
   
   cat("\n\n\n")
-  
-}
+
 ```
 
  

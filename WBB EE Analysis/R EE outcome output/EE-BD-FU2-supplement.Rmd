@@ -1,0 +1,481 @@
+---
+title: "Tables and Figures"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width=12, fig.height=20, message=FALSE, warning =FALSE)
+```
+
+```{r, include=FALSE}
+rm(list=ls())
+library(tidyverse)
+library(knitr)
+library(here)
+load("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/FU2_results.RDATA")
+load("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Results/Andrew/FU2_pooled_results.Rdata")
+
+#Plot parameters
+scaleFUN <- function(x) sprintf("%.2f", x)
+
+#Plot themes
+theme_set(theme_bw())
+
+#hbgdki pallet
+tableau10 <- c("#1F77B4","#FF7F0E","#2CA02C","#D62728",
+  "#9467BD","#8C564B","#E377C2","#7F7F7F","#BCBD22","#17BECF")
+
+  
+```
+
+
+# N's by treatment arm
+
+```{r, echo=F}
+
+colnames(summary_res) <- c("Treatment Arm","FUT2 Status", "Number of Children", "Number of Mothers")
+summary_res<-summary_res[!is.na(summary_res$`FUT2 Status`),]
+summary_res$`FUT2 Status` <- factor(summary_res$`FUT2 Status`, levels=c("Positive","Negative","Inconclusive"))
+summary_res <- summary_res %>% arrange(`Treatment Arm`, `FUT2 Status`)
+knitr::kable(summary_res)
+```
+
+
+# Plots of associations between FUT2 status and growth outcomes (FUT2 as a risk factor)
+
+### Child FUT2 status effect on continuous growth outcomes
+
+```{r, echo=F, fig.width=12, fig.height=8}
+plotdf <-data.frame(X= rownames(pooled_childFU2_growthRF_cont), pooled_childFU2_growthRF_cont)
+plotdf$outcome <- substr(plotdf$X, 1,3)
+plotdf$X <- factor(plotdf$X, levels=c("LAZ", "WHZ", "WAZ", "HCZ"))
+plotdf <- plotdf %>% arrange(X)
+ggplot(plotdf, aes(x=X)) + 
+        geom_point(aes(y=ATE, fill=X, color=X), size = 4) +
+        geom_linerange(aes(ymin=ci.l, ymax=ci.u, color=X),
+                       alpha=0.5, size = 3) +
+        labs(x = "Continuous growth outcome", y = "Difference in Z-scores") +
+        geom_hline(yintercept = 0) +
+        scale_fill_manual(values=rep(tableau10,4)) +
+        scale_colour_manual(values=rep(tableau10,4)) +
+        theme(strip.background = element_blank(),
+          legend.position="none",
+          strip.text.x = element_text(size=12),
+          axis.text.x = element_text(size=12, angle = 60, hjust = 1)) +
+        ggtitle("FUT2 Negative (non-secretor) minus FUT2 Positive (secretor)")
+```
+
+### Child FUT2 status effect on binary growth outcomes
+
+
+```{r, echo=F, fig.width=12, fig.height=8}
+plotdf <- data.frame(X= rownames(pooled_childFU2_growthRF_bin), pooled_childFU2_growthRF_bin)
+plotdf$RR[plotdf$X=="Severe wasted - T1"] <- NA #Temp drop extreme estimates
+plotdf$ci.l[plotdf$X=="Severe wasted - T1"] <- NA
+plotdf$ci.u[plotdf$X=="Severe wasted - T1"] <- NA
+
+plotdf$X <- factor(plotdf$X, levels=c("Stunted", "Wasted", "Underweight", "Severe stunted", "Severe wasted", "Severe underweight"))
+
+plotdf$outcome <- substr(plotdf$X, 1,9)
+ggplot(plotdf, aes(x=X)) + 
+        geom_point(aes(y=RR, fill=X, color=X), size = 4) +
+        geom_linerange(aes(ymin=ci.l, ymax=ci.u, color=X),
+                       alpha=0.5, size = 3) +
+        labs(x = "Binary growth outcome", y = "Prevalence ratio") +
+  scale_y_continuous(trans='log10') +
+        geom_hline(yintercept = 1) +
+        scale_fill_manual(values=rep(tableau10,4)) +
+        scale_colour_manual(values=rep(tableau10,4)) +
+        theme(strip.background = element_blank(),
+          legend.position="none",
+          strip.text.x = element_text(size=12),
+          axis.text.x = element_text(size=12, angle = 60, hjust = 1)) +
+        ggtitle("Ratio of FUT2 Negative (non-secretor) over FUT2 Positive (secretor)")
+```
+
+### Mother FUT2 status effect on continuous growth outcomes
+
+```{r, echo=F, fig.width=12, fig.height=8}
+plotdf <-data.frame(X= rownames(pooled_motherFU2_growthRF_cont), pooled_motherFU2_growthRF_cont)
+plotdf$outcome <- sapply(strsplit(as.character(plotdf$X), " -", fixed=T), `[`, 1)
+
+plotdf$X <- factor(plotdf$X, levels=c("LAZ", "WHZ", "WAZ", "HCZ"))
+plotdf <- plotdf %>% arrange(X)
+
+ggplot(plotdf, aes(x=X)) + 
+        geom_point(aes(y=ATE, fill=X, color=X), size = 4) +
+        geom_linerange(aes(ymin=ci.l, ymax=ci.u, color=X),
+                       alpha=0.5, size = 3) +
+        labs(x = "Continuous growth outcome", y = "Difference in Z-scores") +
+        geom_hline(yintercept = 0) +
+        scale_fill_manual(values=rep(tableau10,4)) +
+        scale_colour_manual(values=rep(tableau10,4)) +
+        theme(strip.background = element_blank(),
+          legend.position="none",
+          strip.text.x = element_text(size=12),
+          axis.text.x = element_text(size=12, angle = 60, hjust = 1)) +
+        ggtitle("FUT2 Negative (non-secretor) minus FUT2 Positive (secretor)")
+```
+
+### Mother FUT2 status effect on binary growth outcomes
+
+```{r, echo=F, fig.width=12, fig.height=8}
+plotdf <-data.frame(X= rownames(pooled_motherFU2_growthRF_bin), pooled_motherFU2_growthRF_bin)
+plotdf$RR[plotdf$X=="Severe wasted - T1"] <- NA #Temp drop extreme estimates
+plotdf$ci.l[plotdf$X=="Severe wasted - T1"] <- NA
+plotdf$ci.u[plotdf$X=="Severe wasted - T1"] <- NA
+
+plotdf$X <- factor(plotdf$X, levels=c("Stunted", "Wasted", "Underweight", "Severe stunted", "Severe wasted", "Severe underweight"))
+
+
+plotdf$outcome <- sapply(strsplit(as.character(plotdf$X), " -", fixed=T), `[`, 1)
+
+ggplot(plotdf, aes(x=X)) + 
+        geom_point(aes(y=RR, fill=outcome, color=outcome), size = 4) +
+        geom_linerange(aes(ymin=ci.l, ymax=ci.u, color=outcome),
+                       alpha=0.5, size = 3) +
+        labs(x = "Binary growth outcome", y = "Prevalence ratio") +
+  scale_y_continuous(trans='log10') +
+        geom_hline(yintercept = 1) +        scale_fill_manual(values=rep(tableau10,4)) +
+        scale_colour_manual(values=rep(tableau10,4)) +
+        theme(strip.background = element_blank(),
+          legend.position="none",
+          strip.text.x = element_text(size=12),
+          axis.text.x = element_text(size=12, angle = 60, hjust = 1)) +
+        ggtitle("Ratio of FUT2 Negative (non-secretor) over FUT2 Positive (secretor)")
+```
+
+
+
+
+
+
+# Plots of associations between FUT2 status and EED outcomes (FUT2 as a risk factor)
+
+### Child FUT2 status effect on EED outcomes
+
+```{r, echo=F, fig.width=12, fig.height=8}
+plotdf <-data.frame(X= rownames(pooled_childFU2_RF_adj), pooled_childFU2_RF_adj)
+
+     
+
+plotdf$X <- factor(plotdf$X, levels=c("Lactulose", "Mannitol", "L/M ratio", "Alpha-1 antitrypsin", "Myeloperoxidase", "Neopterin", "Regenerating gene 1B"))
+
+
+
+plotdf$outcome <- substr(plotdf$X, 1,2)
+ggplot(plotdf, aes(x=X)) + 
+        geom_point(aes(y=ATE, fill=X, color=X), size = 4) +
+        geom_linerange(aes(ymin=ci.l, ymax=ci.u, color=X),
+                       alpha=0.5, size = 3) +
+        labs(x = "EED outcome", y = "Difference in log-transformed outcomes") +
+        geom_hline(yintercept = 0) +
+        scale_fill_manual(values=rep(tableau10,4)) +
+        scale_colour_manual(values=rep(tableau10,4)) +
+        theme(strip.background = element_blank(),
+          legend.position="none",
+          strip.text.x = element_text(size=12),
+          axis.text.x = element_text(size=12, angle = 60, hjust = 1)) +
+        ggtitle("FUT2 Negative (non-secretor) minus FUT2 Positive (secretor)")
+```
+
+### Mother's FUT2 status effect on EED outcomes
+
+```{r, echo=F, fig.width=12, fig.height=8}
+plotdf <-data.frame(X= rownames(pooled_motherFU2_RF_adj), pooled_motherFU2_RF_adj)
+plotdf$outcome <- substr(plotdf$X, 1,2)
+
+plotdf$X <- factor(plotdf$X, levels=c("Lactulose", "Mannitol", "L/M ratio", "Alpha-1 antitrypsin", "Myeloperoxidase", "Neopterin", "Regenerating gene 1B"))
+
+ggplot(plotdf, aes(x=X)) + 
+        geom_point(aes(y=ATE, fill=X, color=X), size = 4) +
+        geom_linerange(aes(ymin=ci.l, ymax=ci.u, color=X),
+                       alpha=0.5, size = 3) +
+        labs(x = "EED outcome", y = "Difference in log-transformed outcomes") +
+        geom_hline(yintercept = 0) +
+        scale_fill_manual(values=rep(tableau10,4)) +
+        scale_colour_manual(values=rep(tableau10,4)) +
+        theme(strip.background = element_blank(),
+          legend.position="none",
+          strip.text.x = element_text(size=12),
+          axis.text.x = element_text(size=12, angle = 60, hjust = 1)) +
+        ggtitle("FUT2 Negative (non-secretor) minus FUT2 Positive (secretor)")
+```
+     
+
+
+
+
+# Plots of WASH Benefits intervention effects, stratified by FUT2 status (FUT2 as an effect modifier)
+
+Note: stars above the plotted points indicate that the P-value of the interaction term between treatment and FUT2 status is < 0.05.
+
+Columns are sampling round, and rows are EED outcomes.
+
+### Child FUT2 status
+
+```{r, echo=F}
+
+C_plot_EM<- ggplot(resC, aes(x=X)) + 
+        geom_point(aes(y=`Unadj. diff.`, fill=Contrast, color=Contrast), size = 4) +
+        geom_linerange(aes(ymin=ci.l, ymax=ci.u, color=Contrast),
+                       alpha=0.5, size = 3) +
+        labs(x = "Treatment contrast and FUT2 status", y = "Average treatment effect") +
+        geom_text(aes(x=X, y=ci.u+0.02, label=ifelse(resC$InteractionPval<0.05,"*",""))) + 
+        geom_hline(yintercept = 0) +
+        #coord_cartesian(ylim=range(yticks)) +
+        scale_fill_manual(values=rep(tableau10,4)) +
+        scale_colour_manual(values=rep(tableau10,4)) +
+        scale_size_continuous(range = c(0.5, 1))+
+        theme(strip.background = element_blank(),
+          legend.position="none",
+          strip.text.x = element_text(size=12),
+          axis.text.x = element_text(size=12, angle = 45, hjust = 1), 
+          strip.text.y = element_text(angle = 0)) +
+        facet_grid(biomarker~Round,) +
+        ggtitle("Child FUT2 status")
+
+
+M_plot_EM<- ggplot(resM, aes(x=X)) + 
+        geom_point(aes(y=`Unadj. diff.`, fill=Contrast, color=Contrast), size = 4) +
+        geom_linerange(aes(ymin=ci.l, ymax=ci.u, color=Contrast),
+                       alpha=0.5, size = 3) +
+        labs(x = "Treatment contrast and FUT2 status", y = "Average treatment effect") +
+        geom_text(aes(x=X, y=ci.u+0.02, label=ifelse(resM$InteractionPval<0.05,"*",""))) + 
+        geom_hline(yintercept = 0) +
+        #coord_cartesian(ylim=range(yticks)) +
+        scale_fill_manual(values=rep(tableau10,4)) +
+        scale_colour_manual(values=rep(tableau10,4)) +
+        scale_size_continuous(range = c(0.5, 1))+
+        theme(strip.background = element_blank(),
+          legend.position="none",
+          strip.text.x = element_text(size=12),
+          axis.text.x = element_text(size=12, angle = 45, hjust = 1), 
+          strip.text.y = element_text(angle = 0)) +
+          facet_grid(biomarker~Round) +
+        ggtitle("Mother FUT2 status")
+
+print(C_plot_EM)
+```
+
+
+### Maternal FUT2 status
+
+
+```{r, echo=F}
+print(M_plot_EM)
+```
+
+
+
+
+     
+
+
+
+# Plots of associations between FUT2 status and growth outcomes (FUT2 as a risk factor) - Stratified by measurement round
+
+### Child FUT2 status effect on continuous growth outcomes
+
+```{r, echo=F, fig.width=12, fig.height=8}
+plotdf <-data.frame(X= rownames(res_childFU2_growthRF_cont), res_childFU2_growthRF_cont)
+
+plotdf$X <- factor(plotdf$X, levels=c("LAZ - T1", "LAZ - T2", "LAZ - T3", 
+									  "WHZ - T1", "WHZ - T2", "WHZ - T3",
+									  "WAZ - T1", "WAZ - T2", "WAZ - T3",
+									  "HCZ - T1", "HCZ - T2", "HCZ - T3"))
+plotdf <- plotdf %>% arrange(X)
+
+plotdf$outcome <- substr(plotdf$X, 1,2)
+plotdf$outcome <- factor(plotdf$outcome, levels=unique(plotdf$outcome))
+
+ggplot(plotdf, aes(x=X)) + 
+        geom_point(aes(y=ATE, fill=outcome, color=outcome), size = 4) +
+        geom_linerange(aes(ymin=ci.l, ymax=ci.u, color=outcome),
+                       alpha=0.5, size = 3) +
+        labs(x = "Continuous growth outcome", y = "Difference in Z-scores") +
+        geom_hline(yintercept = 0) +
+        scale_fill_manual(values=rep(tableau10,4)) +
+        scale_colour_manual(values=rep(tableau10,4)) +
+        theme(strip.background = element_blank(),
+          legend.position="none",
+          strip.text.x = element_text(size=12),
+          axis.text.x = element_text(size=12, angle = 60, hjust = 1)) +
+        ggtitle("FUT2 Negative (non-secretor) minus FUT2 Positive (secretor)")
+```
+
+### Child FUT2 status effect on binary growth outcomes
+
+Note that severe wasting is very rare, with only 16 cases at time one and three, and 19 at time two. There are 0 cases of severe wasting among non-secretor at time 1, leading to an unstable, very small prevalence ratio estimate (2.32 x 10^-08). This estimate has been excluded from the below figure. 
+
+```{r, echo=F, fig.width=12, fig.height=8}
+plotdf <- data.frame(X= rownames(res_childFU2_growthRF_bin), res_childFU2_growthRF_bin)
+plotdf$RR[plotdf$X=="Severe wasted - T1"] <- NA #Temp drop extreme estimates
+plotdf$ci.l[plotdf$X=="Severe wasted - T1"] <- NA
+plotdf$ci.u[plotdf$X=="Severe wasted - T1"] <- NA
+
+
+
+plotdf$X <- factor(plotdf$X, levels=c("Stunted - T1", "Stunted - T2", "Stunted - T3", 
+									  "Wasted - T1", "Wasted - T2", "Wasted - T3",
+									  "Underweight - T1", "Underweight - T2", "Underweight - T3",
+									  "Severe stunted - T1", "Severe stunted - T2", "Severe stunted - T3", 
+									  "Severe wasted - T1", "Severe wasted - T2", "Severe wasted - T3",
+									  "Severe underweight - T1", "Severe underweight - T2", "Severe underweight - T3"))
+plotdf <- plotdf %>% arrange(X)
+
+plotdf$outcome <- substr(plotdf$X, 1,9)
+plotdf$outcome <- factor(plotdf$outcome, levels=unique(plotdf$outcome))
+
+
+ggplot(plotdf, aes(x=X)) + 
+        geom_point(aes(y=RR, fill=outcome, color=outcome), size = 4) +
+        geom_linerange(aes(ymin=ci.l, ymax=ci.u, color=outcome),
+                       alpha=0.5, size = 3) +
+        labs(x = "Binary growth outcome", y = "Prevalence ratio") +
+  scale_y_continuous(trans='log10') +
+        geom_hline(yintercept = 1) +
+        scale_fill_manual(values=rep(tableau10,4)) +
+        scale_colour_manual(values=rep(tableau10,4)) +
+        theme(strip.background = element_blank(),
+          legend.position="none",
+          strip.text.x = element_text(size=12),
+          axis.text.x = element_text(size=12, angle = 60, hjust = 1)) +
+        ggtitle("Ratio of FUT2 Negative (non-secretor) over FUT2 Positive (secretor)")
+```
+
+### Mother FUT2 status effect on continuous growth outcomes
+
+```{r, echo=F, fig.width=12, fig.height=8}
+plotdf <-data.frame(X= rownames(res_motherFU2_growthRF_cont), res_motherFU2_growthRF_cont)
+plotdf$outcome <- sapply(strsplit(as.character(plotdf$X), " -", fixed=T), `[`, 1)
+
+plotdf$X <- factor(plotdf$X, levels=c("LAZ - T1", "LAZ - T2", "LAZ - T3", 
+									  "WHZ - T1", "WHZ - T2", "WHZ - T3",
+									  "WAZ - T1", "WAZ - T2", "WAZ - T3",
+									  "HCZ - T1", "HCZ - T2", "HCZ - T3"))
+plotdf <- plotdf %>% arrange(X)
+
+plotdf$outcome <- substr(plotdf$X, 1,2)
+plotdf$outcome <- factor(plotdf$outcome, levels=unique(plotdf$outcome))
+
+ggplot(plotdf, aes(x=X)) + 
+        geom_point(aes(y=ATE, fill=outcome, color=outcome), size = 4) +
+        geom_linerange(aes(ymin=ci.l, ymax=ci.u, color=outcome),
+                       alpha=0.5, size = 3) +
+        labs(x = "Continuous growth outcome", y = "Difference in Z-scores") +
+        geom_hline(yintercept = 0) +
+        scale_fill_manual(values=rep(tableau10,4)) +
+        scale_colour_manual(values=rep(tableau10,4)) +
+        theme(strip.background = element_blank(),
+          legend.position="none",
+          strip.text.x = element_text(size=12),
+          axis.text.x = element_text(size=12, angle = 60, hjust = 1)) +
+        ggtitle("FUT2 Negative (non-secretor) minus FUT2 Positive (secretor)")
+```
+
+### Mother FUT2 status effect on binary growth outcomes
+
+```{r, echo=F, fig.width=12, fig.height=8}
+plotdf <-data.frame(X= rownames(res_motherFU2_growthRF_bin), res_motherFU2_growthRF_bin)
+plotdf$RR[plotdf$X=="Severe wasted - T1"] <- NA #Temp drop extreme estimates
+plotdf$ci.l[plotdf$X=="Severe wasted - T1"] <- NA
+plotdf$ci.u[plotdf$X=="Severe wasted - T1"] <- NA
+
+plotdf$X <- factor(plotdf$X, levels=c("Stunted - T1", "Stunted - T2", "Stunted - T3", 
+									  "Wasted - T1", "Wasted - T2", "Wasted - T3",
+									  "Underweight - T1", "Underweight - T2", "Underweight - T3",
+									  "Severe stunted - T1", "Severe stunted - T2", "Severe stunted - T3", 
+									  "Severe wasted - T1", "Severe wasted - T2", "Severe wasted - T3",
+									  "Severe underweight - T1", "Severe underweight - T2", "Severe underweight - T3"))
+plotdf <- plotdf %>% arrange(X)
+
+plotdf$outcome <- sapply(strsplit(as.character(plotdf$X), " -", fixed=T), `[`, 1)
+plotdf$outcome <- factor(plotdf$outcome, levels=unique(plotdf$outcome))
+
+
+ggplot(plotdf, aes(x=X)) + 
+        geom_point(aes(y=RR, fill=outcome, color=outcome), size = 4) +
+        geom_linerange(aes(ymin=ci.l, ymax=ci.u, color=outcome),
+                       alpha=0.5, size = 3) +
+        labs(x = "Binary growth outcome", y = "Prevalence ratio") +
+  scale_y_continuous(trans='log10') +
+        geom_hline(yintercept = 1) +        scale_fill_manual(values=rep(tableau10,4)) +
+        scale_colour_manual(values=rep(tableau10,4)) +
+        theme(strip.background = element_blank(),
+          legend.position="none",
+          strip.text.x = element_text(size=12),
+          axis.text.x = element_text(size=12, angle = 60, hjust = 1)) +
+        ggtitle("Ratio of FUT2 Negative (non-secretor) over FUT2 Positive (secretor)")
+```
+
+
+
+
+# Plots of associations between FUT2 status and EED outcomes (FUT2 as a risk factor) - Stratified by measurement round
+
+### Child FUT2 status effect on EED outcomes
+
+```{r, echo=F, fig.width=12, fig.height=8}
+plotdf <-data.frame(X= rownames(res_childFU2_RF_adj), res_childFU2_RF_adj)
+
+plotdf$X <- factor(plotdf$X, levels=c("Lactulose - T1", "Lactulose - T2", "Lactulose - T3", 
+									  "Mannitol - T1", "Mannitol - T2", "Mannitol - T3",
+									  "L/M ratio - T1", "L/M ratio - T2", "L/M ratio - T3",
+									  "Alpha-1 antitrypsin - T1", "Alpha-1 antitrypsin - T2", "Alpha-1 antitrypsin - T3",					
+									  "Neopterin - T1", "Neopterin - T2", "Neopterin - T3",
+									  "Myeloperoxidase - T1", "Myeloperoxidase - T2", "Myeloperoxidase - T3",
+									  "Regenerating gene 1B - T2" ))
+plotdf <- plotdf %>% arrange(X)
+
+plotdf$outcome <- substr(plotdf$X, 1,2)
+plotdf$outcome <- factor(plotdf$outcome, levels=unique(plotdf$outcome))
+ggplot(plotdf, aes(x=X)) + 
+        geom_point(aes(y=ATE, fill=outcome, color=outcome), size = 4) +
+        geom_linerange(aes(ymin=ci.l, ymax=ci.u, color=outcome),
+                       alpha=0.5, size = 3) +
+        labs(x = "EED outcome", y = "Difference in log-transformed outcomes") +
+        geom_hline(yintercept = 0) +
+        scale_fill_manual(values=rep(tableau10,4)) +
+        scale_colour_manual(values=rep(tableau10,4)) +
+        theme(strip.background = element_blank(),
+          legend.position="none",
+          strip.text.x = element_text(size=12),
+          axis.text.x = element_text(size=12, angle = 60, hjust = 1)) +
+        ggtitle("FUT2 Negative (non-secretor) minus FUT2 Positive (secretor)")
+```
+
+### Mother's FUT2 status effect on EED outcomes
+
+```{r, echo=F, fig.width=12, fig.height=8}
+plotdf <-data.frame(X= rownames(res_motherFU2_RF_adj), res_motherFU2_RF_adj)
+
+plotdf$X <- factor(plotdf$X, levels=c("Lactulose - T1", "Lactulose - T2", "Lactulose - T3", 
+									  "Mannitol - T1", "Mannitol - T2", "Mannitol - T3",
+									  "L/M ratio - T1", "L/M ratio - T2", "L/M ratio - T3",
+									  "Alpha-1 antitrypsin - T1", "Alpha-1 antitrypsin - T2", "Alpha-1 antitrypsin - T3",					
+									  "Neopterin - T1", "Neopterin - T2", "Neopterin - T3",
+									  "Myeloperoxidase - T1", "Myeloperoxidase - T2", "Myeloperoxidase - T3",
+									  "Regenerating gene 1B - T2" ))
+plotdf <- plotdf %>% arrange(X)
+
+plotdf$outcome <- substr(plotdf$X, 1,2)
+plotdf$outcome <- factor(plotdf$outcome, levels=unique(plotdf$outcome))
+
+ggplot(plotdf, aes(x=X)) + 
+        geom_point(aes(y=ATE, fill=outcome, color=outcome), size = 4) +
+        geom_linerange(aes(ymin=ci.l, ymax=ci.u, color=outcome),
+                       alpha=0.5, size = 3) +
+        labs(x = "EED outcome", y = "Difference in log-transformed outcomes") +
+        geom_hline(yintercept = 0) +
+        scale_fill_manual(values=rep(tableau10,4)) +
+        scale_colour_manual(values=rep(tableau10,4)) +
+        theme(strip.background = element_blank(),
+          legend.position="none",
+          strip.text.x = element_text(size=12),
+          axis.text.x = element_text(size=12, angle = 60, hjust = 1)) +
+        ggtitle("FUT2 Negative (non-secretor) minus FUT2 Positive (secretor)")
+```
+
