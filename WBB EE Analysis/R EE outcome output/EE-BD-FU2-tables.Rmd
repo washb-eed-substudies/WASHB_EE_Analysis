@@ -1,5 +1,5 @@
 ---
-title: "Tables and Figures"
+title: "Supplementary Tables"
 output:
   pdf_document: default
   html_document: default
@@ -54,7 +54,7 @@ knitr::kable(summary_res)
 
 
 
-## Supplementary Table 2: Table of associations between child FUT2 status and continous growth outcomes 
+## Supplementary Table 2: Table of associations between child FUT2 status and continuous  growth outcomes 
 
 ```{r, echo=F}
 
@@ -74,7 +74,7 @@ knitr::kable(summary_res)
 
 ```
 
-## Supplementary Table 4: Table of associations between maternal FUT2 status and continous growth outcomes 
+## Supplementary Table 4: Table of associations between maternal FUT2 status and continuous growth outcomes 
 
 ```{r, echo=F}
   knitr::kable(clean_table(pooled_motherFU2_growthRF_cont), digits=3)
@@ -119,7 +119,7 @@ knitr::kable(summary_res)
 
 
 
-## Supplementary Table 8: Table of associations between child FUT2 status and continous growth outcomes stratified by measurement round
+## Supplementary Table 8: Table of associations between child FUT2 status and continuous  growth outcomes stratified by measurement round
 
 ```{r, echo=F}
 
@@ -140,7 +140,7 @@ knitr::kable(summary_res)
 
 ```
 
-## Supplementary Table 10: Table of associations between maternal FUT2 status and continous growth outcomes stratified by measurement round
+## Supplementary Table 10: Table of associations between maternal FUT2 status and continuous  growth outcomes stratified by measurement round
 
 
 ```{r, echo=F}
@@ -172,7 +172,7 @@ knitr::kable(summary_res)
 
 ```
 
-## Supplementary Table 13: Table of associations between maternal FUT2 status and continous growth outcomes stratified by measurement round
+## Supplementary Table 13: Table of associations between maternal FUT2 status and EED outcomes stratified by measurement round
 
 
 ```{r, echo=F}

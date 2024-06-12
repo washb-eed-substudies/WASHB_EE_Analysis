@@ -50,6 +50,7 @@ d <- d %>%
 #-------------------------------------------
 
 summary(d$agem1)
+summary(d$agem2)
 
 d <- d %>% filter(!is.na(agem1))
 
@@ -187,6 +188,7 @@ p
 
 
 ggsave(p, filename = "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Figures/EE-Urine-6mo-diff-plot.pdf",width=10,height=8.5)
+ggsave(p, filename = "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Figures/EE-Urine-6mo-diff-plot.png",width=10,height=8.5)
 
 
 

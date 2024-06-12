@@ -249,11 +249,12 @@ p<-ggplot(df, aes(x=contrast)) +
       strip.text.x = element_text(size=12),
       axis.text.x = element_text(size=12)) +
     facet_wrap(outcome~above6mo, ncol=2, scales = "fixed") +
-    ggtitle("WBK Intervention Effects on stool biomarkers, stratified by age at measurement round 1")
+    ggtitle("WBK intervention effects on stool biomarkers, stratified by age at measurement round 1")
 p
 
 
 ggsave(p, filename = "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Figures/EE-Stool-6mo-diff-plot.pdf",width=10,height=8.5)
+ggsave(p, filename = "C:/Users/andre/Dropbox/WASHB-EE-analysis/WBK-EE-analysis/Figures/EE-Stool-6mo-diff-plot.png",width=10,height=8.5)
 
 
 
